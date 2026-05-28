@@ -3,45 +3,47 @@ package hazem.nurmontage.videoquran.model
 import java.io.Serializable
 
 /**
- * Represents a selected gallery item (image or video).
+ * Wraps a selected gallery item (photo or video) together with its
+ * selection index.
  *
- * Used by the gallery picker activities to track which media files
- * the user has selected for use as backgrounds or audio sources.
+ * The original Java class had two constructors:
+ *   - `GallerySelected(PhotoItem, int)` — for image selections
+ *   - `GallerySelected(VideoItem, int)` — for video selections
  *
- * Converted from the original GallerySelected.java.
+ * Only one of [photoItem] or [videoItem] will be non-null at any time,
+ * depending on whether the user selected an image or a video.
+ *
+ * The [index] field tracks the order of selection (1st, 2nd, 3rd…)
+ * and is displayed as a badge on the selected item's thumbnail.
+ *
+ * Field names preserved from original JADX source for compatibility.
+ *
+ * Converted from GallerySelected.java (30 lines).
  */
-data class GallerySelected(
-    val uri: String,
-    val name: String,
-    val path: String,
-    val type: MediaType = MediaType.IMAGE,
-    val duration: Long = 0L,
-    val size: Long = 0L
-) : Serializable {
+class GallerySelected : Serializable {
+
+    var photoItem: PhotoItem? = null
+        private set
+    var videoItem: VideoItem? = null
+        private set
+    var index: Int = 0
+        private set
 
     /**
-     * Media type enum for distinguishing between images and videos.
+     * Constructor for photo/image selection.
      */
-    enum class MediaType {
-        IMAGE,
-        VIDEO,
-        AUDIO
+    constructor(photoItem: PhotoItem, index: Int) {
+        this.photoItem = photoItem
+        this.index = index
     }
 
     /**
-     * Check if this is a video selection.
+     * Constructor for video selection.
      */
-    fun isVideo(): Boolean = type == MediaType.VIDEO
-
-    /**
-     * Check if this is an image selection.
-     */
-    fun isImage(): Boolean = type == MediaType.IMAGE
-
-    /**
-     * Check if this is an audio selection.
-     */
-    fun isAudio(): Boolean = type == MediaType.AUDIO
+    constructor(videoItem: VideoItem, index: Int) {
+        this.videoItem = videoItem
+        this.index = index
+    }
 
     companion object {
         private const val serialVersionUID = 1L

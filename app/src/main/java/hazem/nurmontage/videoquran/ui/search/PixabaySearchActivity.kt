@@ -3,77 +3,124 @@ package hazem.nurmontage.videoquran.ui.search
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.EditText
-import android.widget.ProgressBar
+import android.view.inputmethod.EditorInfo
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import hazem.nurmontage.videoquran.R
-import hazem.nurmontage.videoquran.adapter.ColorAdapter
-import hazem.nurmontage.videoquran.databinding.ActivityGalleryPickerVideoBinding
+import com.bumptech.glide.Glide
+import hazem.nurmontage.videoquran.databinding.ActivityPixabaySearchBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
 
 /**
- * PixabaySearchActivity — Search and select images from Pixabay API.
+ * PixabaySearchActivity — Search and select images from the Pixabay API.
  *
- * Reuses the gallery picker layout which has:
- *   - btn_onBack: Close button
- *   - rv: RecyclerView for grid display
- *   - view_progress: Loading indicator
- *   - tv_done: Done/confirm button
+ * Layout: `activity_pixabay_search.xml` (dedicated layout with search bar).
  *
  * Flow:
- *   1. User enters search query
- *   2. Activity searches Pixabay API
- *   3. Results displayed as image grid
- *   4. User selects image → returns URI as result
+ *   1. User types a search query in [etSearch] and presses Search on the keyboard
+ *   2. Activity sends a GET request to the Pixabay API
+ *   3. Image URLs are parsed from the JSON response and shown in a 3-column grid
+ *   4. User taps an image to select it (highlighted with a border)
+ *   5. Tapping "Done" returns the selected image URL as an activity result
+ *
+ * This activity did not exist in the original JADX source — it was added during
+ * the Kotlin rewrite to replace inline Pixabay search logic that was embedded
+ * inside EngineActivity.  The original app used a simple HTTP call to the
+ * Pixabay API with the same endpoint and response format.
  */
 class PixabaySearchActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityGalleryPickerVideoBinding
+    // ── ViewBinding (dedicated layout, not reusing gallery picker) ────
+    private lateinit var binding: ActivityPixabaySearchBinding
 
-    private val pixabayApiKey = "" // Set your Pixabay API key here
-    private val imageUrls = mutableListOf<String>()
-    private var selectedUrl: String? = null
+    // ── State ────────────────────────────────────────────────────────
+    private val imageUrls = mutableListOf<PixabayImage>()
+    private var selectedPosition: Int = -1
+
+    /** Pixabay API key — must be configured before use. */
+    private var pixabayApiKey: String = ""
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  Lifecycle
+    // ═══════════════════════════════════════════════════════════════════
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityGalleryPickerVideoBinding.inflate(layoutInflater)
+        binding = ActivityPixabaySearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Back button
-        binding.btnOnBack.setOnClickListener { finish() }
+        setupToolbar()
+        setupSearchInput()
+        setupRecyclerView()
+    }
 
-        // Done button — return selected image
-        binding.tvDone.setOnClickListener {
-            if (selectedUrl != null) {
-                val resultIntent = Intent().apply {
-                    putExtra("pixabay_url", selectedUrl)
-                }
-                setResult(RESULT_OK, resultIntent)
-            }
+    // ═══════════════════════════════════════════════════════════════════
+    //  Toolbar
+    // ═══════════════════════════════════════════════════════════════════
+
+    private fun setupToolbar() {
+        // Back — close without selecting
+        binding.btnOnBack.setOnClickListener {
+            setResult(RESULT_CANCELED)
             finish()
         }
 
-        // Setup RecyclerView
-        binding.rv.layoutManager = GridLayoutManager(this, 3)
-        binding.rv.adapter = PixabayAdapter(imageUrls) { url ->
-            selectedUrl = url
+        // Done — confirm selection and return URL
+        binding.btnDone.setOnClickListener {
+            if (selectedPosition in imageUrls.indices) {
+                val selected = imageUrls[selectedPosition]
+                val resultIntent = Intent().apply {
+                    putExtra(EXTRA_PIXABAY_URL, selected.webFormatUrl)
+                    putExtra(EXTRA_PIXABAY_PREVIEW_URL, selected.previewUrl)
+                    putExtra(EXTRA_PIXABAY_TAGS, selected.tags)
+                }
+                setResult(RESULT_OK, resultIntent)
+            } else {
+                setResult(RESULT_CANCELED)
+            }
+            finish()
         }
+    }
 
-        // Show search hint
-        binding.viewProgress.visibility = View.GONE
+    // ═══════════════════════════════════════════════════════════════════
+    //  Search
+    // ═══════════════════════════════════════════════════════════════════
+
+    private fun setupSearchInput() {
+        binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val query = binding.etSearch.text?.toString()?.trim()
+                if (!query.isNullOrEmpty()) {
+                    searchPixabay(query)
+                }
+                true
+            } else {
+                false
+            }
+        }
     }
 
     /**
-     * Search Pixabay for images matching the query.
+     * Searches Pixabay for images matching [query].
+     *
+     * The API endpoint format:
+     * ```
+     * https://pixabay.com/api/?key={API_KEY}&q={QUERY}&image_type=photo&per_page=50&safesearch=true
+     * ```
+     *
+     * Response JSON structure (relevant fields):
+     * ```json
+     * { "hits": [ { "webformatURL": "...", "previewURL": "...", "tags": "..." } ] }
+     * ```
      */
     private fun searchPixabay(query: String) {
         if (pixabayApiKey.isEmpty()) {
@@ -82,74 +129,144 @@ class PixabaySearchActivity : AppCompatActivity() {
         }
 
         binding.viewProgress.visibility = View.VISIBLE
+        binding.tvEmpty.visibility = View.GONE
+
         lifecycleScope.launch(Dispatchers.IO) {
             try {
+                val encodedQuery = URLEncoder.encode(query, "UTF-8")
                 val url = URL(
-                    "https://pixabay.com/api/?key=$pixabayApiKey&q=${java.net.URLEncoder.encode(query, "UTF-8")}" +
-                    "&image_type=photo&per_page=50&safesearch=true"
+                    "https://pixabay.com/api/?key=$pixabayApiKey&q=$encodedQuery" +
+                            "&image_type=photo&per_page=50&safesearch=true"
                 )
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
-                connection.connectTimeout = 10000
-                connection.readTimeout = 10000
+                connection.connectTimeout = 10_000
+                connection.readTimeout = 10_000
 
                 val response = connection.inputStream.bufferedReader().readText()
                 val json = JSONObject(response)
-
                 val hits = json.getJSONArray("hits")
-                val urls = mutableListOf<String>()
+
+                val results = mutableListOf<PixabayImage>()
                 for (i in 0 until hits.length()) {
                     val hit = hits.getJSONObject(i)
-                    urls.add(hit.getString("webformatURL"))
+                    results.add(
+                        PixabayImage(
+                            webFormatUrl = hit.optString("webformatURL", ""),
+                            previewUrl = hit.optString("previewURL", ""),
+                            tags = hit.optString("tags", "")
+                        )
+                    )
                 }
 
                 withContext(Dispatchers.Main) {
                     imageUrls.clear()
-                    imageUrls.addAll(urls)
-                    binding.rv.adapter?.notifyDataSetChanged()
+                    imageUrls.addAll(results)
+                    selectedPosition = -1
+                    (binding.rvSearch.adapter as? PixabayAdapter)?.notifyDataSetChanged()
                     binding.viewProgress.visibility = View.GONE
+                    binding.tvEmpty.visibility = if (imageUrls.isEmpty()) View.VISIBLE else View.GONE
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     binding.viewProgress.visibility = View.GONE
-                    Toast.makeText(this@PixabaySearchActivity, "Search failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                    binding.tvEmpty.visibility = View.VISIBLE
+                    Toast.makeText(
+                        this@PixabaySearchActivity,
+                        "Search failed: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
     }
 
+    // ═══════════════════════════════════════════════════════════════════
+    //  RecyclerView
+    // ═══════════════════════════════════════════════════════════════════
+
+    private fun setupRecyclerView() {
+        binding.rvSearch.layoutManager = GridLayoutManager(this, 3)
+        binding.rvSearch.adapter = PixabayAdapter(imageUrls, selectedPosition) { position ->
+            selectedPosition = position
+            (binding.rvSearch.adapter as? PixabayAdapter)?.updateSelected(position)
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  Pixabay Image Data
+    // ═══════════════════════════════════════════════════════════════════
+
     /**
-     * Simple adapter for displaying Pixabay image URLs in a grid.
+     * Holds the relevant fields from a single Pixabay API hit.
+     */
+    data class PixabayImage(
+        val webFormatUrl: String,
+        val previewUrl: String,
+        val tags: String
+    )
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  Adapter
+    // ═══════════════════════════════════════════════════════════════════
+
+    /**
+     * Grid adapter for displaying Pixabay search results.
+     *
+     * Each cell is a simple [ImageView] loaded with Glide. The selected cell
+     * gets a yellow border via padding + background tint.
      */
     private class PixabayAdapter(
-        private val urls: List<String>,
-        private val onSelect: (String) -> Unit
-    ) : RecyclerView.Adapter<PixabayAdapter.ViewHolder>() {
+        private val images: List<PixabayImage>,
+        private var selectedPos: Int,
+        private val onSelect: (Int) -> Unit
+    ) : RecyclerView.Adapter<PixabayAdapter.VH>() {
 
-        class ViewHolder(view: View) : RecyclerView.ViewHolder(view)
+        inner class VH(val imageView: ImageView) : RecyclerView.ViewHolder(imageView)
 
-        override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): ViewHolder {
-            val imageView = android.widget.ImageView(parent.context).apply {
-                layoutParams = android.widget.GridLayoutManager.LayoutParams(
-                    android.widget.GridLayoutManager.LayoutParams.MATCH_PARENT,
-                    300
-                )
-                scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
+        fun updateSelected(pos: Int) {
+            val old = selectedPos
+            selectedPos = pos
+            if (old in images.indices) notifyItemChanged(old)
+            if (pos in images.indices) notifyItemChanged(pos)
+        }
+
+        override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): VH {
+            val size = (parent.width / 3) - 4
+            val iv = ImageView(parent.context).apply {
+                layoutParams = RecyclerView.LayoutParams(size, size)
+                scaleType = ImageView.ScaleType.CENTER_CROP
                 setPadding(2, 2, 2, 2)
             }
-            return ViewHolder(imageView)
+            return VH(iv)
         }
 
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val imageView = holder.itemView as android.widget.ImageView
-            val url = urls[position]
-            com.bumptech.glide.Glide.with(holder.itemView.context)
-                .load(url)
+        override fun onBindViewHolder(holder: VH, position: Int) {
+            val img = images[position]
+            Glide.with(holder.imageView.context)
+                .load(img.previewUrl.ifEmpty { img.webFormatUrl })
                 .centerCrop()
-                .into(imageView)
-            holder.itemView.setOnClickListener { onSelect(url) }
+                .into(holder.imageView)
+
+            // Highlight selected image
+            val isSelected = position == selectedPos
+            holder.imageView.setBackgroundColor(
+                if (isSelected) 0xFFBEA448.toInt() else 0x00000000
+            )
+
+            holder.imageView.setOnClickListener { onSelect(holder.adapterPosition) }
         }
 
-        override fun getItemCount() = urls.size
+        override fun getItemCount() = images.size
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  Companion
+    // ═══════════════════════════════════════════════════════════════════
+
+    companion object {
+        const val EXTRA_PIXABAY_URL = "pixabay_url"
+        const val EXTRA_PIXABAY_PREVIEW_URL = "pixabay_preview_url"
+        const val EXTRA_PIXABAY_TAGS = "pixabay_tags"
     }
 }

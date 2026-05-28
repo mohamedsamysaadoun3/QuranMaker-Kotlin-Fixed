@@ -12,20 +12,27 @@ import androidx.recyclerview.widget.RecyclerView
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.adapter.PresetAdapter
 import hazem.nurmontage.videoquran.core.common.Common
-import hazem.nurmontage.videoquran.databinding.FragmentColorsBinding
+import hazem.nurmontage.videoquran.databinding.FragmentGradientBinding
 import hazem.nurmontage.videoquran.model.Gradient
-import hazem.nurmontage.videoquran.utils.BillingPreferences
 import hazem.nurmontage.videoquran.views.text.TextCustumFont
 
 /**
  * Child fragment displaying a horizontal gradient palette and
  * an angle SeekBar for controlling gradient direction.
  *
+ * Layout: `fragment_gradient.xml` (dedicated layout, NOT reusing fragment_colors.xml).
+ *
+ * The layout contains the same two elements as the original:
+ *   - `layout_edit_gradient` include (angle label + SeekBar, initially GONE)
+ *   - `rv_color` RecyclerView (horizontal gradient preset list)
+ *
  * Hosted inside [EditIpadFragment]'s "Gradient" tab.
  * Uses [PresetAdapter] with [Common.getListGradientColor] as the gradient source.
  * Selection events are forwarded to the host via [EditIpadFragment.IIpadEditCallback].
  *
- * Converted from GradientFragment.java.
+ * Converted from GradientFragment.java — the original also used `FragmentColorsBinding`
+ * because `fragment_colors.xml` and `fragment_gradient.xml` had identical structure.
+ * We now use the dedicated `FragmentGradientBinding` for type safety and clarity.
  */
 class GradientFragment : Fragment {
 
@@ -46,7 +53,7 @@ class GradientFragment : Fragment {
 
     // ── State ────────────────────────────────────────────────────────
     private var adapter: PresetAdapter? = null
-    private var binding: FragmentColorsBinding? = null
+    private var binding: FragmentGradientBinding? = null
     private var gradient: Gradient? = null
     private var iIpadEditCallback: EditIpadFragment.IIpadEditCallback? = null
     private var index: Int = 0
@@ -57,7 +64,7 @@ class GradientFragment : Fragment {
     private val iColorCallback = object : PresetAdapter.IColor {
         override fun onGradient(gradient: Gradient, position: Int) {
             if (this@GradientFragment.gradient == null) {
-                binding?.root?.findViewById<View>(R.id.layout_edit_gradient)?.visibility = View.VISIBLE
+                binding?.layoutEditGradient?.root?.visibility = View.VISIBLE
             }
             this@GradientFragment.gradient = gradient
             this@GradientFragment.gradient?.angle = seekBarAngle?.progress ?: 0
@@ -80,7 +87,7 @@ class GradientFragment : Fragment {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val bind = FragmentColorsBinding.inflate(inflater, container, false)
+        val bind = FragmentGradientBinding.inflate(inflater, container, false)
         binding = bind
         val root: LinearLayout = bind.root
 
@@ -88,7 +95,7 @@ class GradientFragment : Fragment {
         adapter = PresetAdapter(
             iColorCallback,
             Common.getListGradientColor(),
-            BillingPreferences.isSubscribed(context),
+            false, // BillingPreferences removed — always show all gradients
             index
         )
 
@@ -104,7 +111,7 @@ class GradientFragment : Fragment {
         seekBarAngle = root.findViewById(R.id.seekbar)
 
         if (gradient != null) {
-            root.findViewById<View>(R.id.layout_edit_gradient).visibility = View.VISIBLE
+            binding?.layoutEditGradient?.root?.visibility = View.VISIBLE
             seekBarAngle?.progress = gradient?.angle ?: 0
         }
 
