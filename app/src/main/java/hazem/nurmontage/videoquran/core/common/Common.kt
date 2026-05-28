@@ -19,6 +19,18 @@ import hazem.nurmontage.videoquran.model.Gradient
 object Common {
 
     // ──────────────────────────────────────────────
+    //  Constant aliases (delegate to Constants for
+    //  backward compatibility with converted code)
+    // ──────────────────────────────────────────────
+
+    val COLOR_BLOCK_AUDIO = Constants.COLOR_BLOCK_AUDIO
+    val COLOR_BLOCK_QURAN = Constants.COLOR_BLOCK_QURAN
+    val COLOR_WAVE_INT = Constants.COLOR_WAVE_INT
+    const val ENHANCE_CMD = Constants.ENHANCE_CMD
+    val MUSLIM_COLORS = Constants.MUSLIM_COLORS
+
+
+    // ──────────────────────────────────────────────
     //  Runtime mutable state
     // ──────────────────────────────────────────────
 
