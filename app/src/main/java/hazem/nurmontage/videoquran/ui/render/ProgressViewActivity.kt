@@ -19,6 +19,7 @@ import com.arthenica.ffmpegkit.ReturnCode
 import com.arthenica.ffmpegkit.Statistics
 import com.arthenica.ffmpegkit.StatisticsCallback
 import hazem.nurmontage.videoquran.R
+import hazem.nurmontage.videoquran.databinding.ActivityProgressViewBinding
 import hazem.nurmontage.videoquran.core.base.BaseActivity
 import hazem.nurmontage.videoquran.model.EntityMedia
 import hazem.nurmontage.videoquran.model.RenderManager
@@ -59,6 +60,11 @@ import kotlin.math.max
 class ProgressViewActivity : BaseActivity() {
 
     // ════════════════════════════════════════════════════════════════════
+    //  ViewBinding — ACTIVE
+    // ════════════════════════════════════════════════════════════════════
+    private lateinit var binding: ActivityProgressViewBinding
+
+    // ════════════════════════════════════════════════════════════════════
     //  Fields
     // ════════════════════════════════════════════════════════════════════
 
@@ -71,8 +77,7 @@ class ProgressViewActivity : BaseActivity() {
     private var mTemplate: Template? = null
     private var mUri: String? = null
 
-    /** Progress bar — TODO: replace with SquareOutlineProgressBar once migrated. */
-    private lateinit var progressIndicator: View
+    /** Progress bar — accessed via binding.progressHorizontal */
 
     private var statistics: Statistics? = null
 
@@ -111,7 +116,10 @@ class ProgressViewActivity : BaseActivity() {
         window.setFlags(1536, 1536)
 
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_progress_view)
+
+        // ViewBinding — inflate and set content view
+        binding = ActivityProgressViewBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
@@ -124,20 +132,16 @@ class ProgressViewActivity : BaseActivity() {
         insetsController.isAppearanceLightNavigationBars = false
 
         // Edge-to-edge insets
-        val mainView = findViewById<View>(R.id.main)
-        if (mainView != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(mainView) { view, insets ->
-                val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-                view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
-                insets
-            }
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            insets
         }
 
         wakeLockAcquire()
 
-        // TODO: Replace with SquareOutlineProgressBar when custom view is migrated
-        progressIndicator = findViewById(R.id.progress_horizontal)
-        findViewById<View>(R.id.btn_cancel)?.setOnClickListener { showCancelDialog() }
+        binding.progressHorizontal.max = 100
+        binding.btnCancel.setOnClickListener { showCancelDialog() }
 
         try {
             startExport()
@@ -436,12 +440,9 @@ class ProgressViewActivity : BaseActivity() {
      * TODO: Wire up SquareOutlineProgressBar when migrated.
      */
     private fun setProgressVisual(percent: Float) {
-        (progressIndicator as? ProgressBar)?.let {
-            it.progress = percent.toInt()
-        } ?: run {
-            // Fallback: update progress text if available
-            (progressIndicator as? TextView)?.text = "${percent.toInt()}%"
-        }
+        binding.progressHorizontal.progress = percent.toInt()
+        binding.tvProgress.visibility = View.VISIBLE
+        binding.tvProgress.text = "${percent.toInt()} %"
     }
 
     // ════════════════════════════════════════════════════════════════════

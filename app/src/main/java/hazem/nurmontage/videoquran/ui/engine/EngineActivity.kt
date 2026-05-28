@@ -8,7 +8,7 @@
  * Migration notes:
  *   - Executor/Handler/Thread → Kotlin Coroutines (lifecycleScope + Dispatchers)
  *   - runOnUiThread → lifecycleScope.launch(Dispatchers.Main)
- *   - ViewBinding will replace findViewById once layout XML is migrated
+ *   - ViewBinding ACTIVE — binding.* replaces all findViewById calls
  *   - FFmpeg command building is delegated to FfmpegCommandBuilder
  */
 package hazem.nurmontage.videoquran.ui.engine
@@ -44,24 +44,10 @@ import hazem.nurmontage.videoquran.entity_timeline.EntityBismilahTimeline
 import hazem.nurmontage.videoquran.entity_timeline.EntityQuranTimeline
 import hazem.nurmontage.videoquran.entity_timeline.EntityTrslTimeline
 import hazem.nurmontage.videoquran.model.Template
+import hazem.nurmontage.videoquran.databinding.ActivityTimeLineBinding
 import hazem.nurmontage.videoquran.utils.MyVibrationHelper
 import hazem.nurmontage.videoquran.utils.TimeFormatter
 import hazem.nurmontage.videoquran.views.TrackEntityView
-// TODO: import hazem.nurmontage.videoquran.views.BlurredImageView
-// TODO: import hazem.nurmontage.videoquran.views.CustomButtonCustumFont as ButtonCustumFont
-// TODO: import hazem.nurmontage.videoquran.views.CustomTextCustumFont as TextCustumFont
-// TODO: import hazem.nurmontage.videoquran.views.CustomDiscreteSeekBar
-// TODO: import hazem.nurmontage.videoquran.views.SmoothVideoAnimator
-// TODO: import hazem.nurmontage.videoquran.views.SmoothTimelineAnimator
-// TODO: import hazem.nurmontage.videoquran.ui.engine.FfmpegCommandBuilder
-// TODO: import hazem.nurmontage.videoquran.ui.engine.fragments.*
-// TODO: import hazem.nurmontage.videoquran.ui.engine.adapters.DimensionAdabters
-// TODO: import hazem.nurmontage.videoquran.ui.engine.adapters.RecitersModel
-// TODO: import hazem.nurmontage.videoquran.persistence.LocalPersistence
-// TODO: import hazem.nurmontage.videoquran.utils.FontProvider
-// TODO: import hazem.nurmontage.videoquran.utils.ColorUtils
-// TODO: import hazem.nurmontage.videoquran.utils.DrawableHelper
-// TODO: import hazem.nurmontage.videoquran.utils.FileUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -69,41 +55,14 @@ import kotlinx.coroutines.withContext
 class EngineActivity : BaseActivity() {
 
     // ============================================================
-    // ViewBinding — TODO: switch to ViewBinding after layout XML migration
+    // ViewBinding — ACTIVE
     // ============================================================
-    // private lateinit var binding: ActivityTimeLineBinding
+    private lateinit var binding: ActivityTimeLineBinding
 
     // ============================================================
-    // Animation
+    // All views are now accessed via binding.* — no more findViewById!
+    // e.g. binding.btnPlayPause, binding.tvCurrentTime, etc.
     // ============================================================
-    // TODO: private lateinit var animator_frame_video: SmoothVideoAnimator
-    // TODO: private lateinit var valueAnimator: SmoothTimelineAnimator
-
-    // ============================================================
-    // Views — using findViewById until ViewBinding is available
-    // ============================================================
-    // TODO: private lateinit var blurredImageView: BlurredImageView  // not yet migrated
-    private lateinit var trackViewEntity: TrackEntityView
-    private lateinit var btnPlayPause: ImageButton
-    private lateinit var btnUndo: ImageButton
-    private lateinit var btnRedo: ImageButton
-    private lateinit var btnToStart: ImageButton
-    private lateinit var btnToEnd: ImageButton
-    private lateinit var btn_cancel: ImageButton
-    // TODO: private lateinit var btn_export: ButtonCustumFont
-    // TODO: private lateinit var btnChangeResize: LinearLayout
-    // TODO: private lateinit var btnIpod: LinearLayout
-    // TODO: private lateinit var btn_setup_fps: LinearLayout
-    // TODO: private lateinit var layout_resolution: LinearLayout
-    // TODO: private lateinit var ivIpod: ImageView
-    // TODO: private lateinit var ivResize: ImageView
-    // TODO: private lateinit var seekBar_fps: CustomDiscreteSeekBar
-    // TODO: private lateinit var seekBar_res: CustomDiscreteSeekBar
-    private lateinit var tv_currentTime: TextView
-    private lateinit var tv_endTime: TextView
-    // TODO: private lateinit var tv_resolution: TextCustumFont
-    // TODO: private lateinit var tv_tittle_fragment: TextCustumFont
-    // TODO: private lateinit var textChangeResize: TextCustumFont
 
     // ============================================================
     // State
@@ -484,10 +443,9 @@ class EngineActivity : BaseActivity() {
         // Edge-to-edge display
         // TODO: EdgeToEdge.enable(this) — requires androidx.activity:activity-ktx 1.8+
 
-        // TODO: Switch to ViewBinding after layout XML migration:
-        //   binding = ActivityTimeLineBinding.inflate(layoutInflater)
-        //   setContentView(binding.root)
-        setContentView(R.layout.activity_time_line)
+        // ViewBinding — inflate and set content view
+        binding = ActivityTimeLineBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // Register back press handler
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
@@ -497,15 +455,11 @@ class EngineActivity : BaseActivity() {
         insetsController.isAppearanceLightStatusBars = false
         insetsController.isAppearanceLightNavigationBars = false
 
-        // System bar insets padding
-        // TODO: Replace R.id.main with binding.main after ViewBinding migration
-        val mainView = findViewById<View>(R.id.main)
-        if (mainView != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(mainView) { view, insets ->
-                val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-                view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
-                insets
-            }
+        // System bar insets padding via ViewBinding
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            insets
         }
 
         mResources = resources
@@ -601,11 +555,9 @@ class EngineActivity : BaseActivity() {
      * set up the timeline scrubber/track UI.
      */
     private fun initTimeLineView() {
-        // TODO: Uncomment when TrackEntityView is migrated
-        // trackViewEntity = findViewById(R.id.trackViewEntity)
-        // trackViewEntity.setTrimLineCallback(iTrimLineCallback)
-        // trackViewEntity.setTemplate(mTemplate)
-        // trackViewEntity.setMaxDuration(endTimeAudioVisible)
+        binding.timeLineView.setTrimLineCallback(iTrimLineCallback)
+        // binding.timeLineView.setTemplate(mTemplate)
+        // binding.timeLineView.setMaxDuration(endTimeAudioVisible)
     }
 
     // ============================================================
@@ -618,70 +570,57 @@ class EngineActivity : BaseActivity() {
      *       after layout XML migration.
      */
     private fun initViews() {
-        // --- Playback controls ---
-        btnPlayPause = findViewById(R.id.btn_play_pause)
-        btnPlayPause.setOnClickListener {
+        // --- Playback controls via ViewBinding ---
+        binding.btnPlayPause.setOnClickListener {
             if (mIsPlaying) pausePlayer() else playPlayer()
         }
 
-        btnToStart = findViewById(R.id.btn_to_start)
-        btnToStart.setOnClickListener {
+        binding.btnToStart.setOnClickListener {
             seekToStart()
         }
 
-        btnToEnd = findViewById(R.id.btn_to_end)
-        btnToEnd.setOnClickListener {
+        binding.btnToEnd.setOnClickListener {
             seekToEnd()
         }
 
         // --- Undo / Redo ---
-        btnUndo = findViewById(R.id.btn_undo)
-        btnUndo.setOnClickListener {
+        binding.btnUndo.setOnClickListener {
             performUndo()
         }
 
-        btnRedo = findViewById(R.id.btn_redo)
-        btnRedo.setOnClickListener {
+        binding.btnRedo.setOnClickListener {
             performRedo()
         }
 
         // --- Cancel / Export ---
-        btn_cancel = findViewById(R.id.btn_cancel)
-        btn_cancel.setOnClickListener {
+        binding.btnCancel.setOnClickListener {
             dialog()
         }
 
-        // TODO: btn_export = findViewById(R.id.btn_export)
-        // btn_export.setOnClickListener { toExport() }
+        binding.btnExport.setOnClickListener {
+            toExport()
+        }
 
         // --- Toolbar option buttons ---
-        // TODO: btnChangeResize = findViewById(R.id.btn_change_resize)
-        // btnChangeResize.setOnClickListener { onChangeResizeClicked() }
+        binding.btnAddQuran.setOnClickListener {
+            onAddQuranClicked()
+        }
 
-        // TODO: btnIpod = findViewById(R.id.btn_ipod)
-        // btnIpod.setOnClickListener { onIpodClicked() }
+        binding.btnBg.setOnClickListener {
+            onBgClicked()
+        }
 
-        // TODO: btn_setup_fps = findViewById(R.id.btn_setup_fps)
-        // btn_setup_fps.setOnClickListener { onSetupFpsClicked() }
+        binding.btnIpad.setOnClickListener {
+            onIpadClicked()
+        }
 
-        // TODO: layout_resolution = findViewById(R.id.layout_resolution)
-        // layout_resolution.setOnClickListener { onResolutionClicked() }
+        binding.btnChangeAspect.setOnClickListener {
+            onChangeAspectClicked()
+        }
 
-        // --- Time labels ---
-        tv_currentTime = findViewById(R.id.tv_current_time)
-        tv_endTime = findViewById(R.id.tv_end_time)
-
-        // --- SeekBars ---
-        // TODO: seekBar_fps = findViewById(R.id.seekBar_fps)
-        // seekBar_fps.setOnProgressChangeListener { progress ->
-        //     mTemplate?.fps = progress
-        //     updateTime()
-        // }
-
-        // TODO: seekBar_res = findViewById(R.id.seekBar_res)
-        // seekBar_res.setOnProgressChangeListener { progress ->
-        //     onResolutionProgressChanged(progress)
-        // }
+        binding.btnSetupFps.setOnClickListener {
+            onSetupFpsClicked()
+        }
 
         // --- Initial button states ---
         disableUndoBtn()
@@ -726,7 +665,7 @@ class EngineActivity : BaseActivity() {
         if (mPlayer == null && entityAudio_player == null) return
 
         mIsPlaying = true
-        btnPlayPause.setImageResource(R.drawable.ic_pause) // TODO: verify icon name
+        binding.btnPlayPause.setImageResource(R.drawable.ic_pause) // TODO: verify icon name
 
         // Start audio playback
         mPlayer?.let { player ->
@@ -743,7 +682,7 @@ class EngineActivity : BaseActivity() {
      */
     private fun pausePlayer() {
         mIsPlaying = false
-        btnPlayPause.setImageResource(R.drawable.ic_play) // TODO: verify icon name
+        binding.btnPlayPause.setImageResource(R.drawable.ic_play)
 
         mPlayer?.let { player ->
             if (player.isPlaying) {
@@ -759,7 +698,7 @@ class EngineActivity : BaseActivity() {
      */
     private fun stop() {
         mIsPlaying = false
-        btnPlayPause.setImageResource(R.drawable.ic_play) // TODO: verify icon name
+        binding.btnPlayPause.setImageResource(R.drawable.ic_play)
 
         mPlayer?.let { player ->
             if (player.isPlaying) {
@@ -828,8 +767,8 @@ class EngineActivity : BaseActivity() {
      */
     private fun updateTime() {
         val ms = current_position_time
-        tv_currentTime.text = timeFormatter.format(ms)
-        tv_endTime.text = timeFormatter.format(endTimeAudioVisible)
+        binding.tvCurrentTime.text = timeFormatter.format(ms)
+        binding.tvEndTime.text = timeFormatter.format(endTimeAudioVisible)
     }
 
     /**
@@ -837,15 +776,15 @@ class EngineActivity : BaseActivity() {
      */
     private fun updateTime(ms: Int) {
         current_position_time = ms
-        tv_currentTime.text = timeFormatter.format(ms)
+        binding.tvCurrentTime.text = timeFormatter.format(ms)
     }
 
     /**
      * Update both max and current time labels.
      */
     private fun updateViewTime(max: Int, current: Int) {
-        tv_currentTime.text = timeFormatter.format(current)
-        tv_endTime.text = timeFormatter.format(max)
+        binding.tvCurrentTime.text = timeFormatter.format(current)
+        binding.tvEndTime.text = timeFormatter.format(max)
     }
 
     // ============================================================
@@ -887,8 +826,8 @@ class EngineActivity : BaseActivity() {
      * Update the "seek to start" button enabled state.
      */
     private fun updateBtnToStart() {
-        btnToStart.isEnabled = current_position_time > 0
-        btnToStart.alpha = if (current_position_time > 0) 1.0f else 0.4f
+        binding.btnToStart.isEnabled = current_position_time > 0
+        binding.btnToStart.alpha = if (current_position_time > 0) 1.0f else 0.4f
     }
 
     /**
@@ -896,30 +835,30 @@ class EngineActivity : BaseActivity() {
      */
     private fun updateBtnToEnd() {
         val atEnd = current_position_time >= endTimeAudioVisible
-        btnToEnd.isEnabled = !atEnd
-        btnToEnd.alpha = if (!atEnd) 1.0f else 0.4f
+        binding.btnToEnd.isEnabled = !atEnd
+        binding.btnToEnd.alpha = if (!atEnd) 1.0f else 0.4f
     }
 
     // --- Undo / Redo button states ---
 
     private fun enableUndoBtn() {
-        btnUndo.isEnabled = true
-        btnUndo.alpha = 1.0f
+        binding.btnUndo.isEnabled = true
+        binding.btnUndo.alpha = 1.0f
     }
 
     private fun disableUndoBtn() {
-        btnUndo.isEnabled = false
-        btnUndo.alpha = 0.4f
+        binding.btnUndo.isEnabled = false
+        binding.btnUndo.alpha = 0.4f
     }
 
     private fun enableRedoBtn() {
-        btnRedo.isEnabled = true
-        btnRedo.alpha = 1.0f
+        binding.btnRedo.isEnabled = true
+        binding.btnRedo.alpha = 1.0f
     }
 
     private fun disableRedoBtn() {
-        btnRedo.isEnabled = false
-        btnRedo.alpha = 0.4f
+        binding.btnRedo.isEnabled = false
+        binding.btnRedo.alpha = 0.4f
     }
 
     // ============================================================
@@ -958,7 +897,7 @@ class EngineActivity : BaseActivity() {
         setupShowFragment(title)
 
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment) // TODO: verify container ID
+            .replace(binding.mContainer.id, fragment)
             .commitAllowingStateLoss()
     }
 
@@ -970,15 +909,13 @@ class EngineActivity : BaseActivity() {
 
         supportFragmentManager.beginTransaction()
             .apply {
-                supportFragmentManager.findFragmentById(R.id.fragment_container)?.let {
+                supportFragmentManager.findFragmentById(binding.mContainer.id)?.let {
                     remove(it)
                 }
             }
             .commitAllowingStateLoss()
 
-        // TODO: Hide the fragment title bar
-        // tv_tittle_fragment.visibility = View.GONE
-        // binding.fragmentTitleBar.visibility = View.GONE
+        binding.tvTittleFragment.visibility = View.GONE
     }
 
     /**
@@ -986,10 +923,8 @@ class EngineActivity : BaseActivity() {
      * @param title The title to display
      */
     private fun setupShowFragment(title: String?) {
-        // TODO: Show and configure the fragment title bar
-        // tv_tittle_fragment.visibility = View.VISIBLE
-        // tv_tittle_fragment.text = title ?: ""
-        // binding.fragmentTitleBar.visibility = View.VISIBLE
+        binding.tvTittleFragment.visibility = View.VISIBLE
+        binding.tvTittleFragment.text = title ?: ""
     }
 
     // ============================================================
@@ -1000,16 +935,14 @@ class EngineActivity : BaseActivity() {
      * Show a progress/loading indicator (typically during template load or export).
      */
     private fun showProgress() {
-        // TODO: Show progress fragment or loading overlay
-        // binding.progressOverlay.visibility = View.VISIBLE
+        binding.containerProgress.visibility = View.VISIBLE
     }
 
     /**
      * Hide the progress/loading indicator.
      */
     private fun hideProgressFragment() {
-        // TODO: Hide progress fragment or loading overlay
-        // binding.progressOverlay.visibility = View.GONE
+        binding.containerProgress.visibility = View.GONE
     }
 
     // ============================================================

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="@drawable/top_line_bg"
+    android:padding="8dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <hazem.nurmontage.videoquran.views.text.TextCustumFont
+        android:textSize="12sp"
+        android:textColor="@color/white"
+        android:id="@+id/tv_fps_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FPS"/>
+    <SeekBar
+        android:id="@+id/seekBar_fps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="60"
+        android:progress="25"/>
+    <hazem.nurmontage.videoquran.views.text.TextCustumFont
+        android:textSize="12sp"
+        android:textColor="@color/white"
+        android:id="@+id/tv_res_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Resolution"/>
+    <SeekBar
+        android:id="@+id/seekBar_res"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="50"/>
+</LinearLayout>

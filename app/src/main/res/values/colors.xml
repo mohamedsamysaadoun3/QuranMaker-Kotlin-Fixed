@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#ff000000</color>
+    <color name="white">#ffffffff</color>
+    <color name="transparent">#00f44336</color>
+    <color name="studio">#ff111111</color>
+    <color name="tittle">#ff9096a1</color>
+    <color name="btn_color">#ff546e7a</color>
+    <color name="light_gris">#ffededed</color>
+    <color name="color_hint_add_quran">#ffb6b6b6</color>
+    <color name="black_overlay">#66000000</color>
+    <color name="ic_launcher_background">#ffffffff</color>
+    <color name="price_select">#ffffffff</color>
+    <color name="price_select_last">#ffc084fc</color>
+    <color name="text_act_pro">#ffffffff</color>
+    <color name="your_checked_color">#ff03dac5</color>
+    <color name="your_disabled_color">#ffff0000</color>
+    <color name="your_unchecked_color">#ffffffff</color>
+</resources>
