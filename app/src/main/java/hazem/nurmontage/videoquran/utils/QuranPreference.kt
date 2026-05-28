@@ -92,7 +92,7 @@ class QuranPreference(context: Context) {
          * @param context The application context
          * @param query The search query to persist
          */
-        fun saveLastSearch(context: Context, query: String) {
+        fun saveLastSearch(context: Context, query: String?) {
             context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
                 .edit()
                 .putString(KEY_SEARCH, query)
