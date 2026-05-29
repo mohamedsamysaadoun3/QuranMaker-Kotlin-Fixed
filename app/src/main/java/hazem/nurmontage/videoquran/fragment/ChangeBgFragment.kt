@@ -16,7 +16,6 @@ import hazem.nurmontage.videoquran.adapter.BgAdapter
 import hazem.nurmontage.videoquran.adapter.IBgCallback
 import hazem.nurmontage.videoquran.model.BgItem
 import hazem.nurmontage.videoquran.utils.AppUtils
-import hazem.nurmontage.videoquran.utils.BillingPreferences
 import hazem.nurmontage.videoquran.utils.ScreenUtils
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
@@ -26,11 +25,6 @@ import hazem.nurmontage.videoquran.views.TextCustumFont
  * Displays a horizontal scrolling background picker via [BgAdapter] with
  * 38 predefined backgrounds. Also provides options to upload custom
  * images or videos as backgrounds.
- *
- * Subscription gating:
- * - Video upload requires an active subscription; non-subscribers see
- *   a subscribe prompt and a disabled overlay on premium backgrounds.
- * - Crop button is visually dimmed for non-subscribers.
  *
  * The [IChangeBgCallback] extends [IBgCallback] so it can be passed
  * directly to [BgAdapter] for background selection events.
@@ -93,7 +87,7 @@ class ChangeBgFragment : Fragment {
         if (arguments != null) {
             selectedBg = arguments?.getString("bg_select")
         }
-        isSubscribed = BillingPreferences.isSubscribed(requireContext())
+        isSubscribed = true // Billing removed — always subscribed
     }
 
     override fun onCreateView(

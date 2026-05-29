@@ -21,7 +21,6 @@ import hazem.nurmontage.videoquran.constant.TransitionType
 import hazem.nurmontage.videoquran.databinding.FragmentEffectAyaBinding
 import hazem.nurmontage.videoquran.entity_timeline.EntityQuranTimeline
 import hazem.nurmontage.videoquran.model.Transition
-import hazem.nurmontage.videoquran.utils.BillingPreferences
 import hazem.nurmontage.videoquran.views.TextCustumFont
 import nl.dionsegijn.konfetti.core.Angle
 
@@ -30,8 +29,7 @@ import nl.dionsegijn.konfetti.core.Angle
  * Aya timeline entity.
  *
  * Similar to [EffectBismilahFragment] but operates on [EntityQuranTimeline]
- * entities and adds subscription gating via [BillingPreferences]. Premium
- * transitions (index > 10) are locked for non-subscribers.
+ * entities. All transitions are available (billing removed).
  *
  * Provides a TabLayout with "In Transition" / "Out Transition" tabs,
  * a horizontal RecyclerView of available transition icons, a SeekBar
@@ -236,7 +234,7 @@ class EffectAyaFragment : Fragment {
                     getIndex(inTransition, transition!!.type_in)
                 }
                 transitionEntityAdabters = TransitionEntityAdabters(
-                    BillingPreferences.isSubscribed(context),
+                    true, // Billing removed — always subscribed
                     iTransition, inTransition, selectIndex, entityQuranTimeline!!
                 )
                 recyclerView?.adapter = transitionEntityAdabters

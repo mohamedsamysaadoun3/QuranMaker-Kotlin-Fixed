@@ -16,7 +16,6 @@ import hazem.nurmontage.videoquran.adapter.FrameAdapter
 import hazem.nurmontage.videoquran.constant.IpadType
 import hazem.nurmontage.videoquran.databinding.FragmentEditIpadBinding
 import hazem.nurmontage.videoquran.model.IpadItem
-import hazem.nurmontage.videoquran.utils.BillingPreferences
 import hazem.nurmontage.videoquran.views.text.TextCustumFont
 
 /**
@@ -140,7 +139,7 @@ class EditIpadFragment : Fragment {
         val posSelect = getPosSelect(ipadType, ipadItems)
 
         ipadAdapter = FrameAdapter(
-            BillingPreferences.isSubscribed(context),
+            true, // Billing removed — always subscribed
             posSelect,
             ipadType,
             iIpadEditCallback,

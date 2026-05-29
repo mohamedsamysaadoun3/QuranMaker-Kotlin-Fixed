@@ -37,13 +37,9 @@ object Feadback {
                 "\nTime ago :" + timeDifference +
                 "\nApp Name: " + context.getString(R.string.app_name) +
                 "\nApp Version: " + versionName +
-                if (BillingPreferences.isSubscribed(context)) "*" else "" +
+                "*" +
                 "\nDevice Platform: Android(" + Build.MODEL + ")" +
                 "\nDevice OS: " + Build.VERSION.RELEASE
-
-        if (BillingPreferences.isSubscribed(context)) {
-            body += "."
-        }
 
         val emailAddresses = arrayOf("nurmontage.contact@gmail.com")
 
