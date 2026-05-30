@@ -18,6 +18,7 @@ import android.graphics.RadialGradient
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Shader
+import hazem.nurmontage.videoquran.multitouch.MoveGestureDetector
 import android.graphics.Typeface
 import android.graphics.drawable.VectorDrawable
 import android.text.Layout
@@ -32,7 +33,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
 import hazem.nurmontage.videoquran.R
-import hazem.nurmontage.videoquran.constant.AyaTextPreset
+import hazem.nurmontage.videoquran.core.common.Constants.AyaTextPreset
 import hazem.nurmontage.videoquran.constant.IpadType
 import hazem.nurmontage.videoquran.constant.ResizeType
 import hazem.nurmontage.videoquran.constant.SurahNameStyle
@@ -257,10 +258,8 @@ class BlurredImageView @JvmOverloads constructor(
     fun isPlaying(): Boolean = this.isPlaying
     fun setPro(z: Boolean) { this.isPro = z }
     fun isPro(): Boolean = this.isPro
-    fun setBitmapOriginal(bitmap: Bitmap?) { this.bitmapOriginal = bitmap }
-    fun getBitmapOriginal(): Bitmap? = this.bitmapOriginal
-    fun setGlass(z: Boolean) { this.isGlass = z }
-    fun isGlass(): Boolean = this.isGlass
+
+
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
@@ -596,7 +595,7 @@ class BlurredImageView @JvmOverloads constructor(
                     quranEntity2.applyAll(
                         getmCanvas_width(), rectF,
                         quranEntity.getPaintAya().textSize,
-                        quranEntity.getFactorSize()
+                        quranEntity.factorSize
                     )
                 }
             }
@@ -610,7 +609,7 @@ class BlurredImageView @JvmOverloads constructor(
                     translationQuranEntity2.applyAll(
                         getmCanvas_width(), rectF,
                         translationQuranEntity.getPaintAya().textSize,
-                        translationQuranEntity.getFactorSize()
+                        translationQuranEntity.factorSize
                     )
                 }
             }
@@ -1311,8 +1310,8 @@ class BlurredImageView @JvmOverloads constructor(
             if (entity_select != null && selectTool != null && entity_select!!.isVisible) {
                 val ev = entity_select!!
                 if (ev is SurahNameEntity || ev is BismilahEntity ||
-                    (ev.getEntityQuran() != null && ev.getEntityQuran()!!.visible()) ||
-                    (ev.getEntityTrslTimeline() != null && ev.getEntityTrslTimeline()!!.visible())
+                    (ev.entityQuran != null && ev.entityQuran!!.visible()) ||
+                    (ev.entityTrslTimeline != null && ev.entityTrslTimeline!!.visible())
                 ) {
                     selectTool!!.draw(canvas, ev)
                 }
@@ -1576,27 +1575,27 @@ class BlurredImageView @JvmOverloads constructor(
 
     fun slideInToLeft(entityView: EntityView, duration: Int) {
         // Animation: entity slides in from the right to its current position
-        val rect = entityView.getRect()
+        val rect = entityView.rect
         val targetLeft = rect.left
         rect.left = rect.right
         entityView.postTranslate(targetLeft - rect.left, 0f)
     }
 
     fun slideInToRight(entityView: EntityView, duration: Int) {
-        val rect = entityView.getRect()
+        val rect = entityView.rect
         val targetRight = rect.right
         rect.right = rect.left
         entityView.postTranslate(targetRight - rect.right, 0f)
     }
 
     fun slideOutToRight(entityView: EntityView, duration: Int) {
-        val rect = entityView.getRect()
+        val rect = entityView.rect
         val shift = mCanvas_width.toFloat() - rect.left
         entityView.postTranslate(shift, 0f)
     }
 
     fun slideOutToLeft(entityView: EntityView, duration: Int) {
-        val rect = entityView.getRect()
+        val rect = entityView.rect
         val shift = -rect.right
         entityView.postTranslate(shift, 0f)
     }
@@ -2027,26 +2026,37 @@ class BlurredImageView @JvmOverloads constructor(
     ) {
         val entity = surahNameEntity
         if (entity != null) {
-            entity.setName(name)
-            entity.setReaderName(readerName)
-            entity.setClrBg(clrBg)
-            entity.setHaveBg(haveBg)
-            entity.setIndex_surah(indexSurah)
+            entity.name = name
+            entity.reader = readerName
+            entity.clrBg = clrBg
+            entity.isHaveBg = haveBg
+            entity.index_surah = indexSurah
         } else {
-            surahNameEntity = SurahNameEntity(name, readerName, clrAya)
+            surahNameEntity = SurahNameEntity(
+                Layout.Alignment.ALIGN_CENTER,
+                name,
+                readerName,
+                RectF(),
+                Typeface.DEFAULT,
+                clrAya,
+                1.0f,
+                "",
+                0,
+                null,
+                0,
+                indexSurah,
+                0,
+                haveBg,
+                clrBg
+            )
         }
         invalidate()
     }
-
-    fun getSurahNameEntity(): SurahNameEntity? = surahNameEntity
 
     fun updateAlignmentSurah(alignment: Layout.Alignment) {
         surahNameEntity?.setAlignment(alignment)
     }
 
-    fun setSurahNameEntity(entity: SurahNameEntity?) {
-        this.surahNameEntity = entity
-    }
 
     // ═══════════════════════════════════════════════════════════════════
     //  drawBismilah
@@ -2229,37 +2239,37 @@ class BlurredImageView @JvmOverloads constructor(
 
     fun updateSizeAyaSave() {
         for (q in quranEntities) {
-            q.setupScaleSave(q.getFactorSize(), mCanvas_width)
+            q.setupScaleSave(q.factorSize, mCanvas_width)
         }
     }
 
     fun updateSizeTrslSave() {
         for (t in translationEntities) {
-            t.setupScaleSave(t.getFactorSize(), mCanvas_width)
+            t.setupScaleSave(t.factorSize, mCanvas_width)
         }
     }
 
     fun updateSizeAya() {
         for (q in quranEntities) {
-            q.setupScale(q.getFactorSize(), mCanvas_width, mCanvas_height)
+            q.setupScale(q.factorSize, mCanvas_width, mCanvas_height)
         }
     }
 
     fun updateSizeAyaTrsl() {
         for (t in translationEntities) {
-            t.setupScale(t.getFactorSize(), mCanvas_width, mCanvas_height)
+            t.setupScale(t.factorSize, mCanvas_width, mCanvas_height)
         }
     }
 
     fun updateSizeAyaResize() {
         for (q in quranEntities) {
-            q.scale(q.getFactorScale(), mCanvas_width, mCanvas_height)
+            q.scale(q.factorScale, mCanvas_width, mCanvas_height)
         }
     }
 
     fun updateSizeTrslAyaResize() {
         for (t in translationEntities) {
-            t.scale(t.getFactorScale(), mCanvas_width, mCanvas_height)
+            t.scale(t.factorScale, mCanvas_width, mCanvas_height)
         }
     }
 
@@ -2294,12 +2304,12 @@ class BlurredImageView @JvmOverloads constructor(
 
     fun resizeEntity() {
         for (q in quranEntities) {
-            q.scale(q.getFactorScale(), mCanvas_width, mCanvas_height)
+            q.scale(q.factorScale, mCanvas_width, mCanvas_height)
         }
         for (t in translationEntities) {
-            t.scale(t.getFactorScale(), mCanvas_width, mCanvas_height)
+            t.scale(t.factorScale, mCanvas_width, mCanvas_height)
         }
-        surahNameEntity?.scale(surahNameEntity!!.getFactorScale(), mCanvas_width, mCanvas_height)
+        surahNameEntity?.scale(surahNameEntity!!.factorScale, mCanvas_width, mCanvas_height)
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -2310,31 +2320,31 @@ class BlurredImageView @JvmOverloads constructor(
         // Check translation entities first (they are on top)
         for (i in translationEntities.indices.reversed()) {
             val t = translationEntities[i]
-            if (t.isVisible && t.getRect().contains(x, y)) {
+            if (t.isVisible && t.rect.contains(x, y)) {
                 return t
             }
         }
         // Check quran entities
         for (i in quranEntities.indices.reversed()) {
             val q = quranEntities[i]
-            if (q.isVisible && q.getRect().contains(x, y)) {
+            if (q.isVisible && q.rect.contains(x, y)) {
                 return q
             }
         }
         // Check bismilah
         bismilahEntity?.let {
-            if (it.isVisible && it.getBismilahTimeline()?.visible() == true && it.getRect().contains(x, y)) {
+            if (it.isVisible && it.getBismilahTimeline()?.visible() == true && it.rect.contains(x, y)) {
                 return it
             }
         }
         mIsti3adhaEntity?.let {
-            if (it.isVisible && it.getBismilahTimeline()?.visible() == true && it.getRect().contains(x, y)) {
+            if (it.isVisible && it.getBismilahTimeline()?.visible() == true && it.rect.contains(x, y)) {
                 return it
             }
         }
         // Check surah name
         surahNameEntity?.let {
-            if (it.isVisible && it.getRect().contains(x, y)) {
+            if (it.isVisible && it.rect.contains(x, y)) {
                 return it
             }
         }
@@ -2405,7 +2415,7 @@ class BlurredImageView @JvmOverloads constructor(
     fun distanceToCenter(entityView: EntityView): Float {
         val cx = mCanvas_width / 2f
         val cy = mCanvas_height / 2f
-        val rect = entityView.getRect()
+        val rect = entityView.rect
         val dx = rect.centerX() - cx
         val dy = rect.centerY() - cy
         return sqrt(dx * dx + dy * dy)
@@ -2448,7 +2458,6 @@ class BlurredImageView @JvmOverloads constructor(
     fun getRadius_square(): Int = radius_square
     fun getRectSquare(): Rect? = rectSquare
     fun setRadius_square(radius: Int) { this.radius_square = radius }
-    fun setBitmapBlured(bitmap: Bitmap?) { this.bitmapBlured = bitmap }
     fun setBitmapSquare(bitmap: Bitmap?) { this.bitmapSquare = bitmap }
     fun getRectFProgress(): RectF? = rectFProgress
     fun getRectFAya(): RectF? = rectFAya
@@ -2479,7 +2488,7 @@ class BlurredImageView @JvmOverloads constructor(
 
     private inner class MoveListener : MoveGestureDetector.SimpleOnMoveGestureListener() {
         override fun onMove(detector: MoveGestureDetector): Boolean {
-            handleTranslate(detector.focusDelta)
+            handleTranslate(detector.getFocusDelta().x, detector.getFocusDelta().y)
             return true
         }
 

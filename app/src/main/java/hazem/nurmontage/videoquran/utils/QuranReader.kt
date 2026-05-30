@@ -117,7 +117,7 @@ class QuranReader(private val context: Context) {
             var line: String?
             while (reader.readLine().also { line = it } != null) {
                 if (line!!.startsWith(prefix)) {
-                    return line.substring(prefix.length)
+                    return line!!.substring(prefix.length)
                 }
             }
             reader.close()

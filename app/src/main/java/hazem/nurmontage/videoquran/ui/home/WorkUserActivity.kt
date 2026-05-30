@@ -1,12 +1,14 @@
 package hazem.nurmontage.videoquran.ui.home
 
 import android.content.Intent
+import hazem.nurmontage.videoquran.views.ButtonCustumFont
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import hazem.nurmontage.videoquran.adapter.WorkUserAdapter
 import hazem.nurmontage.videoquran.databinding.ActivityWorkUserBinding
+import hazem.nurmontage.videoquran.model.Template
 import hazem.nurmontage.videoquran.ui.engine.EngineActivity
 import hazem.nurmontage.videoquran.ui.settings.SeettingActivity
 import hazem.nurmontage.videoquran.utils.FileUtils
@@ -42,12 +44,28 @@ class WorkUserActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = WorkUserAdapter(projectList) { project ->
-            // Click on existing project → open in engine for preview
-            val intent = Intent(this, EngineActivity::class.java)
-            intent.putExtra("project_path", project.path)
-            startActivity(intent)
+        val templates = projectList.map { item ->
+            Template().apply {
+                idTemplate = item.name
+                folder_template = item.path
+            }
         }
+        adapter = WorkUserAdapter(
+            appVersion = try { packageManager.getPackageInfo(packageName, 0).versionName ?: "" } catch (_: Exception) { "" },
+            images = templates,
+            iWorkUserCallback = object : WorkUserAdapter.IWorkUserCallback {
+                override fun onClick(template: Template) {
+                    val intent = Intent(this@WorkUserActivity, EngineActivity::class.java)
+                    intent.putExtra("project_path", template.folder_template)
+                    startActivity(intent)
+                }
+                override fun toMenu(template: Template, view: View, position: Int) {
+                    // No menu action needed
+                }
+            },
+            w = resources.displayMetrics.widthPixels,
+            h = resources.displayMetrics.heightPixels
+        )
         binding.rv.layoutManager = LinearLayoutManager(this)
         binding.rv.adapter = adapter
     }

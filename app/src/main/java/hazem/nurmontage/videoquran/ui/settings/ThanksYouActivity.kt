@@ -6,8 +6,16 @@ import android.os.Looper
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.core.base.BaseActivity
 import hazem.nurmontage.videoquran.databinding.ActivityThanksYouBinding
-import nl.dionsegijn.konfetti.models.Shape
-import nl.dionsegijn.konfetti.models.Size
+import nl.dionsegijn.konfetti.core.Angle
+import nl.dionsegijn.konfetti.core.Party
+import nl.dionsegijn.konfetti.core.PartyFactory
+import nl.dionsegijn.konfetti.core.Position
+import nl.dionsegijn.konfetti.core.Rotation
+import nl.dionsegijn.konfetti.core.Spread
+import nl.dionsegijn.konfetti.core.emitter.Emitter
+import nl.dionsegijn.konfetti.core.models.Shape
+import nl.dionsegijn.konfetti.core.models.Size
+import java.util.concurrent.TimeUnit
 
 /**
  * Thank you / credits screen.
@@ -48,51 +56,55 @@ class ThanksYouActivity : BaseActivity() {
     }
 
     /**
-     * Start the confetti celebration animation.
+     * Start the confetti celebration animation using konfetti 2.x API.
      */
     private fun startConfetti() {
         try {
-            binding.konfettiView.build()
-                .addColors(
+            val party1 = PartyFactory(
+                Emitter(2000L, TimeUnit.MILLISECONDS).max(100)
+            )
+                .angle(Angle.Companion.TOP)
+                .spread(Spread.Companion.SMALL)
+                .setSpeedBetween(1f, 5f)
+                .timeToLive(2000L)
+                .shapes(listOf(Shape.Square, Shape.Circle))
+                .sizes(listOf(Size.SMALL, Size.MEDIUM, Size.LARGE))
+                .rotation(Rotation())
+                .colors(listOf(
                     android.graphics.Color.YELLOW,
                     android.graphics.Color.GREEN,
                     android.graphics.Color.MAGENTA,
                     android.graphics.Color.RED,
                     android.graphics.Color.CYAN
-                )
-                .setDirection(0.0, 359.0)
-                .setSpeed(1f, 5f)
-                .setFadeOutEnabled(true)
-                .setTimeToLive(2000L)
-                .addShapes(Shape.Square, Shape.Circle)
-                .addSizes(Size(12), Size(16), Size(20))
-                .setPosition(
-                    binding.konfettiView.width * 0.5f,
-                    binding.konfettiView.height * 0.5f
-                )
-                .burst(100)
+                ))
+                .position(Position.Relative(0.5, 0.5))
+                .build()
+
+            binding.konfettiView.start(listOf(party1))
 
             // Second burst after a short delay
             Handler(Looper.getMainLooper()).postDelayed({
                 try {
-                    binding.konfettiView.build()
-                        .addColors(
+                    val party2 = PartyFactory(
+                        Emitter(2500L, TimeUnit.MILLISECONDS).max(80)
+                    )
+                        .angle(Angle.Companion.TOP)
+                        .spread(Spread.Companion.SMALL)
+                        .setSpeedBetween(2f, 6f)
+                        .timeToLive(2500L)
+                        .shapes(listOf(Shape.Circle, Shape.Square))
+                        .sizes(listOf(Size.SMALL, Size.MEDIUM, Size.LARGE))
+                        .rotation(Rotation())
+                        .colors(listOf(
                             android.graphics.Color.BLUE,
                             android.graphics.Color.GREEN,
                             android.graphics.Color.RED,
                             android.graphics.Color.YELLOW
-                        )
-                        .setDirection(0.0, 359.0)
-                        .setSpeed(2f, 6f)
-                        .setFadeOutEnabled(true)
-                        .setTimeToLive(2500L)
-                        .addShapes(Shape.Circle, Shape.Square)
-                        .addSizes(Size(10), Size(14), Size(18))
-                        .setPosition(
-                            binding.konfettiView.width * 0.3f,
-                            binding.konfettiView.height * 0.5f
-                        )
-                        .burst(80)
+                        ))
+                        .position(Position.Relative(0.3, 0.5))
+                        .build()
+
+                    binding.konfettiView.start(listOf(party2))
                 } catch (_: Exception) {
                     // Konfetti view may be detached
                 }

@@ -1,24 +1,22 @@
-package hazem.nurmontage.videoquran.views.widget
+package hazem.nurmontage.videoquran.views
 
 import android.content.Context
 import android.util.AttributeSet
-import androidx.appcompat.widget.AppCompatButton
+import androidx.appcompat.widget.AppCompatCheckBox
 import hazem.nurmontage.videoquran.views.TypefaceCache
 
 /**
- * Custom Button that applies the ReadexPro Medium font automatically.
+ * Custom CheckBox that applies the ReadexPro Medium font automatically.
  *
- * Originally: ButtonCustumFont.java
- * Converted to: ButtonCustumFont.kt — with shared [TypefaceCache] optimization
+ * Originally: CheckboxCustumFont.java
+ * Converted to: CheckboxCustumFont.kt — with shared [TypefaceCache] optimization
  *
- * Used for all app buttons that need the custom Arabic/Latin font.
- * Shares the same cached Typeface as [TextCustumFont] to prevent
- * redundant native allocations.
+ * Used for settings checkboxes and preference toggles that need
+ * the custom Arabic/Latin font for their text labels.
  *
- * @see hazem.nurmontage.videoquran.views.text.TextCustumFont
  * @see TypefaceCache
  */
-class ButtonCustumFont : AppCompatButton {
+class CheckboxCustumFont : AppCompatCheckBox {
 
     constructor(context: Context) : super(context) { init() }
 

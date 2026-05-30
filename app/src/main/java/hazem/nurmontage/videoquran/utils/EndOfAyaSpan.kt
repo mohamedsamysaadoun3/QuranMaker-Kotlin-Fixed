@@ -31,13 +31,13 @@ import android.text.style.ReplacementSpan
  * - 1-2 digits: 70% of original size, positioned at 54% horizontal offset
  * - 3+ digits: 80% of original size, then 70% again, positioned at 40% offset
  *
- * @property vectorDrawable The ۞ shape drawable for the ayah end marker
- * @property fontNumber The Typeface for rendering the ayah number
+ * @property vectorDrawable The ۞ shape drawable for the ayah end marker (nullable for safety)
+ * @property fontNumber The Typeface for rendering the ayah number (nullable for safety)
  * @property number The ayah number string (e.g., "1", "42", "255")
  */
 class EndOfAyaSpan(
-    private val vectorDrawable: VectorDrawable,
-    private val fontNumber: Typeface,
+    private val vectorDrawable: VectorDrawable?,
+    private val fontNumber: Typeface?,
     private val number: String
 ) : ReplacementSpan() {
 
@@ -56,7 +56,14 @@ class EndOfAyaSpan(
 
         // Only replace the " نص" marker — draw other text normally
         if (substring != " نص") {
-            canvas.drawText(text, start, end, x, baseline, paint)
+            canvas.drawText(text, start, end, x, baseline.toFloat(), paint)
+            return
+        }
+
+        val vd = vectorDrawable
+        if (vd == null) {
+            // No drawable — just draw the number text without the circle
+            canvas.drawText(number, x, baseline.toFloat(), paint)
             return
         }
 
@@ -67,7 +74,9 @@ class EndOfAyaSpan(
         val originalTextSize = paint.textSize
 
         // Apply ayah number font styling
-        paint.typeface = fontNumber
+        if (fontNumber != null) {
+            paint.typeface = fontNumber
+        }
         paint.isFakeBoldText = true
 
         // Adjust text size based on digit count
@@ -82,10 +91,10 @@ class EndOfAyaSpan(
         paint.getTextBounds(number, 0, number.length, textBounds)
 
         // Calculate drawable bounds (centered in the span area)
-        val spanRect = RectF(x.toInt(), top, (textWidth + x).toInt(), bottom)
+        val spanRect = RectF(x, top.toFloat(), textWidth + x, bottom.toFloat())
         val halfWidth = spanRect.width() * 0.43f
         val halfHeight = spanRect.height() * 0.42f
-        vectorDrawable.setBounds(
+        vd.setBounds(
             (spanRect.centerX() - halfWidth).toInt(),
             (spanRect.centerY() - halfHeight).toInt(),
             (spanRect.centerX() + halfWidth).toInt(),
@@ -93,8 +102,8 @@ class EndOfAyaSpan(
         )
 
         // Tint the drawable with the current text color
-        vectorDrawable.setColorFilter(paint.color, PorterDuff.Mode.SRC_IN)
-        vectorDrawable.draw(canvas)
+        vd.setColorFilter(paint.color, PorterDuff.Mode.SRC_IN)
+        vd.draw(canvas)
 
         // Draw the ayah number on top of the circle
         if (number.length > 2) {

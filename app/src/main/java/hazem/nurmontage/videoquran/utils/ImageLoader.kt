@@ -38,17 +38,6 @@ object ImageLoader {
             resource: Resource<Bitmap>,
             outWidth: Int,
             outHeight: Int
-        ): Resource<Bitmap>? {
-            // Unused overload — kept for interface compatibility
-            return null
-        }
-
-        @Suppress("DEPRECATION")
-        fun transform(
-            pool: BitmapPool,
-            resource: Resource<Bitmap>,
-            outWidth: Int,
-            outHeight: Int
         ): Resource<Bitmap> {
             val bitmap = resource.get()
             val width = bitmap.width
@@ -58,18 +47,16 @@ object ImageLoader {
             val targetRatio = targetWidth.toFloat() / targetHeight.toFloat()
 
             val cropped = if (currentRatio > targetRatio) {
-                // Too wide — crop horizontally
                 val cropWidth = (height.toFloat() * targetRatio).toInt()
                 Bitmap.createBitmap(bitmap, (width - cropWidth) / 2, 0, cropWidth, height)
             } else if (currentRatio < targetRatio) {
-                // Too tall — crop vertically
                 val cropHeight = (width.toFloat() / targetRatio).toInt()
                 Bitmap.createBitmap(bitmap, 0, (height - cropHeight) / 2, width, cropHeight)
             } else {
                 bitmap
             }
 
-            return BitmapResource.obtain(cropped, pool)
+            return BitmapResource.obtain(cropped, Glide.get(context).bitmapPool)!!
         }
 
         override fun updateDiskCacheKey(messageDigest: MessageDigest) {

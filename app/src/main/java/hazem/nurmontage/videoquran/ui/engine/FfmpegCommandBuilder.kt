@@ -7,7 +7,7 @@ import com.arthenica.ffmpegkit.FFmpegKit
 import com.arthenica.ffmpegkit.FFmpegSession
 import com.arthenica.ffmpegkit.FFmpegSessionCompleteCallback
 import com.arthenica.ffmpegkit.ReturnCode
-import hazem.nurmontage.videoquran.common.Common
+import hazem.nurmontage.videoquran.core.common.Common
 import hazem.nurmontage.videoquran.model.EffectAudio
 import hazem.nurmontage.videoquran.model.EntityMedia
 import java.io.File

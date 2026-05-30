@@ -10,7 +10,7 @@ import android.media.MediaMetadataRetriever
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import androidx.appcompat.widget.AppCompatView
+import androidx.appcompat.widget.AppCompatImageView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -31,7 +31,7 @@ class VideoFrameSelectorView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : AppCompatView(context, attrs, defStyleAttr) {
+) : View(context, attrs, defStyleAttr) {
 
     /** Callback interface for frame seeking events. */
     interface OnFrameSeekListener {

@@ -30,8 +30,8 @@ import java.util.concurrent.Executors
 object AudioUtils {
 
     private const val TAG = "AudioUtils"
-    private val executor: ExecutorService = Executors.newSingleThreadExecutor()
-    private val mainHandler = Handler(Looper.getMainLooper())
+    internal val executor: ExecutorService = Executors.newSingleThreadExecutor()
+    internal val mainHandler = Handler(Looper.getMainLooper())
 
     /** Callback interface for async audio copy operations. */
     interface Callback {
@@ -72,7 +72,7 @@ object AudioUtils {
      *
      * @return The absolute path of the downloaded file, or null on failure
      */
-    private fun downloadFile(context: Context, urlStr: String, destDir: String): String? {
+    internal fun downloadFile(context: Context, urlStr: String, destDir: String): String? {
         var connection: HttpURLConnection? = null
         try {
             val url = URL(urlStr)
@@ -155,7 +155,7 @@ object AudioUtils {
      * Extract the display name from a content URI using ContentResolver.
      * Falls back to [Uri.getLastPathSegment] if the column is not available.
      */
-    private fun getFileName(context: Context, uri: Uri): String? {
+    internal fun getFileName(context: Context, uri: Uri): String? {
         if ("content" == uri.scheme) {
             context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                 if (cursor.moveToFirst()) {
@@ -173,7 +173,7 @@ object AudioUtils {
      * Append a UUID before the file extension to ensure uniqueness.
      * Example: `song.mp3` → `song_<uuid>.mp3`
      */
-    private fun addUniqueSuffix(fileName: String): String {
+    internal fun addUniqueSuffix(fileName: String): String {
         val dotIndex = fileName.lastIndexOf(".")
         return if (dotIndex > 0) {
             fileName.substring(0, dotIndex) + "_" + UUID.randomUUID() + fileName.substring(dotIndex)

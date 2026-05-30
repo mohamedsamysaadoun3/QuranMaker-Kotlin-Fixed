@@ -15,7 +15,7 @@ abstract class BaseGestureDetector(protected val mContext: Context) {
 
     companion object {
         /** Minimum pressure ratio to consider the touch valid. */
-        protected const val PRESSURE_THRESHOLD = 0.67f
+        const val PRESSURE_THRESHOLD = 0.67f
     }
 
     /** Previous motion event (recycled on reset). */

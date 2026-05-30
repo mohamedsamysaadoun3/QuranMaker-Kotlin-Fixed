@@ -26,24 +26,27 @@ abstract class Entity(secondInScreen: Float) {
     //  Protected state (shared with subclasses)
     // ══════════════════════════════════════════════
 
-    var rect: RectF = RectF()
+    open var rect: RectF = RectF()
     protected var rectFLeft: RectF = RectF()
     protected var rectFRight: RectF = RectF()
-    protected var selectTrim: RectF? = null
-    var trimType: Int = -1
+    open var selectTrim: RectF? = null
+        internal set
+    open var trimType: Int = -1
     var color: Int = 0
     var end: Float = 0f
-    var left: Float = 0f
-    var right: Float = 0f
-    var max: Float = 0f
+    open var left: Float = 0f
+    open var right: Float = 0f
+    open var max: Float = 0f
     var start: Float = 0f
-    var secondInScreen: Float = secondInScreen
+    open var secondInScreen: Float = secondInScreen
     var padding: Float = 0f
-    var round: Float = 0f
-    var isSelect: Boolean = false
-    var isVisible: Boolean = true
-    protected var indexStartThumbnail: Int = 0
-    protected var indexEndThumbnail: Int = 0
+    open var round: Float = 0f
+    open var isSelect: Boolean = false
+    open var isVisible: Boolean = true
+    open var indexStartThumbnail: Int = 0
+        internal set
+    open var indexEndThumbnail: Int = 0
+        internal set
 
     // ══════════════════════════════════════════════
     //  Private state
@@ -56,17 +59,17 @@ abstract class Entity(secondInScreen: Float) {
     private var fadeIn: Float = 0f
     private var fadeOut: Float = 0f
     private var frameId: String? = null
-    private var index: Int = 0
+    open var index: Int = 0
     private var isSelectMultiple: Boolean = false
     private var isSplit: Boolean = false
     private var isTrimLeft: Boolean = false
     private var isVideo: Boolean = false
-    private var offset: Float = 0f
+    open var offset: Float = 0f
     private var offsetLeft: Float = 0f
     private var offsetRight: Float = 0f
     private var onDown: Float = 0f
     private var onTapTime: Float = 0f
-    private var scaleFactor: Float = 1.0f
+    open var scaleFactor: Float = 1.0f
     private var colorSelectMultiple: Int = -409555
     private var entityAction: EntityAction = EntityAction.ADD
     private var visible: Boolean = true
@@ -89,21 +92,14 @@ abstract class Entity(secondInScreen: Float) {
     abstract fun draw(canvas: Canvas, w: Int, h: Int)
     abstract fun getDownX(): Float
     abstract fun getH(): Float
-    abstract fun getLeft(): Float
-    abstract fun getRect(): RectF
-    abstract fun getRight(): Float
-    abstract fun getSelectTrim(): RectF?
-    abstract fun getTrimType(): Int
-    abstract fun onTouch(point: PointF): Boolean
-    abstract fun onUpLeft()
-    abstract fun onUpRight()
     abstract fun setDownX(downX: Float)
     abstract fun setLastLeft(lastLeft: Float)
     abstract fun setLastRight(lastRight: Float)
-    abstract fun setRight(right: Float)
-    abstract fun setSelect(select: Boolean)
     abstract fun setX(x: Float)
     abstract fun setY(y: Float)
+    abstract fun onTouch(point: PointF): Boolean
+    abstract fun onUpLeft()
+    abstract fun onUpRight()
     abstract fun updateStartTrim()
 
     open fun release() {}
@@ -121,22 +117,12 @@ abstract class Entity(secondInScreen: Float) {
 
     fun setSelectMultiple(selectMultiple: Boolean) { isSelectMultiple = selectMultiple }
     fun isSelectMultiple(): Boolean = isSelectMultiple
-    fun isSelect(): Boolean = isSelect
-
-    fun setVisible(visible: Boolean) { isVisible = visible }
 
     // ══════════════════════════════════════════════
     //  Color & appearance
     // ══════════════════════════════════════════════
 
     fun setColorSelectMultiple(color: Int) { colorSelectMultiple = color }
-
-    // ══════════════════════════════════════════════
-    //  Second-in-screen
-    // ══════════════════════════════════════════════
-
-    fun getSecondInScreen(): Float = secondInScreen
-    fun setSecondInScreen(secondInScreen: Float) { this.secondInScreen = secondInScreen }
 
     // ══════════════════════════════════════════════
     //  Audio & frame IDs
@@ -148,13 +134,6 @@ abstract class Entity(secondInScreen: Float) {
     fun setFrameId(frameId: String?) { this.frameId = frameId }
 
     // ══════════════════════════════════════════════
-    //  Thumbnail indices
-    // ══════════════════════════════════════════════
-
-    fun getIndexEndThumbnail(): Int = indexEndThumbnail
-    fun getIndexStartThumbnail(): Int = indexStartThumbnail
-
-    // ══════════════════════════════════════════════
     //  Trim & split
     // ══════════════════════════════════════════════
 
@@ -162,7 +141,6 @@ abstract class Entity(secondInScreen: Float) {
     fun isTrimLeft(): Boolean = isTrimLeft
     fun setSplit(split: Boolean) { isSplit = split }
     fun isSplit(): Boolean = isSplit
-    fun getRound(): Float = round
     fun resetTrimType() { trimType = -1 }
 
     // ══════════════════════════════════════════════
@@ -175,12 +153,10 @@ abstract class Entity(secondInScreen: Float) {
     fun setFadeOut(fadeOut: Float) { this.fadeOut = fadeOut }
 
     // ══════════════════════════════════════════════
-    //  Action & index
+    //  Action
     // ══════════════════════════════════════════════
 
     fun setEntityAction(entityAction: EntityAction) { this.entityAction = entityAction }
-    fun setIndex(index: Int) { this.index = index }
-    fun getIndex(): Int = index
 
     // ══════════════════════════════════════════════
     //  EntityView association
@@ -188,13 +164,6 @@ abstract class Entity(secondInScreen: Float) {
 
     fun setEntityView(entityView: EntityView?) { this.entityView = entityView }
     fun getEntityView(): EntityView? = entityView
-
-    // ══════════════════════════════════════════════
-    //  Scale factor
-    // ══════════════════════════════════════════════
-
-    fun setScaleFactor(scaleFactor: Float) { this.scaleFactor = scaleFactor }
-    fun getScaleFactor(): Float = scaleFactor
 
     // ══════════════════════════════════════════════
     //  Visibility (non-select)
@@ -207,8 +176,6 @@ abstract class Entity(secondInScreen: Float) {
     //  Offset & tap time
     // ══════════════════════════════════════════════
 
-    fun getOffset(): Float = offset
-    fun setOffset(offset: Float) { this.offset = offset }
     fun getOffsetLeft(): Float = offsetLeft
     fun setOffsetLeft(offsetLeft: Float) { this.offsetLeft = offsetLeft }
     fun getOffsetRight(): Float = offsetRight
@@ -249,7 +216,7 @@ abstract class Entity(secondInScreen: Float) {
         rect.left = (rect.left / scaleFactor) * newScale
         rect.right = (rect.right / scaleFactor) * newScale
         setX(rect.left)
-        setRight(rect.right)
+        right = rect.right
         scaleFactor = newScale
     }
 
@@ -280,7 +247,7 @@ abstract class Entity(secondInScreen: Float) {
         if (isSelect) {
             paintStroke.strokeWidth = rect.height() * 0.05f
             paintStroke.color = colorSelectMultiple
-            when (getTrimType()) {
+            when (trimType) {
                 0 -> {
                     rectFLeft.left = rect.left - rectFLeft.width()
                     rectFLeft.right = rect.left
@@ -342,7 +309,7 @@ abstract class Entity(secondInScreen: Float) {
             paintStroke.strokeWidth = rect.height() * 0.05f
             paint.color = colorSelectMultiple
             paintStroke.color = colorSelectMultiple
-            when (getTrimType()) {
+            when (trimType) {
                 0 -> {
                     rectFLeft.left = rect.left - rectFLeft.width()
                     rectFLeft.right = rect.left

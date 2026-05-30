@@ -26,17 +26,17 @@ import android.widget.Scroller
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
 import hazem.nurmontage.videoquran.R
-import hazem.nurmontage.videoquran.Utils.CanvasUtils
-import hazem.nurmontage.videoquran.common.Common
+import hazem.nurmontage.videoquran.utils.CanvasUtils
+import hazem.nurmontage.videoquran.core.common.Common
 import hazem.nurmontage.videoquran.constant.EntityAction
 import hazem.nurmontage.videoquran.entity_timeline.Entity
 import hazem.nurmontage.videoquran.entity_timeline.EntityAudio
 import hazem.nurmontage.videoquran.entity_timeline.EntityBismilahTimeline
 import hazem.nurmontage.videoquran.entity_timeline.EntityQuranTimeline
 import hazem.nurmontage.videoquran.entity_timeline.EntityTrslTimeline
-import hazem.nurmontage.videoquran.model.BismilahEntity
+import hazem.nurmontage.videoquran.model.data.BismilahEntity
 import hazem.nurmontage.videoquran.model.EntityView
-import hazem.nurmontage.videoquran.model.QuranEntity
+import hazem.nurmontage.videoquran.model.data.QuranEntity
 import hazem.nurmontage.videoquran.model.Transition
 import java.util.Locale
 import java.util.Stack
@@ -123,6 +123,7 @@ class TrackEntityView @JvmOverloads constructor(
     internal var clr_btn_trsl: Int = CLR_BTN_DEFAULT
     internal var countMove: Int = 0
     internal var currentEventX: Float = 0f
+    @JvmField
     internal var currentPosition: Float = 0f
     internal var current_cursur_position: Int = 0
     internal var duration: Int = 0
@@ -130,7 +131,6 @@ class TrackEntityView @JvmOverloads constructor(
 
     internal var entityList: Stack<Pair<Entity, EntityAction>> = Stack()
     var entityListAudio: MutableList<EntityAudio> = ArrayList()
-    fun getEntityListAudio(): MutableList<EntityAudio> = entityListAudio
     val entityListQuran: MutableList<EntityQuranTimeline> = ArrayList()
     val entityListTrslQuran: MutableList<EntityTrslTimeline> = ArrayList()
 
@@ -164,6 +164,10 @@ class TrackEntityView @JvmOverloads constructor(
     internal var markerHeight: Float = 0f
     internal var maxBottom: Float = 0f
     internal var maxTime: Int = -1
+        set(value) {
+            field = value
+            timeLineW = (value * getSecond_in_screen()) / 1000.0f
+        }
     internal var max_trim: Float = 0f
     internal var objectAnimator: ObjectAnimator? = null
     internal var onThink: Boolean = true
@@ -199,7 +203,8 @@ class TrackEntityView @JvmOverloads constructor(
     internal var scaleGestureDetector: ScaleGestureDetector? = null
     internal var scrolled_with_zoom: Float = 0f
     internal var scroller: Scroller? = null
-    internal var second_in_screen: Float = 0f
+    @JvmField
+    var second_in_screen: Float = 0f
     var selectedEntity: Entity? = null
     internal var signeX: Float = -1f
     internal var signeY: Float = -1f
@@ -211,7 +216,7 @@ class TrackEntityView @JvmOverloads constructor(
     internal var undoEntityList: Stack<Pair<Entity, EntityAction>> = Stack()
     internal var w_time_item: Float = 0f
     internal var width_screen: Int = 0
-    var y: Float = 0f
+    var entityY: Float = 0f
 
     // ── Gesture listener (extracted from duplicated constructors) ─────
 
@@ -222,21 +227,21 @@ class TrackEntityView @JvmOverloads constructor(
             isPassScroll = true
             if (selectedEntity != null) {
                 val contains = selectedEntity!!.contains(pointF)
-                isPassScroll = !contains && selectedEntity!!.getTrim_type() == -1
-                selectedEntity!!.setSelect(true)
+                isPassScroll = !contains && selectedEntity!!.trimType == -1
+                selectedEntity!!.isSelect = true
                 if (!isPassScroll && iTrimLineCallback != null) {
-                    if (selectedEntity!!.getTrim_type() == 0) {
+                    if (selectedEntity!!.trimType == 0) {
                         selectedEntity!!.setCurrentRect()
                         selectedEntity!!.setOnTapTime(
-                            round(selectedEntity!!.getRect().left / getSecond_in_screen()) * 1000,
-                            selectedEntity!!.getRect().left
+                            round(selectedEntity!!.rect.left / getSecond_in_screen()) * 1000,
+                            selectedEntity!!.rect.left
                         )
                         iTrimLineCallback!!.onPlayVibration()
-                    } else if (selectedEntity!!.getTrim_type() == 1) {
+                    } else if (selectedEntity!!.trimType == 1) {
                         selectedEntity!!.setCurrentRect()
                         selectedEntity!!.setOnTapTime(
-                            round(selectedEntity!!.getRect().right / getSecond_in_screen()) * 1000,
-                            selectedEntity!!.getRect().right
+                            round(selectedEntity!!.rect.right / getSecond_in_screen()) * 1000,
+                            selectedEntity!!.rect.right
                         )
                         iTrimLineCallback!!.onPlayVibration()
                     } else if (contains) {
@@ -267,11 +272,11 @@ class TrackEntityView @JvmOverloads constructor(
             return true
         }
 
-        override fun onScroll(motionEvent: MotionEvent, motionEvent2: MotionEvent, f: Float, f2: Float): Boolean {
-            if (isProgress || !isPassScroll || (selectedEntity != null && selectedEntity!!.getTrim_type() != -1)) {
+        override fun onScroll(motionEvent: MotionEvent?, motionEvent2: MotionEvent, f: Float, f2: Float): Boolean {
+            if (isProgress || !isPassScroll || (selectedEntity != null && selectedEntity!!.trimType != -1)) {
                 return super.onScroll(motionEvent, motionEvent2, f, f2)
             }
-            if (!isScaleListener && motionEvent2.eventTime - motionEvent.eventTime >= 107 && isPass(motionEvent2)) {
+            if (!isScaleListener && motionEvent2.eventTime - motionEvent!!.eventTime >= 107 && isPass(motionEvent2)) {
                 if (isPlaying) {
                     isPlaying = false
                 }
@@ -296,20 +301,20 @@ class TrackEntityView @JvmOverloads constructor(
             return true
         }
 
-        override fun onFling(motionEvent: MotionEvent, motionEvent2: MotionEvent, f: Float, f2: Float): Boolean {
+        override fun onFling(motionEvent: MotionEvent?, motionEvent2: MotionEvent, f: Float, f2: Float): Boolean {
             if (isProgress) return true
             if (isPlaying) isPlaying = false
-            if (motionEvent2.eventTime - motionEvent.eventTime > 107) return true
+            if (motionEvent2.eventTime - motionEvent!!.eventTime > 107) return true
             if (eventX == 0.0f) {
-                eventX = motionEvent.rawX
-                eventY = motionEvent.rawY
+                eventX = motionEvent!!.rawX
+                eventY = motionEvent!!.rawY
             }
             val abs = abs(motionEvent2.rawX - eventX)
             val abs2 = abs(motionEvent2.rawY - eventY)
             eventX = motionEvent2.rawX
             eventY = motionEvent2.rawY
             var velocityX = f
-            if (if (motionEvent2.rawX > motionEvent.rawX) velocityX < 0.0f else velocityX > 0.0f) {
+            if (if (motionEvent2.rawX > motionEvent!!.rawX) velocityX < 0.0f else velocityX > 0.0f) {
                 velocityX *= -1.0f
             }
             if (abs2 > abs * 1.2f) {
@@ -370,31 +375,32 @@ class TrackEntityView @JvmOverloads constructor(
 
     private fun initAutoScroll() {
         autoScrollHandler = Handler()
-        autoScrollRunnable = Runnable {
+        lateinit var scrollRunnable: Runnable
+        scrollRunnable = Runnable {
             if (isAutoScroll) {
-                var currentTimeMillis = (System.currentTimeMillis() - time_start) / FACTOR_VITESSE
+                var currentTimeMillis = (System.currentTimeMillis() - time_start).toFloat() / FACTOR_VITESSE
                 if (SPEED < 0.0f) currentTimeMillis *= -1.0f
                 val f = currentTimeMillis + SPEED
                 if (selectedEntity == null) return@Runnable
-                if (selectedEntity!!.getTrim_type() == 1) {
-                    val rect = selectedEntity!!.getRect()
+                if (selectedEntity!!.trimType == 1) {
+                    val rect = selectedEntity!!.rect
                     val f2 = rect.right + f
                     rect.right = f2
-                    if (rect.right - selectedEntity!!.getRect().left <= max_trim) {
-                        selectedEntity!!.getRect().right = selectedEntity!!.getRect().left + max_trim
-                        selectedEntity!!.setLastRight(selectedEntity!!.getRect().right)
+                    if (rect.right - selectedEntity!!.rect.left <= max_trim) {
+                        selectedEntity!!.rect.right = selectedEntity!!.rect.left + max_trim
+                        selectedEntity!!.setLastRight(selectedEntity!!.rect.right)
                         invalidate()
-                        autoScrollHandler.removeCallbacks(this)
+                        autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                         return@Runnable
                     }
                     if (selectedEntity is EntityQuranTimeline) {
                         val eqt = selectedEntity as EntityQuranTimeline
-                        if (eqt.getIndex() + 1 < entityListQuran.size) {
-                            val next = getPreviewOrNextEntityQuran(entityListQuran, eqt.getIndex() + 1, true)
-                            if (next != null && f2 > next.getRect().left) {
-                                selectedEntity!!.getRect().right = next.getRect().left
-                                selectedEntity!!.setLastRight(selectedEntity!!.getRect().right)
-                                autoScrollHandler.removeCallbacks(this)
+                        if (eqt.index + 1 < entityListQuran.size) {
+                            val next = getPreviewOrNextEntityQuran(entityListQuran, eqt.index + 1, true)
+                            if (next != null && f2 > next.rect.left) {
+                                selectedEntity!!.rect.right = next.rect.left
+                                selectedEntity!!.setLastRight(selectedEntity!!.rect.right)
+                                autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                                 isAutoScroll = false
                                 invalidate()
                                 return@Runnable
@@ -403,52 +409,52 @@ class TrackEntityView @JvmOverloads constructor(
                     }
                     if (selectedEntity is EntityTrslTimeline) {
                         val etl = selectedEntity as EntityTrslTimeline
-                        if (etl.getIndex() + 1 < entityListTrslQuran.size) {
-                            val next = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.getIndex() + 1, true)
-                            if (next != null && f2 > next.getRect().left) {
-                                selectedEntity!!.getRect().right = next.getRect().left
-                                selectedEntity!!.setLastRight(selectedEntity!!.getRect().right)
-                                autoScrollHandler.removeCallbacks(this)
+                        if (etl.index + 1 < entityListTrslQuran.size) {
+                            val next = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.index + 1, true)
+                            if (next != null && f2 > next.rect.left) {
+                                selectedEntity!!.rect.right = next.rect.left
+                                selectedEntity!!.setLastRight(selectedEntity!!.rect.right)
+                                autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                                 isAutoScroll = false
                                 invalidate()
                                 return@Runnable
                             }
                         }
                     }
-                    selectedEntity!!.getRect().right = f2
-                    selectedEntity!!.setLastRight(selectedEntity!!.getRect().right)
-                } else if (selectedEntity!!.getTrim_type() == 0) {
-                    val rect2 = selectedEntity!!.getRect()
+                    selectedEntity!!.rect.right = f2
+                    selectedEntity!!.setLastRight(selectedEntity!!.rect.right)
+                } else if (selectedEntity!!.trimType == 0) {
+                    val rect2 = selectedEntity!!.rect
                     val f3 = rect2.left + f
                     rect2.left = f3
                     if (f3 < 0.0f) {
-                        selectedEntity!!.getRect().left = 0.0f
-                        selectedEntity!!.setLastLeft(selectedEntity!!.getRect().left)
+                        selectedEntity!!.rect.left = 0.0f
+                        selectedEntity!!.setLastLeft(selectedEntity!!.rect.left)
                         selectedEntity!!.updateStartTrim()
                         isAutoScroll = false
-                        autoScrollHandler.removeCallbacks(this)
+                        autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                         invalidate()
                         return@Runnable
                     }
-                    if (selectedEntity!!.getRect().right - f3 <= max_trim) {
-                        val f4 = selectedEntity!!.getRect().right - max_trim
+                    if (selectedEntity!!.rect.right - f3 <= max_trim) {
+                        val f4 = selectedEntity!!.rect.right - max_trim
                         isAutoScroll = false
-                        selectedEntity!!.getRect().left = f4
-                        selectedEntity!!.setLastLeft(selectedEntity!!.getRect().left)
+                        selectedEntity!!.rect.left = f4
+                        selectedEntity!!.setLastLeft(selectedEntity!!.rect.left)
                         selectedEntity!!.updateStartTrim()
-                        autoScrollHandler.removeCallbacks(this)
+                        autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                         invalidate()
                         return@Runnable
                     }
                     if (selectedEntity is EntityQuranTimeline) {
                         val eqt2 = selectedEntity as EntityQuranTimeline
-                        if (eqt2.getIndex() > 0) {
-                            val prev = getPreviewOrNextEntityQuran(entityListQuran, eqt2.getIndex() - 1, false)
-                            if (prev != null && f3 <= prev.getRect().right) {
-                                selectedEntity!!.getRect().left = prev.getRect().right
-                                selectedEntity!!.setLastLeft(selectedEntity!!.getRect().left)
+                        if (eqt2.index > 0) {
+                            val prev = getPreviewOrNextEntityQuran(entityListQuran, eqt2.index - 1, false)
+                            if (prev != null && f3 <= prev.rect.right) {
+                                selectedEntity!!.rect.left = prev.rect.right
+                                selectedEntity!!.setLastLeft(selectedEntity!!.rect.left)
                                 selectedEntity!!.updateStartTrim()
-                                autoScrollHandler.removeCallbacks(this)
+                                autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                                 isAutoScroll = false
                                 invalidate()
                                 return@Runnable
@@ -457,21 +463,21 @@ class TrackEntityView @JvmOverloads constructor(
                     }
                     if (selectedEntity is EntityTrslTimeline) {
                         val etl2 = selectedEntity as EntityTrslTimeline
-                        if (etl2.getIndex() > 0) {
-                            val prev = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl2.getIndex() - 1, false)
-                            if (prev != null && f3 <= prev.getRect().right) {
-                                selectedEntity!!.getRect().left = prev.getRect().right
-                                selectedEntity!!.setLastLeft(selectedEntity!!.getRect().left)
+                        if (etl2.index > 0) {
+                            val prev = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl2.index - 1, false)
+                            if (prev != null && f3 <= prev.rect.right) {
+                                selectedEntity!!.rect.left = prev.rect.right
+                                selectedEntity!!.setLastLeft(selectedEntity!!.rect.left)
                                 selectedEntity!!.updateStartTrim()
-                                autoScrollHandler.removeCallbacks(this)
+                                autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                                 isAutoScroll = false
                                 invalidate()
                                 return@Runnable
                             }
                         }
                     }
-                    selectedEntity!!.getRect().left = f3
-                    selectedEntity!!.setLastLeft(selectedEntity!!.getRect().left)
+                    selectedEntity!!.rect.left = f3
+                    selectedEntity!!.setLastLeft(selectedEntity!!.rect.left)
                     selectedEntity!!.updateStartTrim()
                 }
                 currentPosition -= f / scaleFactor
@@ -479,102 +485,104 @@ class TrackEntityView @JvmOverloads constructor(
                     currentPosition = 0.0f
                     scrolled_with_zoom = currentPosition * scaleFactor
                     isAutoScroll = false
-                    autoScrollHandler.removeCallbacks(this)
+                    autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                     invalidate()
                     return@Runnable
                 }
                 scrolled_with_zoom = currentPosition * scaleFactor
                 invalidate()
-                autoScrollHandler.postDelayed(this, 100L)
+                autoScrollHandler.postDelayed(scrollRunnable, 100L)
             }
         }
+        autoScrollRunnable = scrollRunnable
 
-        autoMoveRunnable = Runnable {
+        lateinit var moveRunnable: Runnable
+        moveRunnable = Runnable {
             if (isAutoMove) {
-                var currentTimeMillis = (System.currentTimeMillis() - time_start) / FACTOR_VITESSE
+                var currentTimeMillis = (System.currentTimeMillis() - time_start).toFloat() / FACTOR_VITESSE
                 if (SPEED < 0.0f) currentTimeMillis *= -1.0f
                 val f = currentTimeMillis + SPEED
-                val width = selectedEntity!!.getRect().width()
-                var f2 = selectedEntity!!.getRect().left + f
+                val width = selectedEntity!!.rect.width()
+                var f2 = selectedEntity!!.rect.left + f
                 if (f2 < 0.0f) f2 = 0.0f
                 val f3 = f2 + width
                 if (selectedEntity is EntityQuranTimeline) {
                     val eqt = selectedEntity as EntityQuranTimeline
-                    if (eqt.getIndex() > 0) {
-                        val prev = getPreviewOrNextEntityQuran(entityListQuran, eqt.getIndex() - 1, false)
-                        if (prev != null && f2 <= prev.getRect().right) {
-                            selectedEntity!!.setX(prev.getRect().right)
-                            selectedEntity!!.setRight(prev.getRect().right + width)
+                    if (eqt.index > 0) {
+                        val prev = getPreviewOrNextEntityQuran(entityListQuran, eqt.index - 1, false)
+                        if (prev != null && f2 <= prev.rect.right) {
+                            selectedEntity!!.setX(prev.rect.right)
+                            selectedEntity!!.right = prev.rect.right + width
                             pass = false
                             invalidate()
                             isAutoMove = false
-                            autoScrollHandler.removeCallbacks(this)
+                            autoScrollHandler.removeCallbacks(autoMoveRunnable!!)
                             return@Runnable
                         }
                     }
-                    if (eqt.getIndex() + 1 < entityListQuran.size) {
-                        val next = getPreviewOrNextEntityQuran(entityListQuran, eqt.getIndex() + 1, true)
-                        if (next != null && f3 >= next.getRect().left) {
-                            selectedEntity!!.setX(next.getRect().left - width)
-                            selectedEntity!!.setRight(next.getRect().left)
+                    if (eqt.index + 1 < entityListQuran.size) {
+                        val next = getPreviewOrNextEntityQuran(entityListQuran, eqt.index + 1, true)
+                        if (next != null && f3 >= next.rect.left) {
+                            selectedEntity!!.setX(next.rect.left - width)
+                            selectedEntity!!.right = next.rect.left
                             pass = false
                             invalidate()
                             isAutoMove = false
-                            autoScrollHandler.removeCallbacks(this)
+                            autoScrollHandler.removeCallbacks(autoMoveRunnable!!)
                             return@Runnable
                         }
                     }
                 }
                 if (selectedEntity is EntityTrslTimeline) {
                     val etl = selectedEntity as EntityTrslTimeline
-                    if (etl.getIndex() > 0) {
-                        val prev = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.getIndex() - 1, false)
-                        if (prev != null && f2 <= prev.getRect().right) {
-                            selectedEntity!!.setX(prev.getRect().right)
-                            selectedEntity!!.setRight(prev.getRect().right + width)
+                    if (etl.index > 0) {
+                        val prev = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.index - 1, false)
+                        if (prev != null && f2 <= prev.rect.right) {
+                            selectedEntity!!.setX(prev.rect.right)
+                            selectedEntity!!.right = prev.rect.right + width
                             pass = false
                             invalidate()
                             isAutoMove = false
-                            autoScrollHandler.removeCallbacks(this)
+                            autoScrollHandler.removeCallbacks(autoMoveRunnable!!)
                             return@Runnable
                         }
                     }
-                    if (etl.getIndex() + 1 < entityListQuran.size) {
-                        val next = getPreviewOrNextEntityQuran(entityListQuran, etl.getIndex() + 1, true)
-                        if (next != null && f3 >= next.getRect().left) {
-                            selectedEntity!!.setX(next.getRect().left - width)
-                            selectedEntity!!.setRight(next.getRect().left)
+                    if (etl.index + 1 < entityListQuran.size) {
+                        val next = getPreviewOrNextEntityQuran(entityListQuran, etl.index + 1, true)
+                        if (next != null && f3 >= next.rect.left) {
+                            selectedEntity!!.setX(next.rect.left - width)
+                            selectedEntity!!.right = next.rect.left
                             pass = false
                             invalidate()
                             isAutoMove = false
-                            autoScrollHandler.removeCallbacks(this)
+                            autoScrollHandler.removeCallbacks(autoMoveRunnable!!)
                             return@Runnable
                         }
                     }
                 }
                 if (selectedEntity is EntityAudio) {
                     val ea = selectedEntity as EntityAudio
-                    if (ea.getIndex() > 0) {
-                        val prev = getPreviewOrNextEntityAudio(entityListAudio, ea.getIndex() - 1, false)
-                        if (prev != null && f2 <= prev.getRect().right) {
-                            selectedEntity!!.setX(prev.getRect().right)
-                            selectedEntity!!.setRight(prev.getRect().right + width)
+                    if (ea.index > 0) {
+                        val prev = getPreviewOrNextEntityAudio(entityListAudio, ea.index - 1, false)
+                        if (prev != null && f2 <= prev.rect.right) {
+                            selectedEntity!!.setX(prev.rect.right)
+                            selectedEntity!!.right = prev.rect.right + width
                             pass = false
                             invalidate()
                             isAutoMove = false
-                            autoScrollHandler.removeCallbacks(this)
+                            autoScrollHandler.removeCallbacks(autoMoveRunnable!!)
                             return@Runnable
                         }
                     }
-                    if (ea.getIndex() + 1 < entityListAudio.size) {
-                        val next = getPreviewOrNextEntityAudio(entityListAudio, ea.getIndex() + 1, true)
-                        if (next != null && f3 >= next.getRect().left) {
-                            selectedEntity!!.setX(next.getRect().left - width)
-                            selectedEntity!!.setRight(next.getRect().left)
+                    if (ea.index + 1 < entityListAudio.size) {
+                        val next = getPreviewOrNextEntityAudio(entityListAudio, ea.index + 1, true)
+                        if (next != null && f3 >= next.rect.left) {
+                            selectedEntity!!.setX(next.rect.left - width)
+                            selectedEntity!!.right = next.rect.left
                             pass = false
                             invalidate()
                             isAutoMove = false
-                            autoScrollHandler.removeCallbacks(this)
+                            autoScrollHandler.removeCallbacks(autoMoveRunnable!!)
                             return@Runnable
                         }
                     }
@@ -584,18 +592,19 @@ class TrackEntityView @JvmOverloads constructor(
                     currentPosition = 0.0f
                     scrolled_with_zoom = currentPosition * scaleFactor
                     isAutoMove = false
-                    autoScrollHandler.removeCallbacks(this)
+                    autoScrollHandler.removeCallbacks(autoMoveRunnable!!)
                     invalidate()
                     return@Runnable
                 }
                 scrolled_with_zoom = currentPosition * scaleFactor
-                selectedEntity!!.getRect().left = f2
-                selectedEntity!!.getRect().right = f3
+                selectedEntity!!.rect.left = f2
+                selectedEntity!!.rect.right = f3
                 isMove = true
                 invalidate()
-                autoScrollHandler.postDelayed(this, 100L)
+                autoScrollHandler.postDelayed(moveRunnable, 100L)
             }
         }
+        autoMoveRunnable = moveRunnable
     }
 
     // ── Public API ──────────────────────────────────────────────────
@@ -691,10 +700,7 @@ class TrackEntityView @JvmOverloads constructor(
         drawable2?.draw(canvas)
     }
 
-    fun setMaxTime(i: Int) {
-        maxTime = i
-        timeLineW = (i * getSecond_in_screen()) / 1000.0f
-    }
+
 
     fun setSecond_in_screen(f: Float, i: Int, i2: Int) {
         second_in_screen = f
@@ -750,9 +756,9 @@ class TrackEntityView @JvmOverloads constructor(
         try {
             val audio = getAudio()
             if (audio != null) {
-                val f = audio.getRect().top
+                val f = audio.rect.top
                 val width = canvas.width * 0.15f
-                val f2 = audio.getRect().bottom
+                val f2 = audio.rect.bottom
                 if (rectItemAudio == null) {
                     val rectF = RectF(0.0f, f, width, f2)
                     rectItemAudio = rectF
@@ -780,9 +786,9 @@ class TrackEntityView @JvmOverloads constructor(
             if (!isExist && !isExist2) {
                 val quran = getQuran()
                 if (quran != null) {
-                    val f6 = quran.getRect().top
+                    val f6 = quran.rect.top
                     val width3 = canvas.width * 0.15f
-                    val f7 = quran.getRect().bottom
+                    val f7 = quran.rect.bottom
                     val rectF2 = rectFItemQuran
                     if (rectF2 == null || rectF2.top != f6) {
                         val rectF3 = RectF(0.0f, f6, width3, f7)
@@ -808,9 +814,9 @@ class TrackEntityView @JvmOverloads constructor(
                 }
                 val trslQuran = getTrslQuran()
                 if (trslQuran != null) {
-                    val f11 = trslQuran.getRect().top
+                    val f11 = trslQuran.rect.top
                     val width5 = canvas.width * 0.15f
-                    val f12 = trslQuran.getRect().bottom
+                    val f12 = trslQuran.rect.bottom
                     val rectF4 = rectFItemTrslQuran
                     if (rectF4 == null || rectF4.top != f11) {
                         val rectF5 = RectF(0.0f, f11, width5, f12)
@@ -825,7 +831,7 @@ class TrackEntityView @JvmOverloads constructor(
                     }
                     paintItem.color = clr_btn_trsl
                     canvas.drawPath(pathItemTrslQuran!!, paintItem)
-                    paintItem.color = Common.COLOR_BLOCK_TRSLATION
+                    paintItem.color = Common.COLOR_BLOCK_TRANSLATION
                     canvas.drawRoundRect(rectSquareTrslQuran!!, 2.0f, 2.0f, paintItem)
                     if (clr_btn_trsl != CLR_BTN_DEFAULT) {
                         val drawable3 = ContextCompat.getDrawable(context, R.drawable.checked_timeline)
@@ -837,9 +843,9 @@ class TrackEntityView @JvmOverloads constructor(
             } else {
                 val entityBismilahTimeline = mIsi3adaTimeline
                 if (entityBismilahTimeline != null) {
-                    val f16 = entityBismilahTimeline.getRect().top
+                    val f16 = entityBismilahTimeline.rect.top
                     val width7 = canvas.width * 0.15f
-                    val f17 = entityBismilahTimeline.getRect().bottom
+                    val f17 = entityBismilahTimeline.rect.bottom
                     val rectF6 = rectFItemQuran
                     if (rectF6 == null || rectF6.top != f16) {
                         val rectF7 = RectF(0.0f, f16, width7, f17)
@@ -865,9 +871,9 @@ class TrackEntityView @JvmOverloads constructor(
                 }
                 val trslQuran = getTrslQuran()
                 if (trslQuran != null) {
-                    val f11 = trslQuran.getRect().top
+                    val f11 = trslQuran.rect.top
                     val width5 = canvas.width * 0.15f
-                    val f12 = trslQuran.getRect().bottom
+                    val f12 = trslQuran.rect.bottom
                     val rectF4 = rectFItemTrslQuran
                     if (rectF4 == null || rectF4.top != f11) {
                         val rectF5 = RectF(0.0f, f11, width5, f12)
@@ -882,7 +888,7 @@ class TrackEntityView @JvmOverloads constructor(
                     }
                     paintItem.color = clr_btn_trsl
                     canvas.drawPath(pathItemTrslQuran!!, paintItem)
-                    paintItem.color = Common.COLOR_BLOCK_TRSLATION
+                    paintItem.color = Common.COLOR_BLOCK_TRANSLATION
                     canvas.drawRoundRect(rectSquareTrslQuran!!, 2.0f, 2.0f, paintItem)
                     if (clr_btn_trsl != CLR_BTN_DEFAULT) {
                         val drawable3 = ContextCompat.getDrawable(context, R.drawable.checked_timeline)
@@ -910,17 +916,15 @@ class TrackEntityView @JvmOverloads constructor(
         super.onDraw(canvas)
     }
 
+    val second_in_screenNoScale: Float get() = second_in_screen
+
+    fun getSecond_in_screen(): Float = second_in_screen * scaleFactor
+
     fun setSecond_in_screen(f: Float) {
         second_in_screen = f
         dx = 0.03f * f
         max_trim = f * 0.2f
     }
-
-    fun getSecond_in_screenNoScale(): Float = second_in_screen
-
-    fun getSecond_in_screen(): Float = second_in_screen * scaleFactor
-
-    fun getSelectedEntity(): Entity? = selectedEntity
 
     private fun mDraw(canvas: Canvas) {
         canvas.drawColor(-15658735)
@@ -1011,9 +1015,7 @@ class TrackEntityView @JvmOverloads constructor(
 
     fun getCurrentPosition(): Float = scrolled_with_zoom
 
-    fun setPlaying(playing: Boolean) {
-        isPlaying = playing
-    }
+
 
     fun isExist(entityBismilahTimeline: EntityBismilahTimeline?): Boolean {
         return entityBismilahTimeline != null && entityBismilahTimeline.visible()
@@ -1025,24 +1027,24 @@ class TrackEntityView @JvmOverloads constructor(
             bismilahTimeline!!.updateRect(scaleFactor)
             if (bismilahTimeline!!.getEntityView() != null) {
                 if (bismilahTimeline!!.getEntityView()!!.isVisible) {
-                    if (round(getCurrentPosition() + bismilahTimeline!!.getRect().left) > 0.0f || round(getCurrentPosition() + bismilahTimeline!!.getRect().right) <= 0.0f) {
+                    if (round(getCurrentPosition() + bismilahTimeline!!.rect.left) > 0.0f || round(getCurrentPosition() + bismilahTimeline!!.rect.right) <= 0.0f) {
                         bismilahTimeline!!.getEntityView()!!.isVisible = false
-                        bismilahTimeline!!.getQuranEntity().endAnimator()
+                        bismilahTimeline!!.quranEntity.endAnimator()
                         iTrimLineCallback!!.onUpdate()
                     } else {
-                        setupAnimation(bismilahTimeline!!.getQuranEntity())
+                        setupAnimation(bismilahTimeline!!.quranEntity)
                     }
-                } else if (round(bismilahTimeline!!.getRect().left + getCurrentPosition()) <= 0.0f && round(bismilahTimeline!!.getRect().right + getCurrentPosition()) > 0.0f) {
-                    setupAnimation(bismilahTimeline!!.getQuranEntity())
+                } else if (round(bismilahTimeline!!.rect.left + getCurrentPosition()) <= 0.0f && round(bismilahTimeline!!.rect.right + getCurrentPosition()) > 0.0f) {
+                    setupAnimation(bismilahTimeline!!.quranEntity)
                     bismilahTimeline!!.getEntityView()!!.isVisible = true
                     iTrimLineCallback!!.onUpdate()
                 }
             }
-            bismilahTimeline!!.setY(y)
-            if (RectF.intersects(rectF, bismilahTimeline!!.getRect())) {
+            bismilahTimeline!!.setY(entityY)
+            if (RectF.intersects(rectF, bismilahTimeline!!.rect)) {
                 bismilahTimeline!!.update(canvas)
             }
-            f = bismilahTimeline!!.getRect().bottom
+            f = bismilahTimeline!!.rect.bottom
         } else {
             f = 0.0f
         }
@@ -1050,136 +1052,136 @@ class TrackEntityView @JvmOverloads constructor(
         mIsi3adaTimeline!!.updateRect(scaleFactor)
         if (mIsi3adaTimeline!!.getEntityView() != null) {
             if (mIsi3adaTimeline!!.getEntityView()!!.isVisible) {
-                if (round(getCurrentPosition() + mIsi3adaTimeline!!.getRect().left) > 0.0f || round(getCurrentPosition() + mIsi3adaTimeline!!.getRect().right) <= 0.0f) {
+                if (round(getCurrentPosition() + mIsi3adaTimeline!!.rect.left) > 0.0f || round(getCurrentPosition() + mIsi3adaTimeline!!.rect.right) <= 0.0f) {
                     mIsi3adaTimeline!!.getEntityView()!!.isVisible = false
-                    mIsi3adaTimeline!!.getQuranEntity().endAnimator()
+                    mIsi3adaTimeline!!.quranEntity.endAnimator()
                     iTrimLineCallback!!.onUpdate()
                 } else {
-                    setupAnimation(mIsi3adaTimeline!!.getQuranEntity())
+                    setupAnimation(mIsi3adaTimeline!!.quranEntity)
                 }
-            } else if (round(mIsi3adaTimeline!!.getRect().left + getCurrentPosition()) <= 0.0f && round(mIsi3adaTimeline!!.getRect().right + getCurrentPosition()) > 0.0f) {
-                setupAnimation(mIsi3adaTimeline!!.getQuranEntity())
+            } else if (round(mIsi3adaTimeline!!.rect.left + getCurrentPosition()) <= 0.0f && round(mIsi3adaTimeline!!.rect.right + getCurrentPosition()) > 0.0f) {
+                setupAnimation(mIsi3adaTimeline!!.quranEntity)
                 mIsi3adaTimeline!!.getEntityView()!!.isVisible = true
                 iTrimLineCallback!!.onUpdate()
             }
         }
-        mIsi3adaTimeline!!.setY(y)
-        if (RectF.intersects(rectF, mIsi3adaTimeline!!.getRect())) {
+        mIsi3adaTimeline!!.setY(entityY)
+        if (RectF.intersects(rectF, mIsi3adaTimeline!!.rect)) {
             mIsi3adaTimeline!!.update(canvas)
         }
-        return mIsi3adaTimeline!!.getRect().bottom
+        return mIsi3adaTimeline!!.rect.bottom
     }
 
     private fun drawAllEntities(canvas: Canvas, start: Int, end: Int) {
         var f7 = start_y_draw
-        y = f7
+        entityY = f7
         val f8 = scrolled_with_zoom
         val f9 = centerX
-        val rectF = RectF(-f8 - f9, -mScrollY + y, -f8 + f9, canvas.height - mScrollY.toFloat())
+        val rectF = RectF(-f8 - f9, -mScrollY + entityY, -f8 + f9, canvas.height - mScrollY.toFloat())
         for (i3 in entityListAudio.indices) {
             val entityAudio = entityListAudio[i3]
             if (entityAudio.visible()) {
                 if (selectedEntity === entityAudio && !isPlaying) {
-                    selectedEntity!!.setY(y)
+                    selectedEntity!!.setY(entityY)
                     selectedEntity!!.updateRect(scaleFactor)
-                    f7 = entityAudio.getRect().bottom + p
+                    f7 = entityAudio.rect.bottom + p
                 } else {
                     entityAudio.updateRect(scaleFactor)
-                    if (entityAudio.isVisible()) {
-                        if (round(getCurrentPosition() + entityAudio.getRect().left) > 0.0f || round(getCurrentPosition() + entityAudio.getRect().right) <= 0.0f) {
-                            entityAudio.setVisible(false)
+                    if (entityAudio.isVisible) {
+                        if (round(getCurrentPosition() + entityAudio.rect.left) > 0.0f || round(getCurrentPosition() + entityAudio.rect.right) <= 0.0f) {
+                            entityAudio.isVisible = false
                         } else {
                             setupFade(entityAudio)
                         }
-                    } else if (round(entityAudio.getRect().left + getCurrentPosition()) <= 0.0f && round(entityAudio.getRect().right + getCurrentPosition()) > 0.0f) {
+                    } else if (round(entityAudio.rect.left + getCurrentPosition()) <= 0.0f && round(entityAudio.rect.right + getCurrentPosition()) > 0.0f) {
                         setupFade(entityAudio)
-                        entityAudio.setVisible(true)
+                        entityAudio.isVisible = true
                         iTrimLineCallback?.onUpdatePlayerAudio(entityAudio)
                     }
-                    entityAudio.setY(y)
-                    if (RectF.intersects(rectF, entityAudio.getRect())) {
+                    entityAudio.setY(entityY)
+                    if (RectF.intersects(rectF, entityAudio.rect)) {
                         entityAudio.update(canvas)
                     }
-                    f7 = entityAudio.getRect().bottom + p
+                    f7 = entityAudio.rect.bottom + p
                 }
             }
         }
-        y = f7
+        entityY = f7
         var maxVal = max(start_y_draw, drawBasmala(canvas, rectF) + p)
         for (i4 in entityListQuran.indices) {
             val eqt = entityListQuran[i4]
             if (eqt.visible()) {
                 if (selectedEntity === eqt && !isPlaying) {
                     eqt.updateRect(scaleFactor)
-                    selectedEntity!!.setY(y)
-                    maxVal = eqt.getRect().bottom + p
+                    selectedEntity!!.setY(entityY)
+                    maxVal = eqt.rect.bottom + p
                 } else {
                     eqt.updateRect(scaleFactor)
                     if (eqt.getEntityView() != null) {
                         if (eqt.getEntityView()!!.isVisible) {
-                            if (round(getCurrentPosition() + eqt.getRect().left) > 0.0f || round(getCurrentPosition() + eqt.getRect().right) <= 0.0f) {
+                            if (round(getCurrentPosition() + eqt.rect.left) > 0.0f || round(getCurrentPosition() + eqt.rect.right) <= 0.0f) {
                                 eqt.getEntityView()!!.isVisible = false
-                                eqt.getQuranEntity().endAnimator()
+                                eqt.quranEntity.endAnimator()
                                 iTrimLineCallback?.onUpdate()
                             } else {
-                                setupAnimation(eqt.getQuranEntity())
+                                setupAnimation(eqt.quranEntity)
                             }
-                        } else if (round(eqt.getRect().left + getCurrentPosition()) <= 0.0f && round(eqt.getRect().right + getCurrentPosition()) > 0.0f) {
-                            setupAnimation(eqt.getQuranEntity())
+                        } else if (round(eqt.rect.left + getCurrentPosition()) <= 0.0f && round(eqt.rect.right + getCurrentPosition()) > 0.0f) {
+                            setupAnimation(eqt.quranEntity)
                             eqt.getEntityView()!!.isVisible = true
                             iTrimLineCallback?.onUpdate()
                         }
                     }
-                    eqt.setY(y)
-                    if (RectF.intersects(rectF, eqt.getRect())) {
+                    eqt.setY(entityY)
+                    if (RectF.intersects(rectF, eqt.rect)) {
                         eqt.update(canvas)
                     }
-                    maxVal = eqt.getRect().bottom + p
+                    maxVal = eqt.rect.bottom + p
                 }
             }
         }
-        y = maxVal
+        entityY = maxVal
         for (i5 in entityListTrslQuran.indices) {
             val etl = entityListTrslQuran[i5]
             if (etl.visible()) {
                 if (selectedEntity === etl && !isPlaying) {
                     etl.updateRect(scaleFactor)
-                    selectedEntity!!.setY(y)
-                    maxVal = etl.getRect().bottom + p
+                    selectedEntity!!.setY(entityY)
+                    maxVal = etl.rect.bottom + p
                 } else {
                     etl.updateRect(scaleFactor)
                     if (etl.getEntityView() != null) {
                         if (etl.getEntityView()!!.isVisible) {
-                            if (round(getCurrentPosition() + etl.getRect().left) > 0.0f || round(getCurrentPosition() + etl.getRect().right) <= 0.0f) {
+                            if (round(getCurrentPosition() + etl.rect.left) > 0.0f || round(getCurrentPosition() + etl.rect.right) <= 0.0f) {
                                 etl.getEntityView()!!.isVisible = false
-                                etl.getQuranEntity().endAnimator()
+                                etl.quranEntity.endAnimator()
                                 iTrimLineCallback?.onUpdate()
                             }
-                        } else if (round(etl.getRect().left + getCurrentPosition()) <= 0.0f && round(etl.getRect().right + getCurrentPosition()) > 0.0f) {
+                        } else if (round(etl.rect.left + getCurrentPosition()) <= 0.0f && round(etl.rect.right + getCurrentPosition()) > 0.0f) {
                             etl.getEntityView()!!.isVisible = true
                             iTrimLineCallback?.onUpdate()
                         }
                     }
-                    etl.setY(y)
-                    if (RectF.intersects(rectF, etl.getRect())) {
+                    etl.setY(entityY)
+                    if (RectF.intersects(rectF, etl.rect)) {
                         etl.update(canvas)
                     }
-                    maxVal = etl.getRect().bottom + p
+                    maxVal = etl.rect.bottom + p
                 }
             }
         }
-        y = maxVal
+        entityY = maxVal
         if (selectedEntity == null || isPlaying || !selectedEntity!!.visible()) return
-        if (RectF.intersects(rectF, selectedEntity!!.getRect())) {
+        if (RectF.intersects(rectF, selectedEntity!!.rect)) {
             val entity = selectedEntity!!
             if (entity is EntityAudio) {
-                if (round(entity.getRect().left + getCurrentPosition()) <= 0.0f && round(selectedEntity!!.getRect().right + getCurrentPosition()) > 0.0f) {
-                    selectedEntity!!.setVisible(true)
+                if (round(entity.rect.left + getCurrentPosition()) <= 0.0f && round(selectedEntity!!.rect.right + getCurrentPosition()) > 0.0f) {
+                    selectedEntity!!.isVisible = true
                 } else {
-                    selectedEntity!!.setVisible(false)
+                    selectedEntity!!.isVisible = false
                 }
             } else if (entity.getEntityView() != null) {
-                if (round(selectedEntity!!.getRect().left + getCurrentPosition()) <= 0.0f && round(selectedEntity!!.getRect().right + getCurrentPosition()) > 0.0f) {
+                if (round(selectedEntity!!.rect.left + getCurrentPosition()) <= 0.0f && round(selectedEntity!!.rect.right + getCurrentPosition()) > 0.0f) {
                     selectedEntity!!.getEntityView()!!.endAnimator()
                     if (!selectedEntity!!.getEntityView()!!.isVisible) {
                         selectedEntity!!.getEntityView()!!.isVisible = true
@@ -1201,26 +1203,26 @@ class TrackEntityView @JvmOverloads constructor(
     }
 
     private fun setupAnimation(quranEntity: QuranEntity) {
-        if (!isPlaying || quranEntity.getEntityQuran().getTransition() == null || quranEntity.isAnimRun()) return
-        val transition = quranEntity.getEntityQuran().getTransition() ?: return
+        if (!isPlaying || quranEntity.entityQuran?.getTransition() == null || quranEntity.isAnimRun()) return
+        val transition = quranEntity.entityQuran?.getTransition() ?: return
         val abs = abs(round(getCurrentPosition() / getSecond_in_screen() * 1000.0f))
-        if (transition.isIn()) {
-            val round = round(quranEntity.getEntityQuran().getRect().left / getSecond_in_screen() * 1000.0f).toInt()
-            val durationIn = (transition.getDuration_in() * 1000.0f).toInt()
+        if (transition.isIn) {
+            val round = round(quranEntity.entityQuran!!.rect.left / getSecond_in_screen() * 1000.0f).toInt()
+            val durationIn = (transition.duration_in * 1000.0f).toInt()
             val f = round.toFloat()
             if (abs < durationIn * 0.5f + f) {
-                quranEntity.runIn(durationIn, false, transition.getType_in())
-            } else if (!transition.isOut() && (abs < f || abs >= round + durationIn)) {
+                quranEntity.runIn(durationIn, false, transition.type_in)
+            } else if (!transition.isOut && (abs < f || abs >= round + durationIn)) {
                 quranEntity.endAnimator()
             }
         }
-        if (!quranEntity.isAnimRun() && transition.isOut()) {
-            val secondInScreen = round(quranEntity.getEntityQuran().getRect().right / getSecond_in_screen() * 1000.0f).toInt()
-            val durationOut = (transition.getDuration_out() * 1000.0f).toInt()
+        if (!quranEntity.isAnimRun() && transition.isOut) {
+            val secondInScreen = round(quranEntity.entityQuran!!.rect.right / getSecond_in_screen() * 1000.0f).toInt()
+            val durationOut = (transition.duration_out * 1000.0f).toInt()
             val f2 = secondInScreen - durationOut
             val f3 = durationOut * 0.5f + f2
             if (abs >= f2 && abs < f3) {
-                quranEntity.runOut(durationOut, false, transition.getType_out())
+                quranEntity.runOut(durationOut, false, transition.type_out)
             } else if (abs >= secondInScreen) {
                 quranEntity.endAnimator()
             }
@@ -1228,26 +1230,26 @@ class TrackEntityView @JvmOverloads constructor(
     }
 
     private fun setupAnimation(bismilahEntity: BismilahEntity) {
-        if (!isPlaying || bismilahEntity.getEntityBismilah().getTransition() == null || bismilahEntity.isAnimRun()) return
-        val transition = bismilahEntity.getEntityBismilah().getTransition() ?: return
+        if (!isPlaying || bismilahEntity.bismilahTimeline?.getTransition() == null || bismilahEntity.isAnimRun()) return
+        val transition = bismilahEntity.bismilahTimeline?.getTransition() ?: return
         val abs = abs(round(getCurrentPosition() / getSecond_in_screen() * 1000.0f))
-        if (transition.isIn()) {
-            val round = round(bismilahEntity.getEntityBismilah().getRect().left / getSecond_in_screen() * 1000.0f).toInt()
-            val durationIn = (transition.getDuration_in() * 1000.0f).toInt()
+        if (transition.isIn) {
+            val round = round(bismilahEntity.bismilahTimeline!!.rect.left / getSecond_in_screen() * 1000.0f).toInt()
+            val durationIn = (transition.duration_in * 1000.0f).toInt()
             val f = round.toFloat()
             if (abs < durationIn * 0.5f + f) {
-                bismilahEntity.runIn(durationIn, false, transition.getType_in())
-            } else if (!transition.isOut() && (abs < f || abs >= round + durationIn)) {
+                bismilahEntity.runIn(durationIn, false, transition.type_in)
+            } else if (!transition.isOut && (abs < f || abs >= round + durationIn)) {
                 bismilahEntity.endAnimator()
             }
         }
-        if (!bismilahEntity.isAnimRun() && transition.isOut()) {
-            val secondInScreen = round(bismilahEntity.getEntityBismilah().getRect().right / getSecond_in_screen() * 1000.0f).toInt()
-            val durationOut = (transition.getDuration_out() * 1000.0f).toInt()
+        if (!bismilahEntity.isAnimRun() && transition.isOut) {
+            val secondInScreen = round(bismilahEntity.bismilahTimeline!!.rect.right / getSecond_in_screen() * 1000.0f).toInt()
+            val durationOut = (transition.duration_out * 1000.0f).toInt()
             val f2 = secondInScreen - durationOut
             val f3 = durationOut * 0.5f + f2
             if (abs >= f2 && abs < f3) {
-                bismilahEntity.runOut(durationOut, false, transition.getType_out())
+                bismilahEntity.runOut(durationOut, false, transition.type_out)
             } else if (abs >= secondInScreen) {
                 bismilahEntity.endAnimator()
             }
@@ -1260,18 +1262,18 @@ class TrackEntityView @JvmOverloads constructor(
         if (entity is EntityQuranTimeline) {
             val eqt = entity
             var absVal = abs(getCurrentPosition())
-            if (eqt.getRect().right - absVal < secondInScreen) return
-            if (eqt.getIndex() - 1 >= 0) {
-                val prev = getPreviewOrNextEntityQuran(entityListQuran, eqt.getIndex() - 1, false)
+            if (eqt.rect.right - absVal < secondInScreen) return
+            if (eqt.index - 1 >= 0) {
+                val prev = getPreviewOrNextEntityQuran(entityListQuran, eqt.index - 1, false)
                 if (prev != null) {
-                    if (absVal < prev.getRect().left + getSecond_in_screen()) {
-                        absVal = getSecond_in_screen() + prev.getRect().left
+                    if (absVal < prev.rect.left + getSecond_in_screen()) {
+                        absVal = getSecond_in_screen() + prev.rect.left
                     }
                     eqt.setCurrentRect()
                     eqt.setX(absVal)
-                    if (eqt.getRect().left < prev.getRect().right) {
+                    if (eqt.rect.left < prev.rect.right) {
                         prev.setCurrentRect()
-                        prev.setRight(eqt.getRect().left)
+                        prev.right = eqt.rect.left
                         prev.onChange()
                         entityList.push(Pair(prev, EntityAction.MOVE))
                         iTrimLineCallback?.onAddStack(EntityAction.MOVE)
@@ -1284,14 +1286,14 @@ class TrackEntityView @JvmOverloads constructor(
                 }
             }
             if (isExist(bismilahTimeline)) {
-                if (absVal < bismilahTimeline!!.getRect().left + getSecond_in_screen()) {
-                    absVal = bismilahTimeline!!.getRect().left + getSecond_in_screen()
+                if (absVal < bismilahTimeline!!.rect.left + getSecond_in_screen()) {
+                    absVal = bismilahTimeline!!.rect.left + getSecond_in_screen()
                 }
                 eqt.setCurrentRect()
                 eqt.setX(absVal)
-                if (eqt.getRect().left < bismilahTimeline!!.getRect().right) {
+                if (eqt.rect.left < bismilahTimeline!!.rect.right) {
                     bismilahTimeline!!.setCurrentRect()
-                    bismilahTimeline!!.setRight(eqt.getRect().left)
+                    bismilahTimeline!!.right = eqt.rect.left
                     bismilahTimeline!!.onChange()
                     entityList.push(Pair(bismilahTimeline!!, EntityAction.MOVE))
                     iTrimLineCallback?.onAddStack(EntityAction.MOVE)
@@ -1303,14 +1305,14 @@ class TrackEntityView @JvmOverloads constructor(
                 return
             }
             if (isExist(mIsi3adaTimeline)) {
-                if (absVal < mIsi3adaTimeline!!.getRect().left + getSecond_in_screen()) {
-                    absVal = mIsi3adaTimeline!!.getRect().left + getSecond_in_screen()
+                if (absVal < mIsi3adaTimeline!!.rect.left + getSecond_in_screen()) {
+                    absVal = mIsi3adaTimeline!!.rect.left + getSecond_in_screen()
                 }
                 eqt.setCurrentRect()
                 eqt.setX(absVal)
-                if (eqt.getRect().left < mIsi3adaTimeline!!.getRect().right) {
+                if (eqt.rect.left < mIsi3adaTimeline!!.rect.right) {
                     mIsi3adaTimeline!!.setCurrentRect()
-                    mIsi3adaTimeline!!.setRight(eqt.getRect().left)
+                    mIsi3adaTimeline!!.right = eqt.rect.left
                     mIsi3adaTimeline!!.onChange()
                     entityList.push(Pair(mIsi3adaTimeline!!, EntityAction.MOVE))
                     iTrimLineCallback?.onAddStack(EntityAction.MOVE)
@@ -1332,12 +1334,12 @@ class TrackEntityView @JvmOverloads constructor(
         if (entity is EntityBismilahTimeline) {
             val ebt = entity
             var absVal = abs(getCurrentPosition())
-            if (ebt.getRect().right - absVal < secondInScreen) return
+            if (ebt.rect.right - absVal < secondInScreen) return
             ebt.setCurrentRect()
             selectedEntity!!.setX(absVal)
-            if (entity === bismilahTimeline && mIsi3adaTimeline != null && bismilahTimeline!!.getRect().left < mIsi3adaTimeline!!.getRect().right) {
+            if (entity === bismilahTimeline && mIsi3adaTimeline != null && bismilahTimeline!!.rect.left < mIsi3adaTimeline!!.rect.right) {
                 mIsi3adaTimeline!!.setCurrentRect()
-                mIsi3adaTimeline!!.setRight(ebt.getRect().left)
+                mIsi3adaTimeline!!.right = ebt.rect.left
                 mIsi3adaTimeline!!.onChange()
                 entityList.push(Pair(mIsi3adaTimeline!!, EntityAction.MOVE))
                 iTrimLineCallback?.onAddStack(EntityAction.MOVE)
@@ -1351,18 +1353,18 @@ class TrackEntityView @JvmOverloads constructor(
         if (entity is EntityTrslTimeline) {
             val etl = entity
             var absVal = abs(getCurrentPosition())
-            if (etl.getRect().right - absVal < secondInScreen) return
-            if (etl.getIndex() - 1 >= 0) {
-                val prev = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.getIndex() - 1, false)
+            if (etl.rect.right - absVal < secondInScreen) return
+            if (etl.index - 1 >= 0) {
+                val prev = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.index - 1, false)
                 if (prev != null) {
-                    if (absVal < prev.getRect().left + getSecond_in_screen()) {
-                        absVal = getSecond_in_screen() + prev.getRect().left
+                    if (absVal < prev.rect.left + getSecond_in_screen()) {
+                        absVal = getSecond_in_screen() + prev.rect.left
                     }
                     etl.setCurrentRect()
                     etl.setX(absVal)
-                    if (etl.getRect().left < prev.getRect().right) {
+                    if (etl.rect.left < prev.rect.right) {
                         prev.setCurrentRect()
-                        prev.setRight(etl.getRect().left)
+                        prev.right = etl.rect.left
                         prev.onChange()
                         entityList.push(Pair(prev, EntityAction.MOVE))
                         iTrimLineCallback?.onAddStack(EntityAction.MOVE)
@@ -1384,41 +1386,42 @@ class TrackEntityView @JvmOverloads constructor(
     }
 
     fun translateToRight(isIsi3ada: Boolean) {
-        val ebt = if (isIsi3ada) mIsi3adaTimeline else bismilahTimeline ?: return
-        val f = ebt.getRect().right
-        if (isIsi3ada && isExist(bismilahTimeline) && f >= bismilahTimeline!!.getRect().left) {
-            val width = bismilahTimeline!!.getRect().width() + f
-            val f2 = f - bismilahTimeline!!.getRect().left
-            bismilahTimeline!!.setCurrentRect()
-            bismilahTimeline!!.setX(f)
-            bismilahTimeline!!.setRight(width)
-            for (index in bismilahTimeline!!.getIndex() until entityListQuran.size) {
+        val ebt: EntityBismilahTimeline = if (isIsi3ada) mIsi3adaTimeline!! else bismilahTimeline ?: return
+        val f = ebt.rect.right
+        if (isIsi3ada && isExist(bismilahTimeline) && f >= bismilahTimeline!!.rect.left) {
+            val bisml = bismilahTimeline!!
+            val width = bisml.rect.width() + f
+            val f2 = f - bisml.rect.left
+            bisml.setCurrentRect()
+            bisml.setX(f)
+            bisml.right = width
+            for (index in bisml.index until entityListQuran.size) {
                 val eqt = entityListQuran[index]
                 if (eqt.visible()) {
-                    val f3 = eqt.getRect().left + f2
-                    val width2 = eqt.getRect().width() + f3
+                    val f3 = eqt.rect.left + f2
+                    val width2 = eqt.rect.width() + f3
                     eqt.setCurrentRect()
                     eqt.setX(f3)
-                    eqt.setRight(width2)
+                    eqt.right = width2
                 }
             }
             return
         }
-        val next = getPreviewOrNextEntityQuran(entityListQuran, ebt.getIndex(), true) ?: return
-        if (f >= next.getRect().left) {
-            val f4 = f - next.getRect().left
-            val width3 = next.getRect().width() + f
+        val next = getPreviewOrNextEntityQuran(entityListQuran, ebt.index, true) ?: return
+        if (f >= next.rect.left) {
+            val f4 = f - next.rect.left
+            val width3 = next.rect.width() + f
             next.setCurrentRect()
             next.setX(f)
-            next.setRight(width3)
-            for (index2 in ebt.getIndex() + 1 until entityListQuran.size) {
+            next.right = width3
+            for (index2 in ebt.index + 1 until entityListQuran.size) {
                 val eqt2 = entityListQuran[index2]
                 if (eqt2.visible()) {
-                    val f5 = eqt2.getRect().left + f4
-                    val width4 = eqt2.getRect().width() + f5
+                    val f5 = eqt2.rect.left + f4
+                    val width4 = eqt2.rect.width() + f5
                     eqt2.setCurrentRect()
                     eqt2.setX(f5)
-                    eqt2.setRight(width4)
+                    eqt2.right = width4
                 }
             }
         }
@@ -1426,22 +1429,22 @@ class TrackEntityView @JvmOverloads constructor(
 
     fun translateToRight() {
         val ebt = bismilahTimeline ?: return
-        val f = ebt.getRect().right
-        val next = getPreviewOrNextEntityQuran(entityListQuran, ebt.getIndex(), true) ?: return
-        if (f >= next.getRect().left) {
-            val f2 = f - next.getRect().left
-            val width = next.getRect().width() + f
+        val f = ebt.rect.right
+        val next = getPreviewOrNextEntityQuran(entityListQuran, ebt.index, true) ?: return
+        if (f >= next.rect.left) {
+            val f2 = f - next.rect.left
+            val width = next.rect.width() + f
             next.setCurrentRect()
             next.setX(f)
-            next.setRight(width)
-            for (index in ebt.getIndex() + 1 until entityListQuran.size) {
+            next.right = width
+            for (index in ebt.index + 1 until entityListQuran.size) {
                 val eqt = entityListQuran[index]
                 if (eqt.visible()) {
-                    val f3 = eqt.getRect().left + f2
-                    val width2 = eqt.getRect().width() + f3
+                    val f3 = eqt.rect.left + f2
+                    val width2 = eqt.rect.width() + f3
                     eqt.setCurrentRect()
                     eqt.setX(f3)
-                    eqt.setRight(width2)
+                    eqt.right = width2
                 }
             }
         }
@@ -1451,11 +1454,11 @@ class TrackEntityView @JvmOverloads constructor(
         val entity = selectedEntity ?: return
         if (entity is EntityQuranTimeline) {
             val eqt = entity
-            if (eqt.getIndex() - 1 >= 0) {
-                val prev = getPreviewOrNextEntityQuran(entityListQuran, eqt.getIndex() - 1, false)
+            if (eqt.index - 1 >= 0) {
+                val prev = getPreviewOrNextEntityQuran(entityListQuran, eqt.index - 1, false)
                 if (prev != null) {
                     eqt.setCurrentRect()
-                    eqt.setX(prev.getRect().right)
+                    eqt.setX(prev.rect.right)
                     invalidate()
                     selectedEntity!!.onChange()
                     entityList.push(Pair(selectedEntity!!, EntityAction.TRIM))
@@ -1464,8 +1467,9 @@ class TrackEntityView @JvmOverloads constructor(
                 }
             }
             if (isExist(bismilahTimeline)) {
+                val bisml = bismilahTimeline!!
                 eqt.setCurrentRect()
-                eqt.setX(bismilahTimeline!!.getRect().right)
+                eqt.setX(bisml.rect.right)
                 invalidate()
                 selectedEntity!!.onChange()
                 entityList.push(Pair(selectedEntity!!, EntityAction.TRIM))
@@ -1473,8 +1477,9 @@ class TrackEntityView @JvmOverloads constructor(
                 return
             }
             if (isExist(mIsi3adaTimeline)) {
+                val isi3ada = mIsi3adaTimeline!!
                 eqt.setCurrentRect()
-                eqt.setX(mIsi3adaTimeline!!.getRect().right)
+                eqt.setX(isi3ada.rect.right)
                 invalidate()
                 selectedEntity!!.onChange()
                 entityList.push(Pair(selectedEntity!!, EntityAction.TRIM))
@@ -1492,8 +1497,9 @@ class TrackEntityView @JvmOverloads constructor(
         if (entity is EntityBismilahTimeline) {
             val ebt = entity
             if (entity === bismilahTimeline && isExist(mIsi3adaTimeline)) {
+                val isi3ada = mIsi3adaTimeline!!
                 ebt.setCurrentRect()
-                ebt.setX(mIsi3adaTimeline!!.getRect().right)
+                ebt.setX(isi3ada.rect.right)
                 invalidate()
                 selectedEntity!!.onChange()
                 entityList.push(Pair(selectedEntity!!, EntityAction.TRIM))
@@ -1510,11 +1516,11 @@ class TrackEntityView @JvmOverloads constructor(
         }
         if (entity is EntityTrslTimeline) {
             val etl = entity
-            if (etl.getIndex() - 1 >= 0) {
-                val prev = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.getIndex() - 1, false)
+            if (etl.index - 1 >= 0) {
+                val prev = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.index - 1, false)
                 if (prev != null) {
                     etl.setCurrentRect()
-                    etl.setX(prev.getRect().right)
+                    etl.setX(prev.rect.right)
                     invalidate()
                     selectedEntity!!.onChange()
                     entityList.push(Pair(selectedEntity!!, EntityAction.TRIM))
@@ -1537,28 +1543,28 @@ class TrackEntityView @JvmOverloads constructor(
         if (entity is EntityQuranTimeline) {
             val eqt = entity
             var absVal = abs(getCurrentPosition())
-            if (absVal - eqt.getRect().left < secondInScreen) return
-            if (eqt.getIndex() + 1 < entityListQuran.size) {
-                val next = getPreviewOrNextEntityQuran(entityListQuran, eqt.getIndex() + 1, true)
+            if (absVal - eqt.rect.left < secondInScreen) return
+            if (eqt.index + 1 < entityListQuran.size) {
+                val next = getPreviewOrNextEntityQuran(entityListQuran, eqt.index + 1, true)
                 if (next != null) {
                     eqt.setCurrentRect()
-                    eqt.setRight(absVal)
-                    if (eqt.getRect().right > next.getRect().left) {
-                        val width = eqt.getRect().right + next.getRect().width()
-                        val f = eqt.getRect().right - next.getRect().left
+                    eqt.right = absVal
+                    if (eqt.rect.right > next.rect.left) {
+                        val width = eqt.rect.right + next.rect.width()
+                        val f = eqt.rect.right - next.rect.left
                         next.setCurrentRect()
-                        next.setX(eqt.getRect().right)
-                        next.setRight(width)
+                        next.setX(eqt.rect.right)
+                        next.right = width
                         next.onChange()
                         entityList.push(Pair(next, EntityAction.MOVE))
                         iTrimLineCallback?.onAddStack(EntityAction.MOVE)
-                        for (index in eqt.getIndex() + 2 until entityListQuran.size) {
+                        for (index in eqt.index + 2 until entityListQuran.size) {
                             val eqt2 = entityListQuran[index]
                             eqt2.setCurrentRect()
-                            val f2 = eqt2.getRect().left + f
-                            val width2 = eqt2.getRect().width() + f2
+                            val f2 = eqt2.rect.left + f
+                            val width2 = eqt2.rect.width() + f2
                             eqt2.setX(f2)
-                            eqt2.setRight(width2)
+                            eqt2.right = width2
                             invalidate()
                             eqt2.onChange()
                             entityList.push(Pair(eqt2, EntityAction.MOVE))
@@ -1573,7 +1579,7 @@ class TrackEntityView @JvmOverloads constructor(
                 }
             }
             eqt.setCurrentRect()
-            selectedEntity!!.setRight(absVal)
+            selectedEntity!!.right = absVal
             invalidate()
             selectedEntity!!.onChange()
             entityList.push(Pair(selectedEntity!!, EntityAction.TRIM))
@@ -1583,26 +1589,26 @@ class TrackEntityView @JvmOverloads constructor(
         if (entity is EntityBismilahTimeline) {
             val ebt = entity
             var absVal = abs(getCurrentPosition())
-            if (absVal - ebt.getRect().left < secondInScreen) return
+            if (absVal - ebt.rect.left < secondInScreen) return
             if (ebt === mIsi3adaTimeline && isExist(bismilahTimeline)) {
                 ebt.setCurrentRect()
-                ebt.setRight(absVal)
-                if (ebt.getRect().right > bismilahTimeline!!.getRect().left) {
-                    val width = ebt.getRect().right + bismilahTimeline!!.getRect().width()
-                    val f = ebt.getRect().right - bismilahTimeline!!.getRect().left
+                ebt.right = absVal
+                if (ebt.rect.right > bismilahTimeline!!.rect.left) {
+                    val width = ebt.rect.right + bismilahTimeline!!.rect.width()
+                    val f = ebt.rect.right - bismilahTimeline!!.rect.left
                     bismilahTimeline!!.setCurrentRect()
-                    bismilahTimeline!!.setX(ebt.getRect().right)
-                    bismilahTimeline!!.setRight(width)
+                    bismilahTimeline!!.setX(ebt.rect.right)
+                    bismilahTimeline!!.right = width
                     bismilahTimeline!!.onChange()
                     entityList.push(Pair(bismilahTimeline!!, EntityAction.MOVE))
                     iTrimLineCallback?.onAddStack(EntityAction.MOVE)
-                    for (index in bismilahTimeline!!.getIndex() until entityListQuran.size) {
+                    for (index in bismilahTimeline!!.index until entityListQuran.size) {
                         val eqt3 = entityListQuran[index]
                         eqt3.setCurrentRect()
-                        val f4 = eqt3.getRect().left + f
-                        val width4 = eqt3.getRect().width() + f4
+                        val f4 = eqt3.rect.left + f
+                        val width4 = eqt3.rect.width() + f4
                         eqt3.setX(f4)
-                        eqt3.setRight(width4)
+                        eqt3.right = width4
                         invalidate()
                         eqt3.onChange()
                         entityList.push(Pair(eqt3, EntityAction.MOVE))
@@ -1615,27 +1621,27 @@ class TrackEntityView @JvmOverloads constructor(
                 iTrimLineCallback?.onAddStack(EntityAction.TRIM)
                 return
             }
-            if (ebt.getIndex() < entityListQuran.size) {
-                val next = getPreviewOrNextEntityQuran(entityListQuran, ebt.getIndex(), true)
+            if (ebt.index < entityListQuran.size) {
+                val next = getPreviewOrNextEntityQuran(entityListQuran, ebt.index, true)
                 if (next != null) {
                     ebt.setCurrentRect()
-                    ebt.setRight(absVal)
-                    if (ebt.getRect().right > next.getRect().left) {
-                        val width = ebt.getRect().right + next.getRect().width()
-                        val f = ebt.getRect().right - next.getRect().left
+                    ebt.right = absVal
+                    if (ebt.rect.right > next.rect.left) {
+                        val width = ebt.rect.right + next.rect.width()
+                        val f = ebt.rect.right - next.rect.left
                         next.setCurrentRect()
-                        next.setX(ebt.getRect().right)
-                        next.setRight(width)
+                        next.setX(ebt.rect.right)
+                        next.right = width
                         next.onChange()
                         entityList.push(Pair(next, EntityAction.MOVE))
                         iTrimLineCallback?.onAddStack(EntityAction.MOVE)
-                        for (index in ebt.getIndex() + 1 until entityListQuran.size) {
+                        for (index in ebt.index + 1 until entityListQuran.size) {
                             val eqt4 = entityListQuran[index]
                             eqt4.setCurrentRect()
-                            val f6 = eqt4.getRect().left + f
-                            val width6 = eqt4.getRect().width() + f6
+                            val f6 = eqt4.rect.left + f
+                            val width6 = eqt4.rect.width() + f6
                             eqt4.setX(f6)
-                            eqt4.setRight(width6)
+                            eqt4.right = width6
                             invalidate()
                             eqt4.onChange()
                             entityList.push(Pair(eqt4, EntityAction.MOVE))
@@ -1650,7 +1656,7 @@ class TrackEntityView @JvmOverloads constructor(
                 }
             }
             ebt.setCurrentRect()
-            selectedEntity!!.setRight(absVal)
+            selectedEntity!!.right = absVal
             invalidate()
             selectedEntity!!.onChange()
             entityList.push(Pair(selectedEntity!!, EntityAction.TRIM))
@@ -1660,28 +1666,28 @@ class TrackEntityView @JvmOverloads constructor(
         if (entity is EntityTrslTimeline) {
             val etl = entity
             var absVal = abs(getCurrentPosition())
-            if (absVal - etl.getRect().left < secondInScreen) return
-            if (etl.getIndex() + 1 < entityListTrslQuran.size) {
-                val next = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.getIndex() + 1, true)
+            if (absVal - etl.rect.left < secondInScreen) return
+            if (etl.index + 1 < entityListTrslQuran.size) {
+                val next = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.index + 1, true)
                 if (next != null) {
                     etl.setCurrentRect()
-                    etl.setRight(absVal)
-                    if (etl.getRect().right > next.getRect().left) {
-                        val width = etl.getRect().right + next.getRect().width()
-                        val f = etl.getRect().right - next.getRect().left
+                    etl.right = absVal
+                    if (etl.rect.right > next.rect.left) {
+                        val width = etl.rect.right + next.rect.width()
+                        val f = etl.rect.right - next.rect.left
                         next.setCurrentRect()
-                        next.setX(etl.getRect().right)
-                        next.setRight(width)
+                        next.setX(etl.rect.right)
+                        next.right = width
                         next.onChange()
                         entityList.push(Pair(next, EntityAction.MOVE))
                         iTrimLineCallback?.onAddStack(EntityAction.MOVE)
-                        for (index in etl.getIndex() + 2 until entityListTrslQuran.size) {
+                        for (index in etl.index + 2 until entityListTrslQuran.size) {
                             val etl2 = entityListTrslQuran[index]
                             etl2.setCurrentRect()
-                            val f8 = etl2.getRect().left + f
-                            val width8 = etl2.getRect().width() + f8
+                            val f8 = etl2.rect.left + f
+                            val width8 = etl2.rect.width() + f8
                             etl2.setX(f8)
-                            etl2.setRight(width8)
+                            etl2.right = width8
                             invalidate()
                             etl2.onChange()
                             entityList.push(Pair(etl2, EntityAction.MOVE))
@@ -1696,7 +1702,7 @@ class TrackEntityView @JvmOverloads constructor(
                 }
             }
             etl.setCurrentRect()
-            selectedEntity!!.setRight(absVal)
+            selectedEntity!!.right = absVal
             invalidate()
             selectedEntity!!.onChange()
             entityList.push(Pair(selectedEntity!!, EntityAction.TRIM))
@@ -1705,24 +1711,24 @@ class TrackEntityView @JvmOverloads constructor(
     }
 
     fun translateToRightBismilah(entityBismilahTimeline: EntityBismilahTimeline) {
-        if (abs(getCurrentPosition()) - entityBismilahTimeline.getRect().left < second_in_screen && entityBismilahTimeline.getIndex() < entityListQuran.size) {
-            val next = getPreviewOrNextEntityQuran(entityListQuran, entityBismilahTimeline.getIndex(), true)
-            if (next != null && entityBismilahTimeline.getRect().right > next.getRect().left) {
-                val width = entityBismilahTimeline.getRect().right + next.getRect().width()
-                val f = entityBismilahTimeline.getRect().right - next.getRect().left
+        if (abs(getCurrentPosition()) - entityBismilahTimeline.rect.left < second_in_screen && entityBismilahTimeline.index < entityListQuran.size) {
+            val next = getPreviewOrNextEntityQuran(entityListQuran, entityBismilahTimeline.index, true)
+            if (next != null && entityBismilahTimeline.rect.right > next.rect.left) {
+                val width = entityBismilahTimeline.rect.right + next.rect.width()
+                val f = entityBismilahTimeline.rect.right - next.rect.left
                 next.setCurrentRect()
-                next.setX(entityBismilahTimeline.getRect().right)
-                next.setRight(width)
+                next.setX(entityBismilahTimeline.rect.right)
+                next.right = width
                 next.onChange()
                 entityList.push(Pair(next, EntityAction.MOVE))
                 iTrimLineCallback?.onAddStack(EntityAction.MOVE)
-                for (index in entityBismilahTimeline.getIndex() + 1 until entityListQuran.size) {
+                for (index in entityBismilahTimeline.index + 1 until entityListQuran.size) {
                     val eqt = entityListQuran[index]
                     eqt.setCurrentRect()
-                    val f2 = eqt.getRect().left + f
-                    val width2 = eqt.getRect().width() + f2
+                    val f2 = eqt.rect.left + f
+                    val width2 = eqt.rect.width() + f2
                     eqt.setX(f2)
-                    eqt.setRight(width2)
+                    eqt.right = width2
                     invalidate()
                     eqt.onChange()
                     entityList.push(Pair(eqt, EntityAction.MOVE))
@@ -1737,11 +1743,11 @@ class TrackEntityView @JvmOverloads constructor(
         val entity = selectedEntity ?: return
         if (entity is EntityQuranTimeline) {
             val eqt = entity
-            if (eqt.getIndex() + 1 < entityListQuran.size) {
-                val next = getPreviewOrNextEntityQuran(entityListQuran, eqt.getIndex() + 1, true)
+            if (eqt.index + 1 < entityListQuran.size) {
+                val next = getPreviewOrNextEntityQuran(entityListQuran, eqt.index + 1, true)
                 if (next != null) {
                     eqt.setCurrentRect()
-                    eqt.setRight(next.getRect().left)
+                    eqt.right = next.rect.left
                     invalidate()
                     selectedEntity!!.onChange()
                     entityList.push(Pair(selectedEntity!!, EntityAction.TRIM))
@@ -1750,7 +1756,7 @@ class TrackEntityView @JvmOverloads constructor(
                 }
             }
             eqt.setCurrentRect()
-            getSelectedEntity()!!.setRight(timeLineW * scaleFactor)
+            selectedEntity!!.right = timeLineW * scaleFactor
             invalidate()
             selectedEntity!!.onChange()
             entityList.push(Pair(selectedEntity!!, EntityAction.TRIM))
@@ -1761,18 +1767,18 @@ class TrackEntityView @JvmOverloads constructor(
             val ebt = entity
             if (ebt === mIsi3adaTimeline && isExist(bismilahTimeline)) {
                 ebt.setCurrentRect()
-                ebt.setRight(bismilahTimeline!!.getRect().left)
+                ebt.right = bismilahTimeline!!.rect.left
                 invalidate()
                 selectedEntity!!.onChange()
                 entityList.push(Pair(selectedEntity!!, EntityAction.TRIM))
                 iTrimLineCallback?.onAddStack(EntityAction.TRIM)
                 return
             }
-            if (ebt.getIndex() < entityListQuran.size) {
-                val next = getPreviewOrNextEntityQuran(entityListQuran, ebt.getIndex(), true)
+            if (ebt.index < entityListQuran.size) {
+                val next = getPreviewOrNextEntityQuran(entityListQuran, ebt.index, true)
                 if (next != null) {
                     ebt.setCurrentRect()
-                    ebt.setRight(next.getRect().left)
+                    ebt.right = next.rect.left
                     invalidate()
                     selectedEntity!!.onChange()
                     entityList.push(Pair(selectedEntity!!, EntityAction.TRIM))
@@ -1781,7 +1787,7 @@ class TrackEntityView @JvmOverloads constructor(
                 }
             }
             ebt.setCurrentRect()
-            getSelectedEntity()!!.setRight(timeLineW * scaleFactor)
+            selectedEntity!!.right = timeLineW * scaleFactor
             invalidate()
             selectedEntity!!.onChange()
             entityList.push(Pair(selectedEntity!!, EntityAction.TRIM))
@@ -1790,11 +1796,11 @@ class TrackEntityView @JvmOverloads constructor(
         }
         if (entity is EntityTrslTimeline) {
             val etl = entity
-            if (etl.getIndex() + 1 < entityListTrslQuran.size) {
-                val next = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.getIndex() + 1, true)
+            if (etl.index + 1 < entityListTrslQuran.size) {
+                val next = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.index + 1, true)
                 if (next != null) {
                     etl.setCurrentRect()
-                    etl.setRight(next.getRect().left)
+                    etl.right = next.rect.left
                     invalidate()
                     selectedEntity!!.onChange()
                     entityList.push(Pair(selectedEntity!!, EntityAction.TRIM))
@@ -1803,7 +1809,7 @@ class TrackEntityView @JvmOverloads constructor(
                 }
             }
             etl.setCurrentRect()
-            getSelectedEntity()!!.setRight(timeLineW * scaleFactor)
+            selectedEntity!!.right = timeLineW * scaleFactor
             invalidate()
             selectedEntity!!.onChange()
             entityList.push(Pair(selectedEntity!!, EntityAction.TRIM))
@@ -1828,7 +1834,7 @@ class TrackEntityView @JvmOverloads constructor(
 
     fun translateToStart(entity: Entity?) {
         if (entity == null) return
-        current_cursur_position = round(entity.getRect().left / getSecond_in_screen()) * 1000
+        current_cursur_position = (round(entity.rect.left / getSecond_in_screen()) * 1000).toInt()
         val f = (-current_cursur_position * getSecond_in_screen()) / 1000.0f
         currentPosition = f
         scrolled_with_zoom = f * scaleFactor
@@ -1837,7 +1843,7 @@ class TrackEntityView @JvmOverloads constructor(
 
     fun translateToEnd(entity: Entity?) {
         if (entity == null) return
-        current_cursur_position = round(entity.getRect().right / getSecond_in_screen()) * 1000
+        current_cursur_position = (round(entity.rect.right / getSecond_in_screen()) * 1000).toInt()
         val f = (-current_cursur_position * getSecond_in_screen()) / 1000.0f
         currentPosition = f
         scrolled_with_zoom = f * scaleFactor
@@ -1846,18 +1852,18 @@ class TrackEntityView @JvmOverloads constructor(
 
     fun previewEntity(entity: Entity?) {
         if (entity == null) return
-        current_cursur_position = round(entity.getRect().left / getSecond_in_screen()) * 1000
+        current_cursur_position = (round(entity.rect.left / getSecond_in_screen()) * 1000).toInt()
         val f = (-current_cursur_position * getSecond_in_screen()) / 1000.0f
         currentPosition = f
         scrolled_with_zoom = f * scaleFactor
-        maxTime = (entity.getRect().right / getSecond_in_screen() * 1000.0f).toInt()
-        timeLineW = entity.getRect().right / scaleFactor
+        maxTime = (entity.rect.right / getSecond_in_screen() * 1000.0f).toInt()
+        timeLineW = entity.rect.right / scaleFactor
     }
 
     fun updateCursurToSelectEntity() {
         val entity = selectedEntity ?: return
         if (entity.getEntityView()?.isVisible != false) return
-        current_cursur_position = round((entity.getRect().left + selectedEntity!!.getRect().width() * 0.5f) / getSecond_in_screen()) * 1000
+        current_cursur_position = (round((entity.rect.left + selectedEntity!!.rect.width() * 0.5f) / getSecond_in_screen()) * 1000).toInt()
         val f = (-current_cursur_position * second_in_screen) / 1000.0f
         currentPosition = f
         scrolled_with_zoom = f * scaleFactor
@@ -1869,8 +1875,8 @@ class TrackEntityView @JvmOverloads constructor(
     }
 
     fun selectEntity(entity: Entity?, invalidate: Boolean) {
-        selectedEntity?.setSelect(false)
-        entity?.setSelect(true)
+        selectedEntity?.isSelect = false
+        entity?.isSelect = true
         selectedEntity = entity
         if (invalidate) {
             this.invalidate()
@@ -1896,7 +1902,7 @@ class TrackEntityView @JvmOverloads constructor(
             val entity = selectedEntity
             if (entity != null) {
                 entity.visible(false)
-                iTrimLineCallback?.onDelete(selectedEntity!!.getEntityView())
+                iTrimLineCallback?.onDelete(selectedEntity!!.getEntityView()!!)
                 entityList.push(Pair(selectedEntity!!, EntityAction.DELETE))
                 iTrimLineCallback?.onAddStack(EntityAction.DELETE)
                 selectedEntity = null
@@ -1913,12 +1919,12 @@ class TrackEntityView @JvmOverloads constructor(
                 val arrayList = ArrayList<EntityQuranTimeline>()
                 var entityQuranTimeline: EntityQuranTimeline? = null
                 for (eqt in entityListQuran) {
-                    if (eqt.visible() && eqt.isSelect()) {
+                    if (eqt.visible() && eqt.isSelect) {
                         if (entityQuranTimeline == null) entityQuranTimeline = eqt
                         else arrayList.add(eqt)
                         eqt.visible(false)
-                        eqt.setSelect(false)
-                        iTrimLineCallback?.onDelete(eqt.getEntityView())
+                        eqt.isSelect = false
+                        iTrimLineCallback?.onDelete(eqt.getEntityView()!!)
                         iTrimLineCallback?.onAddStack(EntityAction.DELETE)
                     }
                 }
@@ -1932,12 +1938,12 @@ class TrackEntityView @JvmOverloads constructor(
                 val arrayList2 = ArrayList<EntityTrslTimeline>()
                 var entityTrslTimeline: EntityTrslTimeline? = null
                 for (etl in entityListTrslQuran) {
-                    if (etl.visible() && etl.isSelect()) {
+                    if (etl.visible() && etl.isSelect) {
                         if (entityTrslTimeline == null) entityTrslTimeline = etl
                         else arrayList2.add(etl)
                         etl.visible(false)
-                        etl.setSelect(false)
-                        iTrimLineCallback?.onDelete(etl.getEntityView())
+                        etl.isSelect = false
+                        iTrimLineCallback?.onDelete(etl.getEntityView()!!)
                         iTrimLineCallback?.onAddStack(EntityAction.DELETE)
                     }
                 }
@@ -1947,27 +1953,27 @@ class TrackEntityView @JvmOverloads constructor(
                 }
                 updateTrslIndex()
             }
-            if (isExist(bismilahTimeline) && bismilahTimeline!!.isSelect()) {
+            if (isExist(bismilahTimeline) && bismilahTimeline!!.isSelect) {
                 bismilahTimeline!!.visible(false)
-                bismilahTimeline!!.setSelect(false)
+                bismilahTimeline!!.isSelect = false
                 bismilahTimeline!!.setSelectMultiple(false)
-                iTrimLineCallback?.onDelete(bismilahTimeline!!.getEntityView())
+                iTrimLineCallback?.onDelete(bismilahTimeline!!.getEntityView()!!)
                 entityList.push(Pair(bismilahTimeline!!, EntityAction.DELETE_MULTIPLE))
             }
-            if (isExist(mIsi3adaTimeline) && mIsi3adaTimeline!!.isSelect()) {
+            if (isExist(mIsi3adaTimeline) && mIsi3adaTimeline!!.isSelect) {
                 mIsi3adaTimeline!!.visible(false)
-                mIsi3adaTimeline!!.setSelect(false)
+                mIsi3adaTimeline!!.isSelect = false
                 mIsi3adaTimeline!!.setSelectMultiple(false)
-                iTrimLineCallback?.onDelete(mIsi3adaTimeline!!.getEntityView())
+                iTrimLineCallback?.onDelete(mIsi3adaTimeline!!.getEntityView()!!)
                 entityList.push(Pair(mIsi3adaTimeline!!, EntityAction.DELETE_MULTIPLE))
             }
             if (entityListAudio.isNotEmpty()) {
                 val arrayList3 = ArrayList<EntityAudio>()
                 var entityAudio: EntityAudio? = null
                 for (ea in entityListAudio) {
-                    if (ea.visible() && ea.isSelect()) {
+                    if (ea.visible() && ea.isSelect) {
                         ea.visible(false)
-                        ea.setSelect(false)
+                        ea.isSelect = false
                         if (entityAudio == null) entityAudio = ea
                         else arrayList3.add(ea)
                         iTrimLineCallback?.onAddStack(EntityAction.DELETE)
@@ -2003,24 +2009,24 @@ class TrackEntityView @JvmOverloads constructor(
 
     fun addAudio(entityAudio: EntityAudio, i: Int) {
         if (i < entityListAudio.size) {
-            entityAudio.setIndex(i)
+            entityAudio.index = i
             entityListAudio.add(i, entityAudio)
-            var f = entityAudio.getRect().right
+            var f = entityAudio.rect.right
             var idx = i + 1
             while (idx < entityListAudio.size) {
                 val ea = entityListAudio[idx]
                 if (ea.visible()) {
-                    val width = ea.getRect().width()
+                    val width = ea.rect.width()
                     ea.setCurrentRect()
                     ea.setX(f)
-                    ea.setRight(f + width)
-                    ea.setIndex(idx)
-                    f = ea.getRect().right
+                    ea.right = f + width
+                    ea.index = idx
+                    f = ea.rect.right
                 }
                 idx++
             }
         } else {
-            entityAudio.setIndex(i)
+            entityAudio.index = i
             entityListAudio.add(entityAudio)
         }
         entityList.push(Pair(entityAudio, EntityAction.ADD))
@@ -2029,45 +2035,45 @@ class TrackEntityView @JvmOverloads constructor(
 
     fun addAudio(entityAudio: EntityAudio) {
         entityListAudio.add(entityAudio)
-        entityAudio.setIndex(entityListAudio.size - 1)
+        entityAudio.index = entityListAudio.size - 1
         entityList.push(Pair(entityAudio, EntityAction.ADD))
         iTrimLineCallback?.onAddStack(EntityAction.ADD)
     }
 
     fun addQuran(entityQuranTimeline: EntityQuranTimeline) {
         entityListQuran.add(entityQuranTimeline)
-        entityQuranTimeline.setIndex(entityListQuran.size - 1)
+        entityQuranTimeline.index = entityListQuran.size - 1
         entityList.push(Pair(entityQuranTimeline, EntityAction.ADD))
         iTrimLineCallback?.onAddStack(EntityAction.ADD)
     }
 
     fun addTrslQuran(entityTrslTimeline: EntityTrslTimeline) {
         entityListTrslQuran.add(entityTrslTimeline)
-        entityTrslTimeline.setIndex(entityListTrslQuran.size - 1)
+        entityTrslTimeline.index = entityListTrslQuran.size - 1
         entityList.push(Pair(entityTrslTimeline, EntityAction.ADD))
         iTrimLineCallback?.onAddStack(EntityAction.ADD)
     }
 
     fun addTrslQuran(entityTrslTimeline: EntityTrslTimeline, i: Int) {
         if (i < entityListTrslQuran.size) {
-            entityTrslTimeline.setIndex(i)
+            entityTrslTimeline.index = i
             entityListTrslQuran.add(i, entityTrslTimeline)
-            var f = entityTrslTimeline.getRect().right
+            var f = entityTrslTimeline.rect.right
             var idx = i + 1
             while (idx < entityListTrslQuran.size) {
                 val etl = entityListTrslQuran[idx]
                 if (etl.visible()) {
-                    val width = etl.getRect().width()
+                    val width = etl.rect.width()
                     etl.setCurrentRect()
                     etl.setX(f)
-                    etl.setRight(f + width)
-                    etl.setIndex(idx)
-                    f = etl.getRect().right
+                    etl.right = f + width
+                    etl.index = idx
+                    f = etl.rect.right
                 }
                 idx++
             }
         } else {
-            entityTrslTimeline.setIndex(i)
+            entityTrslTimeline.index = i
             entityListTrslQuran.add(entityTrslTimeline)
         }
         entityList.push(Pair(entityTrslTimeline, EntityAction.ADD))
@@ -2076,24 +2082,24 @@ class TrackEntityView @JvmOverloads constructor(
 
     fun addQuran(entityQuranTimeline: EntityQuranTimeline, i: Int) {
         if (i < entityListQuran.size) {
-            entityQuranTimeline.setIndex(i)
+            entityQuranTimeline.index = i
             entityListQuran.add(i, entityQuranTimeline)
-            var f = entityQuranTimeline.getRect().right
+            var f = entityQuranTimeline.rect.right
             var idx = i + 1
             while (idx < entityListQuran.size) {
                 val eqt = entityListQuran[idx]
                 if (eqt.visible()) {
-                    val width = eqt.getRect().width()
+                    val width = eqt.rect.width()
                     eqt.setCurrentRect()
                     eqt.setX(f)
-                    eqt.setRight(f + width)
-                    eqt.setIndex(idx)
-                    f = eqt.getRect().right
+                    eqt.right = f + width
+                    eqt.index = idx
+                    f = eqt.rect.right
                 }
                 idx++
             }
         } else {
-            entityQuranTimeline.setIndex(i)
+            entityQuranTimeline.index = i
             entityListQuran.add(entityQuranTimeline)
         }
         entityList.push(Pair(entityQuranTimeline, EntityAction.ADD))
@@ -2102,16 +2108,16 @@ class TrackEntityView @JvmOverloads constructor(
 
     fun addQuran_split(entityQuranTimeline: EntityQuranTimeline, i: Int) {
         if (i < entityListQuran.size) {
-            entityQuranTimeline.setIndex(i)
+            entityQuranTimeline.index = i
             entityListQuran.add(i, entityQuranTimeline)
             var idx = i + 1
             while (idx < entityListQuran.size) {
                 val eqt = entityListQuran[idx]
-                if (eqt.visible()) eqt.setIndex(idx)
+                if (eqt.visible()) eqt.index = idx
                 idx++
             }
         } else {
-            entityQuranTimeline.setIndex(i)
+            entityQuranTimeline.index = i
             entityListQuran.add(entityQuranTimeline)
         }
         entityList.push(Pair(entityQuranTimeline, EntityAction.SPLIT))
@@ -2120,29 +2126,27 @@ class TrackEntityView @JvmOverloads constructor(
 
     fun addQuran_split(entityTrslTimeline: EntityTrslTimeline, i: Int) {
         if (i < entityListTrslQuran.size) {
-            entityTrslTimeline.setIndex(i)
+            entityTrslTimeline.index = i
             entityListTrslQuran.add(i, entityTrslTimeline)
             var idx = i + 1
             while (idx < entityListTrslQuran.size) {
                 val etl = entityListTrslQuran[idx]
-                if (etl.visible()) etl.setIndex(idx)
+                if (etl.visible()) etl.index = idx
                 idx++
             }
         } else {
-            entityTrslTimeline.setIndex(i)
+            entityTrslTimeline.index = i
             entityListTrslQuran.add(entityTrslTimeline)
         }
         entityList.push(Pair(entityTrslTimeline, EntityAction.SPLIT))
         iTrimLineCallback?.onAddStack(EntityAction.SPLIT)
     }
 
-    fun getDuration(): Int = duration
 
-    fun setDuration(i: Int) { duration = i }
 
     fun getXCursur(): Float = (-currentPosition) * scaleFactor
 
-    fun getCurrent_cursur_position(): Int = current_cursur_position
+
 
     fun setOnProgress(progress: Boolean) { isProgress = progress }
 
@@ -2167,22 +2171,22 @@ class TrackEntityView @JvmOverloads constructor(
     }
 
     private fun updateMediaIndex() {
-        for (i in entityListAudio.indices) entityListAudio[i].setIndex(i)
+        for (i in entityListAudio.indices) entityListAudio[i].index = i
     }
 
     private fun updateIndex() {
         for (i in entityListQuran.indices) {
             val eqt = entityListQuran[i]
-            eqt.setIndex(i)
-            eqt.getQuranEntity().setIndex(i)
+            eqt.index = i
+            eqt.quranEntity.index = i
         }
     }
 
     private fun updateTrslIndex() {
         for (i in entityListTrslQuran.indices) {
             val etl = entityListTrslQuran[i]
-            etl.setIndex(i)
-            etl.getQuranEntity().setIndex(i)
+            etl.index = i
+            etl.quranEntity.index = i
         }
     }
 
@@ -2193,22 +2197,22 @@ class TrackEntityView @JvmOverloads constructor(
         var foundEntity: Entity? = null
         if (entity != null) {
             val contains3 = entity.contains(pointF)
-            isPassScroll = !contains3 && selectedEntity!!.getTrim_type() == -1
-            if (contains3 || selectedEntity!!.getTrim_type() != -1) {
+            isPassScroll = !contains3 && selectedEntity!!.trimType == -1
+            if (contains3 || selectedEntity!!.trimType != -1) {
                 selectedEntity!!.setCurrentRect()
                 if (iTrimLineCallback != null) {
-                    if (selectedEntity!!.getTrim_type() == 0) {
-                        selectedEntity!!.setOnTapTime(round(selectedEntity!!.getRect().left / getSecond_in_screen()) * 1000, selectedEntity!!.getRect().left)
+                    if (selectedEntity!!.trimType == 0) {
+                        selectedEntity!!.setOnTapTime(round(selectedEntity!!.rect.left / getSecond_in_screen()) * 1000, selectedEntity!!.rect.left)
                         iTrimLineCallback!!.onPlayVibration()
-                    } else if (selectedEntity!!.getTrim_type() == 1) {
-                        selectedEntity!!.setOnTapTime(round(selectedEntity!!.getRect().right / getSecond_in_screen()) * 1000, selectedEntity!!.getRect().right)
+                    } else if (selectedEntity!!.trimType == 1) {
+                        selectedEntity!!.setOnTapTime(round(selectedEntity!!.rect.right / getSecond_in_screen()) * 1000, selectedEntity!!.rect.right)
                         iTrimLineCallback!!.onPlayVibration()
                     } else {
                         iTrimLineCallback!!.onSelectEntity(selectedEntity!!, 0.0f)
                     }
                 }
-                if (selectedEntity!!.isSelect()) return
-                selectedEntity!!.setSelect(true)
+                if (selectedEntity!!.isSelect) return
+                selectedEntity!!.isSelect = true
                 invalidate()
                 return
             }
@@ -2217,17 +2221,17 @@ class TrackEntityView @JvmOverloads constructor(
         for (eqt in entityListQuran) {
             if (eqt !== selectedEntity && eqt.visible()) {
                 val contains4 = eqt.contains(pointF)
-                isPassScroll = !contains4 && eqt.getTrim_type() == -1
-                if (contains4 || eqt.getTrim_type() != -1) {
+                isPassScroll = !contains4 && eqt.trimType == -1
+                if (contains4 || eqt.trimType != -1) {
                     eqt.setCurrentRect()
-                    eqt.setSelect(true)
+                    eqt.isSelect = true
                     eqt.setDownX(pointF.x)
                     if (iTrimLineCallback != null) {
-                        if (eqt.getTrim_type() == 0) {
-                            eqt.setOnTapTime(round(eqt.getRect().left / getSecond_in_screen()) * 1000, eqt.getRect().left)
+                        if (eqt.trimType == 0) {
+                            eqt.setOnTapTime(round(eqt.rect.left / getSecond_in_screen()) * 1000, eqt.rect.left)
                             iTrimLineCallback!!.onPlayVibration()
-                        } else if (eqt.getTrim_type() == 1) {
-                            eqt.setOnTapTime(round(eqt.getRect().right / getSecond_in_screen()) * 1000, eqt.getRect().right)
+                        } else if (eqt.trimType == 1) {
+                            eqt.setOnTapTime(round(eqt.rect.right / getSecond_in_screen()) * 1000, eqt.rect.right)
                             iTrimLineCallback!!.onPlayVibration()
                         } else {
                             iTrimLineCallback!!.onSelectEntity(eqt, 0.0f)
@@ -2242,17 +2246,17 @@ class TrackEntityView @JvmOverloads constructor(
             for (etl in entityListTrslQuran) {
                 if (etl !== selectedEntity && etl.visible()) {
                     val contains5 = etl.contains(pointF)
-                    isPassScroll = !contains5 && etl.getTrim_type() == -1
-                    if (contains5 || etl.getTrim_type() != -1) {
+                    isPassScroll = !contains5 && etl.trimType == -1
+                    if (contains5 || etl.trimType != -1) {
                         etl.setCurrentRect()
-                        etl.setSelect(true)
+                        etl.isSelect = true
                         etl.setDownX(pointF.x)
                         if (iTrimLineCallback != null) {
-                            if (etl.getTrim_type() == 0) {
-                                etl.setOnTapTime(round(etl.getRect().left / getSecond_in_screen()) * 1000, etl.getRect().left)
+                            if (etl.trimType == 0) {
+                                etl.setOnTapTime(round(etl.rect.left / getSecond_in_screen()) * 1000, etl.rect.left)
                                 iTrimLineCallback!!.onPlayVibration()
-                            } else if (etl.getTrim_type() == 1) {
-                                etl.setOnTapTime(round(etl.getRect().right / getSecond_in_screen()) * 1000, etl.getRect().right)
+                            } else if (etl.trimType == 1) {
+                                etl.setOnTapTime(round(etl.rect.right / getSecond_in_screen()) * 1000, etl.rect.right)
                                 iTrimLineCallback!!.onPlayVibration()
                             } else {
                                 iTrimLineCallback!!.onSelectEntity(etl, 0.0f)
@@ -2268,17 +2272,17 @@ class TrackEntityView @JvmOverloads constructor(
             for (ea in entityListAudio) {
                 if (ea !== selectedEntity && ea.visible()) {
                     val contains6 = ea.contains(pointF)
-                    isPassScroll = !contains6 && ea.getTrim_type() == -1
-                    if (contains6 || ea.getTrim_type() != -1) {
+                    isPassScroll = !contains6 && ea.trimType == -1
+                    if (contains6 || ea.trimType != -1) {
                         ea.setCurrentRect()
-                        ea.setSelect(true)
+                        ea.isSelect = true
                         ea.setDownX(pointF.x)
                         if (iTrimLineCallback != null) {
-                            if (ea.getTrim_type() == 0) {
-                                ea.setOnTapTime(round(ea.getRect().left / getSecond_in_screen()) * 1000, ea.getRect().left)
+                            if (ea.trimType == 0) {
+                                ea.setOnTapTime(round(ea.rect.left / getSecond_in_screen()) * 1000, ea.rect.left)
                                 iTrimLineCallback!!.onPlayVibration()
-                            } else if (ea.getTrim_type() == 1) {
-                                ea.setOnTapTime(round(ea.getRect().right / getSecond_in_screen()) * 1000, ea.getRect().right)
+                            } else if (ea.trimType == 1) {
+                                ea.setOnTapTime(round(ea.rect.right / getSecond_in_screen()) * 1000, ea.rect.right)
                                 iTrimLineCallback!!.onPlayVibration()
                             } else {
                                 iTrimLineCallback!!.onSelectEntity(ea, 0.0f)
@@ -2292,18 +2296,18 @@ class TrackEntityView @JvmOverloads constructor(
         // Search Bismilah
         if (foundEntity == null && isExist(bismilahTimeline)) {
             val contains2 = bismilahTimeline!!.contains(pointF)
-            isPassScroll = contains2 && bismilahTimeline!!.getTrim_type() == -1
-            if (!contains2 || bismilahTimeline!!.getTrim_type() != -1) {
+            isPassScroll = contains2 && bismilahTimeline!!.trimType == -1
+            if (!contains2 || bismilahTimeline!!.trimType != -1) {
                 foundEntity = bismilahTimeline
                 foundEntity!!.setCurrentRect()
-                foundEntity!!.setSelect(true)
+                foundEntity!!.isSelect = true
                 foundEntity!!.setDownX(pointF.x)
                 if (iTrimLineCallback != null) {
-                    if (foundEntity!!.getTrim_type() == 0) {
-                        foundEntity!!.setOnTapTime(round(foundEntity!!.getRect().left / getSecond_in_screen()) * 1000, foundEntity!!.getRect().left)
+                    if (foundEntity!!.trimType == 0) {
+                        foundEntity!!.setOnTapTime(round(foundEntity!!.rect.left / getSecond_in_screen()) * 1000, foundEntity!!.rect.left)
                         iTrimLineCallback!!.onPlayVibration()
-                    } else if (foundEntity!!.getTrim_type() == 1) {
-                        foundEntity!!.setOnTapTime(round(foundEntity!!.getRect().right / getSecond_in_screen()) * 1000, foundEntity!!.getRect().right)
+                    } else if (foundEntity!!.trimType == 1) {
+                        foundEntity!!.setOnTapTime(round(foundEntity!!.rect.right / getSecond_in_screen()) * 1000, foundEntity!!.rect.right)
                         iTrimLineCallback!!.onPlayVibration()
                     } else {
                         iTrimLineCallback!!.onSelectEntity(foundEntity!!, 0.0f)
@@ -2314,18 +2318,18 @@ class TrackEntityView @JvmOverloads constructor(
         // Search Isi3ada
         if (foundEntity == null && isExist(mIsi3adaTimeline)) {
             val contains = mIsi3adaTimeline!!.contains(pointF)
-            isPassScroll = !contains && mIsi3adaTimeline!!.getTrim_type() == -1
-            if (!contains || mIsi3adaTimeline!!.getTrim_type() != -1) {
+            isPassScroll = !contains && mIsi3adaTimeline!!.trimType == -1
+            if (!contains || mIsi3adaTimeline!!.trimType != -1) {
                 foundEntity = mIsi3adaTimeline
                 foundEntity!!.setCurrentRect()
-                foundEntity!!.setSelect(true)
+                foundEntity!!.isSelect = true
                 foundEntity!!.setDownX(pointF.x)
                 if (iTrimLineCallback != null) {
-                    if (foundEntity!!.getTrim_type() == 0) {
-                        foundEntity!!.setOnTapTime(round(foundEntity!!.getRect().left / getSecond_in_screen()) * 1000, foundEntity!!.getRect().left)
+                    if (foundEntity!!.trimType == 0) {
+                        foundEntity!!.setOnTapTime(round(foundEntity!!.rect.left / getSecond_in_screen()) * 1000, foundEntity!!.rect.left)
                         iTrimLineCallback!!.onPlayVibration()
-                    } else if (foundEntity!!.getTrim_type() == 1) {
-                        foundEntity!!.setOnTapTime(round(foundEntity!!.getRect().right / getSecond_in_screen()) * 1000, foundEntity!!.getRect().right)
+                    } else if (foundEntity!!.trimType == 1) {
+                        foundEntity!!.setOnTapTime(round(foundEntity!!.rect.right / getSecond_in_screen()) * 1000, foundEntity!!.rect.right)
                         iTrimLineCallback!!.onPlayVibration()
                     } else {
                         iTrimLineCallback!!.onSelectEntity(foundEntity!!, 0.0f)
@@ -2380,22 +2384,22 @@ class TrackEntityView @JvmOverloads constructor(
     }
 
     fun updateWhenEffect(entityAudio: EntityAudio) {
-        if (entityAudio.getIndex() + 1 >= entityListAudio.size) return
-        val next = getPreviewOrNextEntityAudio(entityListAudio, entityAudio.getIndex() + 1, true) ?: return
-        if (entityAudio.getRect().right <= next.getRect().left) return
-        val width = next.getRect().width() + entityAudio.getRect().right
-        val f = entityAudio.getRect().right - next.getRect().left
+        if (entityAudio.index + 1 >= entityListAudio.size) return
+        val next = getPreviewOrNextEntityAudio(entityListAudio, entityAudio.index + 1, true) ?: return
+        if (entityAudio.rect.right <= next.rect.left) return
+        val width = next.rect.width() + entityAudio.rect.right
+        val f = entityAudio.rect.right - next.rect.left
         next.setCurrentRect()
-        next.setX(entityAudio.getRect().right)
-        next.setRight(width)
-        for (index in entityAudio.getIndex() + 2 until entityListAudio.size) {
+        next.setX(entityAudio.rect.right)
+        next.right = width
+        for (index in entityAudio.index + 2 until entityListAudio.size) {
             val ea = entityListAudio[index]
             if (ea.visible()) {
-                val f2 = ea.getRect().left + f
-                val width2 = ea.getRect().width() + f2
+                val f2 = ea.rect.left + f
+                val width2 = ea.rect.width() + f2
                 ea.setCurrentRect()
                 ea.setX(f2)
-                ea.setRight(width2)
+                ea.right = width2
             }
         }
     }
@@ -2425,7 +2429,7 @@ class TrackEntityView @JvmOverloads constructor(
             isAutoMove = false
             if (selectedEntity != null) {
                 if (isMove) {
-                    current_cursur_position = round(currentPosition * 1000.0f / second_in_screen * -1.0f)
+                    current_cursur_position = (round(currentPosition * 1000.0f / second_in_screen * -1.0f)).toInt()
                     isAutoScroll = false
                     isOnUp = true
                     isCheckLineCursur = false
@@ -2438,7 +2442,7 @@ class TrackEntityView @JvmOverloads constructor(
                         it.onAddStack(EntityAction.MOVE)
                     }
                 }
-                if (selectedEntity!!.getSelectTrim() != null) {
+                if (selectedEntity!!.selectTrim != null) {
                     isAutoScroll = false
                     iTrimLineCallback?.onUp()
                     pass = true
@@ -2447,13 +2451,13 @@ class TrackEntityView @JvmOverloads constructor(
                     isOnUp = true
                     isCheckLineCursur = false
                     isCheckLine = false
-                    if (selectedEntity!!.getTrim_type() == 0) {
+                    if (selectedEntity!!.trimType == 0) {
                         selectedEntity!!.onChange()
                         entityList.push(Pair(selectedEntity!!, EntityAction.TRIM))
                         iTrimLineCallback?.onAddStack(EntityAction.TRIM)
                         selectedEntity!!.onUpLeft()
                     }
-                    if (selectedEntity!!.getTrim_type() == 1) {
+                    if (selectedEntity!!.trimType == 1) {
                         val entity2 = selectedEntity!!
                         if (entity2 is EntityQuranTimeline) {
                             for (eqt in entityListQuran) {
@@ -2478,11 +2482,11 @@ class TrackEntityView @JvmOverloads constructor(
                         iTrimLineCallback?.onAddStack(EntityAction.TRIM)
                         selectedEntity!!.onUpRight()
                     }
-                    selectedEntity!!.resetTrim_type()
+                    selectedEntity!!.resetTrimType()
                     invalidate()
                 }
-                selectedEntity!!.setX(selectedEntity!!.getRect().left)
-                selectedEntity!!.setRight(selectedEntity!!.getRect().right)
+                selectedEntity!!.setX(selectedEntity!!.rect.left)
+                selectedEntity!!.right = selectedEntity!!.rect.right
                 if (iTrimLineCallback != null && !isMove) {
                     iTrimLineCallback!!.onUpdateTime()
                 }
@@ -2492,39 +2496,39 @@ class TrackEntityView @JvmOverloads constructor(
             }
             iTrimLineCallback?.onUp()
         } else if (action == MotionEvent.ACTION_MOVE && selectedEntity != null && !isPassScroll) {
-            if (selectedEntity!!.getSelectTrim() != null) {
+            if (selectedEntity!!.selectTrim != null) {
                 if (!isPass(motionEvent)) return true
                 iTrimLineCallback?.onMove()
                 // Trim left (trim_type == 0)
-                if (selectedEntity!!.getTrim_type() == 0 && onThink) {
+                if (selectedEntity!!.trimType == 0 && onThink) {
                     if (abs(motionEvent.x - lasX) <= TOLERANCE_X) return false
                     lasX = motionEvent.x
                     val x = motionEvent.x - selectedEntity!!.getDownX()
                     if (x == 0.0f) return false
                     selectedEntity!!.setTrimLeft(true)
-                    var left = selectedEntity!!.getLeft() + x
-                    val isValidTrim = selectedEntity!!.getRect().right - left > max_trim
+                    var left = selectedEntity!!.left + x
+                    val isValidTrim = selectedEntity!!.rect.right - left > max_trim
                     if (left < 0.0f) left = 0.0f
-                    else if (!isValidTrim) left = selectedEntity!!.getRect().right - max_trim
+                    else if (!isValidTrim) left = selectedEntity!!.rect.right - max_trim
                     // EntityAudio trim left
                     if (selectedEntity is EntityAudio) {
                         val ea = selectedEntity as EntityAudio
-                        val offsetRight = ea.getOffset_right() * ea.getmScaleFactor()
-                        val f2 = selectedEntity!!.getRect().right + offsetRight - left
-                        val max = ea.getMax() * ea.getmScaleFactor()
+                        val offsetRight = ea.getOffsetRight() * ea.scaleFactor
+                        val f2 = selectedEntity!!.rect.right + offsetRight - left
+                        val max = ea.max * ea.scaleFactor
                         if (f2 > max) {
-                            selectedEntity!!.setX(selectedEntity!!.getRect().right + offsetRight - max)
+                            selectedEntity!!.setX(selectedEntity!!.rect.right + offsetRight - max)
                             ea.updateStartTrim()
                             invalidate()
                             return true
                         }
-                        if (ea.getIndex() > 0) {
-                            val prev = getPreviewOrNextEntityAudio(entityListAudio, ea.getIndex() - 1, false)
-                            if (prev != null && left <= prev.getRect().right) {
-                                val width = prev.getRect().right + selectedEntity!!.getRect().width()
-                                selectedEntity!!.setX(prev.getRect().right)
+                        if (ea.index > 0) {
+                            val prev = getPreviewOrNextEntityAudio(entityListAudio, ea.index - 1, false)
+                            if (prev != null && left <= prev.rect.right) {
+                                val width = prev.rect.right + selectedEntity!!.rect.width()
+                                selectedEntity!!.setX(prev.rect.right)
                                 ea.updateStartTrim()
-                                selectedEntity!!.setRight(width)
+                                selectedEntity!!.right = width
                                 pass = false
                                 invalidate()
                                 return true
@@ -2534,23 +2538,23 @@ class TrackEntityView @JvmOverloads constructor(
                     // EntityQuranTimeline trim left
                     if (selectedEntity is EntityQuranTimeline) {
                         val eqt = selectedEntity as EntityQuranTimeline
-                        if (eqt.getIndex() > 0) {
-                            val prev = getPreviewOrNextEntityQuran(entityListQuran, eqt.getIndex() - 1, false)
-                            if (prev != null && left <= prev.getRect().right) {
-                                selectedEntity!!.setX(prev.getRect().right)
+                        if (eqt.index > 0) {
+                            val prev = getPreviewOrNextEntityQuran(entityListQuran, eqt.index - 1, false)
+                            if (prev != null && left <= prev.rect.right) {
+                                selectedEntity!!.setX(prev.rect.right)
                                 pass = false
                                 invalidate()
                                 return true
                             }
                         }
-                        if (isExist(bismilahTimeline) && left <= bismilahTimeline!!.getRect().right) {
-                            selectedEntity!!.setX(bismilahTimeline!!.getRect().right)
+                        if (isExist(bismilahTimeline) && left <= bismilahTimeline!!.rect.right) {
+                            selectedEntity!!.setX(bismilahTimeline!!.rect.right)
                             pass = false
                             invalidate()
                             return true
                         }
-                        if (isExist(mIsi3adaTimeline) && left <= mIsi3adaTimeline!!.getRect().right) {
-                            selectedEntity!!.setX(mIsi3adaTimeline!!.getRect().right)
+                        if (isExist(mIsi3adaTimeline) && left <= mIsi3adaTimeline!!.rect.right) {
+                            selectedEntity!!.setX(mIsi3adaTimeline!!.rect.right)
                             pass = false
                             invalidate()
                             return true
@@ -2559,10 +2563,10 @@ class TrackEntityView @JvmOverloads constructor(
                     // EntityTrslTimeline trim left
                     if (selectedEntity is EntityTrslTimeline) {
                         val etl = selectedEntity as EntityTrslTimeline
-                        if (etl.getIndex() > 0) {
-                            val prev = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.getIndex() - 1, false)
-                            if (prev != null && left <= prev.getRect().right) {
-                                selectedEntity!!.setX(prev.getRect().right)
+                        if (etl.index > 0) {
+                            val prev = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.index - 1, false)
+                            if (prev != null && left <= prev.rect.right) {
+                                selectedEntity!!.setX(prev.rect.right)
                                 pass = false
                                 invalidate()
                                 return true
@@ -2570,15 +2574,15 @@ class TrackEntityView @JvmOverloads constructor(
                         }
                     }
                     // EntityBismilahTimeline trim left
-                    if (selectedEntity is EntityBismilahTimeline && selectedEntity === bismilahTimeline && isExist(mIsi3adaTimeline) && left <= mIsi3adaTimeline!!.getRect().right) {
-                        selectedEntity!!.setX(mIsi3adaTimeline!!.getRect().right)
+                    if (selectedEntity is EntityBismilahTimeline && selectedEntity === bismilahTimeline && isExist(mIsi3adaTimeline) && left <= mIsi3adaTimeline!!.rect.right) {
+                        selectedEntity!!.setX(mIsi3adaTimeline!!.rect.right)
                         pass = false
                         invalidate()
                         return true
                     }
                     // Snap to cursor line
                     if (onThink && pass) {
-                        val f3 = selectedEntity!!.getRect().left
+                        val f3 = selectedEntity!!.rect.left
                         val f4 = scrolled_with_zoom
                         val f5 = f3 + f4
                         if (f5 >= -TOLERANCE_X && f5 < TOLERANCE_X) {
@@ -2587,10 +2591,10 @@ class TrackEntityView @JvmOverloads constructor(
                             selectedEntity!!.setX(f7)
                             selectedEntity!!.updateStartTrim()
                             if (selectedEntity is EntityAudio) {
-                                selectedEntity!!.setRight(f7 + selectedEntity!!.getRect().width())
+                                selectedEntity!!.right = f7 + selectedEntity!!.rect.width()
                             }
                             isCheckLineCursur = true
-                            startXLine = selectedEntity!!.getRect().left
+                            startXLine = selectedEntity!!.rect.left
                             invalidate()
                             iTrimLineCallback?.onPlayVibration()
                             Handler().postDelayed({
@@ -2606,17 +2610,17 @@ class TrackEntityView @JvmOverloads constructor(
                         while (it.hasNext()) {
                             val next = it.next()
                             val nextEntity = next.first
-                            if (nextEntity.getRect().top != selectedEntity!!.getRect().top && nextEntity !== selectedEntity && (next.second == EntityAction.ADD || next.second == EntityAction.SPLIT)) {
+                            if (nextEntity.rect.top != selectedEntity!!.rect.top && nextEntity !== selectedEntity && (next.second == EntityAction.ADD || next.second == EntityAction.SPLIT)) {
                                 if (!nextEntity.visible()) continue
-                                if (selectedEntity!!.getRect().left >= nextEntity.getRect().left - TOLERANCE_X && selectedEntity!!.getRect().left <= nextEntity.getRect().left + TOLERANCE_X) {
+                                if (selectedEntity!!.rect.left >= nextEntity.rect.left - TOLERANCE_X && selectedEntity!!.rect.left <= nextEntity.rect.left + TOLERANCE_X) {
                                     onThink = false
-                                    selectedEntity!!.setX(nextEntity.getRect().left)
+                                    selectedEntity!!.setX(nextEntity.rect.left)
                                     selectedEntity!!.updateStartTrim()
                                     if (selectedEntity is EntityAudio) {
-                                        selectedEntity!!.setRight(nextEntity.getRect().left + selectedEntity!!.getRect().width())
+                                        selectedEntity!!.right = nextEntity.rect.left + selectedEntity!!.rect.width()
                                     }
                                     isCheckLine = true
-                                    startXLine = selectedEntity!!.getRect().left
+                                    startXLine = selectedEntity!!.rect.left
                                     invalidate()
                                     iTrimLineCallback?.onPlayVibration()
                                     Handler().postDelayed({
@@ -2627,15 +2631,15 @@ class TrackEntityView @JvmOverloads constructor(
                                     }, 500L)
                                     return false
                                 }
-                                if (selectedEntity!!.getRect().left >= nextEntity.getRect().right - TOLERANCE_X && selectedEntity!!.getRect().left <= nextEntity.getRect().right + TOLERANCE_X) {
+                                if (selectedEntity!!.rect.left >= nextEntity.rect.right - TOLERANCE_X && selectedEntity!!.rect.left <= nextEntity.rect.right + TOLERANCE_X) {
                                     onThink = false
-                                    selectedEntity!!.setX(nextEntity.getRect().right)
+                                    selectedEntity!!.setX(nextEntity.rect.right)
                                     if (selectedEntity is EntityAudio) {
-                                        selectedEntity!!.setRight(nextEntity.getRect().right + selectedEntity!!.getRect().width())
+                                        selectedEntity!!.right = nextEntity.rect.right + selectedEntity!!.rect.width()
                                         selectedEntity!!.updateStartTrim()
                                     }
                                     isCheckLine = true
-                                    startXLine = selectedEntity!!.getRect().left
+                                    startXLine = selectedEntity!!.rect.left
                                     invalidate()
                                     iTrimLineCallback?.onPlayVibration()
                                     Handler().postDelayed({
@@ -2651,17 +2655,17 @@ class TrackEntityView @JvmOverloads constructor(
                     }
                     // Apply trim left for EntityAudio
                     if (selectedEntity is EntityAudio) {
-                        selectedEntity!!.getRect().left = left
-                        selectedEntity!!.setLastLeft(selectedEntity!!.getLeft() + x)
+                        selectedEntity!!.rect.left = left
+                        selectedEntity!!.setLastLeft(selectedEntity!!.left + x)
                         selectedEntity!!.updateStartTrim()
                         autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                         isAutoScroll = false
                     } else if (isValidTrim) {
                         // Auto-scroll right trim left
-                        if (selectedEntity!!.getRect().left < left) {
-                            if (selectedEntity!!.getRect().left + getCurrentPosition() > DETECT_RIGHT_MOVE) {
+                        if (selectedEntity!!.rect.left < left) {
+                            if (selectedEntity!!.rect.left + getCurrentPosition() > DETECT_RIGHT_MOVE) {
                                 if (!isAutoScroll) {
-                                    if (left > selectedEntity!!.getRect().left) {
+                                    if (left > selectedEntity!!.rect.left) {
                                         if (SPEED < 0.0f) SPEED *= -1.0f
                                     } else {
                                         if (SPEED > 0.0f) SPEED *= -1.0f
@@ -2669,7 +2673,7 @@ class TrackEntityView @JvmOverloads constructor(
                                     isAutoScroll = true
                                     time_start = System.currentTimeMillis()
                                     autoScrollHandler.postDelayed(autoScrollRunnable!!, 100L)
-                                } else if (left < selectedEntity!!.getRect().left && isAutoScroll) {
+                                } else if (left < selectedEntity!!.rect.left && isAutoScroll) {
                                     isAutoScroll = false
                                     autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                                 }
@@ -2677,7 +2681,7 @@ class TrackEntityView @JvmOverloads constructor(
                                 isAutoScroll = false
                                 autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                             }
-                        } else if (selectedEntity!!.getRect().left > 0.0f && selectedEntity!!.getRect().left + getCurrentPosition() < -DETECT_LEFT_MOVE) {
+                        } else if (selectedEntity!!.rect.left > 0.0f && selectedEntity!!.rect.left + getCurrentPosition() < -DETECT_LEFT_MOVE) {
                             if (!isAutoScroll) {
                                 if (SPEED < 0.0f) SPEED *= -1.0f
                                 isAutoScroll = true
@@ -2692,49 +2696,49 @@ class TrackEntityView @JvmOverloads constructor(
                         }
                     }
                     if (!isAutoScroll) {
-                        if (left > selectedEntity!!.getRect().left) {
-                            selectedEntity!!.getRect().left = left + TOLERANCE_X
+                        if (left > selectedEntity!!.rect.left) {
+                            selectedEntity!!.rect.left = left + TOLERANCE_X
                         } else {
-                            selectedEntity!!.getRect().left = left - TOLERANCE_X
+                            selectedEntity!!.rect.left = left - TOLERANCE_X
                         }
                     }
                     val strokeWidth = paintCursur!!.strokeWidth * 0.3f
-                    pass = selectedEntity!!.getRect().left < startXLine - strokeWidth || selectedEntity!!.getRect().left > startXLine + strokeWidth
+                    pass = selectedEntity!!.rect.left < startXLine - strokeWidth || selectedEntity!!.rect.left > startXLine + strokeWidth
                     invalidate()
-                } else if (selectedEntity!!.getTrim_type() == 1 && onThink) {
+                } else if (selectedEntity!!.trimType == 1 && onThink) {
                     // Trim right
                     if (abs(motionEvent.x - lasX) <= TOLERANCE_X) return false
                     lasX = motionEvent.x
                     val x2 = motionEvent.x - selectedEntity!!.getDownX()
                     if (x2 == 0.0f) return false
-                    var right = selectedEntity!!.getRight() + x2
-                    val isValidTrim = right - selectedEntity!!.getRect().left > max_trim
-                    if (!isValidTrim) right = selectedEntity!!.getRect().left + max_trim
+                    var right = selectedEntity!!.right + x2
+                    val isValidTrim = right - selectedEntity!!.rect.left > max_trim
+                    if (!isValidTrim) right = selectedEntity!!.rect.left + max_trim
                     var f: Float = -1.0f
                     if (selectedEntity is EntityAudio) {
                         val ea = selectedEntity as EntityAudio
-                        f = right - selectedEntity!!.getRect().left
-                        val max2 = ea.getMax() * ea.getmScaleFactor() - ea.getOffset_left() * ea.getmScaleFactor()
-                        if (f > max2) right = selectedEntity!!.getRect().left + max2
-                        else if (ea.getIndex() + 1 < entityListAudio.size) {
-                            val next = getPreviewOrNextEntityAudio(entityListAudio, ea.getIndex() + 1, true)
-                            if (next != null && right > next.getRect().left) {
-                                selectedEntity!!.getRect().right = right
-                                if (f == -1.0f) selectedEntity!!.setLastRight(selectedEntity!!.getRight() + x2)
-                                else selectedEntity!!.setLastRight(selectedEntity!!.getRect().right)
-                                val width2 = next.getRect().width() + right
-                                val f12 = right - next.getRect().left
+                        f = right - selectedEntity!!.rect.left
+                        val max2 = ea.max * ea.scaleFactor - ea.getOffsetLeft() * ea.scaleFactor
+                        if (f > max2) right = selectedEntity!!.rect.left + max2
+                        else if (ea.index + 1 < entityListAudio.size) {
+                            val next = getPreviewOrNextEntityAudio(entityListAudio, ea.index + 1, true)
+                            if (next != null && right > next.rect.left) {
+                                selectedEntity!!.rect.right = right
+                                if (f == -1.0f) selectedEntity!!.setLastRight(selectedEntity!!.right + x2)
+                                else selectedEntity!!.setLastRight(selectedEntity!!.rect.right)
+                                val width2 = next.rect.width() + right
+                                val f12 = right - next.rect.left
                                 next.setCurrentRect()
                                 next.setX(right)
-                                next.setRight(width2)
-                                for (index in ea.getIndex() + 2 until entityListAudio.size) {
+                                next.right = width2
+                                for (index in ea.index + 2 until entityListAudio.size) {
                                     val ea2 = entityListAudio[index]
                                     if (ea2.visible()) {
-                                        val f13 = ea2.getRect().left + f12
-                                        val width3 = ea2.getRect().width() + f13
+                                        val f13 = ea2.rect.left + f12
+                                        val width3 = ea2.rect.width() + f13
                                         ea2.setCurrentRect()
                                         ea2.setX(f13)
-                                        ea2.setRight(width3)
+                                        ea2.right = width3
                                     }
                                 }
                                 pass = false
@@ -2745,18 +2749,18 @@ class TrackEntityView @JvmOverloads constructor(
                     }
                     // Snap to cursor line for right trim
                     if (onThink && pass) {
-                        val f14 = selectedEntity!!.getRect().right
+                        val f14 = selectedEntity!!.rect.right
                         val f15 = scrolled_with_zoom
                         val f16 = f14 + f15
                         if (f16 >= -TOLERANCE_X && f16 < TOLERANCE_X) {
                             onThink = false
                             val f18 = -f15 + TOLERANCE_X
                             if (selectedEntity is EntityAudio) {
-                                selectedEntity!!.setX(selectedEntity!!.getRect().right - selectedEntity!!.getRect().width())
+                                selectedEntity!!.setX(selectedEntity!!.rect.right - selectedEntity!!.rect.width())
                             }
-                            selectedEntity!!.setRight(f18)
+                            selectedEntity!!.right = f18
                             isCheckLineCursur = true
-                            startXLine = selectedEntity!!.getRect().right
+                            startXLine = selectedEntity!!.rect.right
                             invalidate()
                             iTrimLineCallback?.onPlayVibration()
                             Handler().postDelayed({
@@ -2772,15 +2776,15 @@ class TrackEntityView @JvmOverloads constructor(
                         while (it2.hasNext()) {
                             val next2 = it2.next()
                             val nextEntity2 = next2.first
-                            if (nextEntity2.getRect().top != selectedEntity!!.getRect().top && nextEntity2 !== selectedEntity && (next2.second == EntityAction.ADD || next2.second == EntityAction.SPLIT) && nextEntity2.visible()) {
-                                if (selectedEntity!!.getRect().right >= nextEntity2.getRect().left - TOLERANCE_X && selectedEntity!!.getRect().right <= nextEntity2.getRect().left + TOLERANCE_X) {
+                            if (nextEntity2.rect.top != selectedEntity!!.rect.top && nextEntity2 !== selectedEntity && (next2.second == EntityAction.ADD || next2.second == EntityAction.SPLIT) && nextEntity2.visible()) {
+                                if (selectedEntity!!.rect.right >= nextEntity2.rect.left - TOLERANCE_X && selectedEntity!!.rect.right <= nextEntity2.rect.left + TOLERANCE_X) {
                                     onThink = false
-                                    selectedEntity!!.setRight(nextEntity2.getRect().left)
+                                    selectedEntity!!.right = nextEntity2.rect.left
                                     if (selectedEntity is EntityAudio) {
-                                        selectedEntity!!.setX(nextEntity2.getRect().left - selectedEntity!!.getRect().width())
+                                        selectedEntity!!.setX(nextEntity2.rect.left - selectedEntity!!.rect.width())
                                     }
                                     isCheckLine = true
-                                    startXLine = selectedEntity!!.getRect().right
+                                    startXLine = selectedEntity!!.rect.right
                                     invalidate()
                                     iTrimLineCallback?.onPlayVibration()
                                     Handler().postDelayed({
@@ -2791,14 +2795,14 @@ class TrackEntityView @JvmOverloads constructor(
                                     }, 500L)
                                     return false
                                 }
-                                if (selectedEntity!!.getRect().right >= nextEntity2.getRect().right - TOLERANCE_X && selectedEntity!!.getRect().right <= nextEntity2.getRect().right + TOLERANCE_X) {
+                                if (selectedEntity!!.rect.right >= nextEntity2.rect.right - TOLERANCE_X && selectedEntity!!.rect.right <= nextEntity2.rect.right + TOLERANCE_X) {
                                     onThink = false
-                                    selectedEntity!!.setRight(nextEntity2.getRect().right)
+                                    selectedEntity!!.right = nextEntity2.rect.right
                                     if (selectedEntity is EntityAudio) {
-                                        selectedEntity!!.setX(nextEntity2.getRect().right - selectedEntity!!.getRect().width())
+                                        selectedEntity!!.setX(nextEntity2.rect.right - selectedEntity!!.rect.width())
                                     }
                                     isCheckLine = true
-                                    startXLine = selectedEntity!!.getRect().right
+                                    startXLine = selectedEntity!!.rect.right
                                     invalidate()
                                     iTrimLineCallback?.onPlayVibration()
                                     Handler().postDelayed({
@@ -2814,50 +2818,50 @@ class TrackEntityView @JvmOverloads constructor(
                     }
                     // Apply right trim for EntityAudio
                     if (selectedEntity is EntityAudio) {
-                        selectedEntity!!.getRect().right = right
-                        if (f == -1.0f) selectedEntity!!.setLastRight(selectedEntity!!.getRight() + x2)
-                        else selectedEntity!!.setLastRight(selectedEntity!!.getRect().right)
+                        selectedEntity!!.rect.right = right
+                        if (f == -1.0f) selectedEntity!!.setLastRight(selectedEntity!!.right + x2)
+                        else selectedEntity!!.setLastRight(selectedEntity!!.rect.right)
                         autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                         isAutoScroll = false
                     }
                     // Right trim collision for Quran
                     if (selectedEntity is EntityQuranTimeline) {
                         val eqt = selectedEntity as EntityQuranTimeline
-                        if (eqt.getIndex() < entityListQuran.size) {
-                            val next = getPreviewOrNextEntityQuran(entityListQuran, eqt.getIndex() + 1, true)
-                            if (next != null && right > next.getRect().left) {
-                                val width = next.getRect().width() + right
-                                val f19 = right - next.getRect().left
+                        if (eqt.index < entityListQuran.size) {
+                            val next = getPreviewOrNextEntityQuran(entityListQuran, eqt.index + 1, true)
+                            if (next != null && right > next.rect.left) {
+                                val width = next.rect.width() + right
+                                val f19 = right - next.rect.left
                                 next.setCurrentRect()
                                 next.setX(right)
-                                next.setRight(width)
-                                for (index in eqt.getIndex() + 2 until entityListQuran.size) {
+                                next.right = width
+                                for (index in eqt.index + 2 until entityListQuran.size) {
                                     val eqt2 = entityListQuran[index]
                                     if (eqt2.visible()) {
-                                        val f20 = eqt2.getRect().left + f19
-                                        val width5 = eqt2.getRect().width() + f20
+                                        val f20 = eqt2.rect.left + f19
+                                        val width5 = eqt2.rect.width() + f20
                                         eqt2.setCurrentRect()
                                         eqt2.setX(f20)
-                                        eqt2.setRight(width5)
+                                        eqt2.right = width5
                                     }
                                 }
                                 pass = false
-                                selectedEntity!!.getRect().right = right
+                                selectedEntity!!.rect.right = right
                                 invalidate()
                                 return true
                             }
                         }
                         // Auto-scroll for Quran right trim
                         if (isValidTrim) {
-                            if (selectedEntity!!.getRect().right < right) {
-                                if (selectedEntity!!.getRect().right + getCurrentPosition() > DETECT_RIGHT_MOVE) {
+                            if (selectedEntity!!.rect.right < right) {
+                                if (selectedEntity!!.rect.right + getCurrentPosition() > DETECT_RIGHT_MOVE) {
                                     if (!isAutoScroll) {
-                                        if (right > selectedEntity!!.getRect().right) { if (SPEED < 0.0f) SPEED *= -1.0f }
+                                        if (right > selectedEntity!!.rect.right) { if (SPEED < 0.0f) SPEED *= -1.0f }
                                         else { if (SPEED > 0.0f) SPEED *= -1.0f }
                                         isAutoScroll = true
                                         time_start = System.currentTimeMillis()
                                         autoScrollHandler.postDelayed(autoScrollRunnable!!, 100L)
-                                    } else if (right < selectedEntity!!.getRect().right && isAutoScroll) {
+                                    } else if (right < selectedEntity!!.rect.right && isAutoScroll) {
                                         isAutoScroll = false
                                         autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                                     }
@@ -2865,7 +2869,7 @@ class TrackEntityView @JvmOverloads constructor(
                                     isAutoScroll = false
                                     autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                                 }
-                            } else if (selectedEntity!!.getRect().right > 0.0f && selectedEntity!!.getRect().right + getCurrentPosition() < -DETECT_LEFT_MOVE) {
+                            } else if (selectedEntity!!.rect.right > 0.0f && selectedEntity!!.rect.right + getCurrentPosition() < -DETECT_LEFT_MOVE) {
                                 if (!isAutoScroll) {
                                     if (SPEED < 0.0f) SPEED *= -1.0f
                                     isAutoScroll = true
@@ -2881,40 +2885,40 @@ class TrackEntityView @JvmOverloads constructor(
                     // Right trim collision for Trsl
                     if (selectedEntity is EntityTrslTimeline) {
                         val etl = selectedEntity as EntityTrslTimeline
-                        if (etl.getIndex() < entityListTrslQuran.size) {
-                            val next = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.getIndex() + 1, true)
-                            if (next != null && right > next.getRect().left) {
-                                val width = next.getRect().width() + right
-                                val f = right - next.getRect().left
+                        if (etl.index < entityListTrslQuran.size) {
+                            val next = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.index + 1, true)
+                            if (next != null && right > next.rect.left) {
+                                val width = next.rect.width() + right
+                                val f = right - next.rect.left
                                 next.setCurrentRect()
                                 next.setX(right)
-                                next.setRight(width)
-                                for (index in etl.getIndex() + 2 until entityListTrslQuran.size) {
+                                next.right = width
+                                for (index in etl.index + 2 until entityListTrslQuran.size) {
                                     val etl2 = entityListTrslQuran[index]
                                     if (etl2.visible()) {
-                                        val f26 = etl2.getRect().left + f
-                                        val width7 = etl2.getRect().width() + f26
+                                        val f26 = etl2.rect.left + f
+                                        val width7 = etl2.rect.width() + f26
                                         etl2.setCurrentRect()
                                         etl2.setX(f26)
-                                        etl2.setRight(width7)
+                                        etl2.right = width7
                                     }
                                 }
                                 pass = false
-                                selectedEntity!!.getRect().right = right
+                                selectedEntity!!.rect.right = right
                                 invalidate()
                                 return true
                             }
                         }
                         if (isValidTrim) {
-                            if (selectedEntity!!.getRect().right < right) {
-                                if (selectedEntity!!.getRect().right + getCurrentPosition() > DETECT_RIGHT_MOVE) {
+                            if (selectedEntity!!.rect.right < right) {
+                                if (selectedEntity!!.rect.right + getCurrentPosition() > DETECT_RIGHT_MOVE) {
                                     if (!isAutoScroll) {
-                                        if (right > selectedEntity!!.getRect().right) { if (SPEED < 0.0f) SPEED *= -1.0f }
+                                        if (right > selectedEntity!!.rect.right) { if (SPEED < 0.0f) SPEED *= -1.0f }
                                         else { if (SPEED > 0.0f) SPEED *= -1.0f }
                                         isAutoScroll = true
                                         time_start = System.currentTimeMillis()
                                         autoScrollHandler.postDelayed(autoScrollRunnable!!, 100L)
-                                    } else if (right < selectedEntity!!.getRect().right && isAutoScroll) {
+                                    } else if (right < selectedEntity!!.rect.right && isAutoScroll) {
                                         isAutoScroll = false
                                         autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                                     }
@@ -2922,7 +2926,7 @@ class TrackEntityView @JvmOverloads constructor(
                                     isAutoScroll = false
                                     autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                                 }
-                            } else if (selectedEntity!!.getRect().right > 0.0f && selectedEntity!!.getRect().right + getCurrentPosition() < -DETECT_LEFT_MOVE) {
+                            } else if (selectedEntity!!.rect.right > 0.0f && selectedEntity!!.rect.right + getCurrentPosition() < -DETECT_LEFT_MOVE) {
                                 if (!isAutoScroll) {
                                     if (SPEED < 0.0f) SPEED *= -1.0f
                                     isAutoScroll = true
@@ -2938,67 +2942,67 @@ class TrackEntityView @JvmOverloads constructor(
                     // Right trim collision for Bismilah
                     if (selectedEntity is EntityBismilahTimeline) {
                         val ebt = selectedEntity as EntityBismilahTimeline
-                        if (ebt === mIsi3adaTimeline && isExist(bismilahTimeline) && right >= bismilahTimeline!!.getRect().left) {
-                            val f = right - bismilahTimeline!!.getRect().left
-                            val width = bismilahTimeline!!.getRect().width() + right
+                        if (ebt === mIsi3adaTimeline && isExist(bismilahTimeline) && right >= bismilahTimeline!!.rect.left) {
+                            val f = right - bismilahTimeline!!.rect.left
+                            val width = bismilahTimeline!!.rect.width() + right
                             bismilahTimeline!!.setCurrentRect()
                             bismilahTimeline!!.setX(right)
-                            bismilahTimeline!!.setRight(width)
+                            bismilahTimeline!!.right = width
                             bismilahTimeline!!.onChange()
                             entityList.push(Pair(bismilahTimeline!!, EntityAction.MOVE))
                             iTrimLineCallback?.onAddStack(EntityAction.MOVE)
-                            for (index in bismilahTimeline!!.getIndex() until entityListQuran.size) {
+                            for (index in bismilahTimeline!!.index until entityListQuran.size) {
                                 val eqt = entityListQuran[index]
                                 if (eqt.visible()) {
-                                    val f34 = eqt.getRect().left + f
-                                    val width11 = eqt.getRect().width() + f34
+                                    val f34 = eqt.rect.left + f
+                                    val width11 = eqt.rect.width() + f34
                                     eqt.setCurrentRect()
                                     eqt.setX(f34)
-                                    eqt.setRight(width11)
+                                    eqt.right = width11
                                 }
                             }
                             pass = false
-                            selectedEntity!!.getRect().right = right
+                            selectedEntity!!.rect.right = right
                             invalidate()
                             return true
                         }
-                        if (ebt.getIndex() < entityListQuran.size) {
-                            val next = getPreviewOrNextEntityQuran(entityListQuran, ebt.getIndex(), true)
-                            if (next != null && right >= next.getRect().left) {
-                                val f = right - next.getRect().left
-                                val width = next.getRect().width() + right
+                        if (ebt.index < entityListQuran.size) {
+                            val next = getPreviewOrNextEntityQuran(entityListQuran, ebt.index, true)
+                            if (next != null && right >= next.rect.left) {
+                                val f = right - next.rect.left
+                                val width = next.rect.width() + right
                                 next.setCurrentRect()
                                 next.setX(right)
-                                next.setRight(width)
+                                next.right = width
                                 next.onChange()
                                 entityList.push(Pair(next, EntityAction.MOVE))
                                 iTrimLineCallback?.onAddStack(EntityAction.MOVE)
-                                for (index in ebt.getIndex() + 1 until entityListQuran.size) {
+                                for (index in ebt.index + 1 until entityListQuran.size) {
                                     val eqt = entityListQuran[index]
                                     if (eqt.visible()) {
-                                        val f34 = eqt.getRect().left + f
-                                        val width11 = eqt.getRect().width() + f34
+                                        val f34 = eqt.rect.left + f
+                                        val width11 = eqt.rect.width() + f34
                                         eqt.setCurrentRect()
                                         eqt.setX(f34)
-                                        eqt.setRight(width11)
+                                        eqt.right = width11
                                     }
                                 }
                                 pass = false
-                                selectedEntity!!.getRect().right = right
+                                selectedEntity!!.rect.right = right
                                 invalidate()
                                 return true
                             }
                         }
                         if (isValidTrim) {
-                            if (selectedEntity!!.getRect().right < right) {
-                                if (selectedEntity!!.getRect().right + getCurrentPosition() > DETECT_RIGHT_MOVE) {
+                            if (selectedEntity!!.rect.right < right) {
+                                if (selectedEntity!!.rect.right + getCurrentPosition() > DETECT_RIGHT_MOVE) {
                                     if (!isAutoScroll) {
-                                        if (right > selectedEntity!!.getRect().right) { if (SPEED < 0.0f) SPEED *= -1.0f }
+                                        if (right > selectedEntity!!.rect.right) { if (SPEED < 0.0f) SPEED *= -1.0f }
                                         else { if (SPEED > 0.0f) SPEED *= -1.0f }
                                         isAutoScroll = true
                                         time_start = System.currentTimeMillis()
                                         autoScrollHandler.postDelayed(autoScrollRunnable!!, 100L)
-                                    } else if (right < selectedEntity!!.getRect().right && isAutoScroll) {
+                                    } else if (right < selectedEntity!!.rect.right && isAutoScroll) {
                                         isAutoScroll = false
                                         autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                                     }
@@ -3006,7 +3010,7 @@ class TrackEntityView @JvmOverloads constructor(
                                     isAutoScroll = false
                                     autoScrollHandler.removeCallbacks(autoScrollRunnable!!)
                                 }
-                            } else if (selectedEntity!!.getRect().right > 0.0f && selectedEntity!!.getRect().right + getCurrentPosition() < -DETECT_LEFT_MOVE) {
+                            } else if (selectedEntity!!.rect.right > 0.0f && selectedEntity!!.rect.right + getCurrentPosition() < -DETECT_LEFT_MOVE) {
                                 if (!isAutoScroll) {
                                     if (SPEED < 0.0f) SPEED *= -1.0f
                                     isAutoScroll = true
@@ -3020,14 +3024,14 @@ class TrackEntityView @JvmOverloads constructor(
                         }
                     }
                     if (!isAutoScroll) {
-                        if (right > selectedEntity!!.getRect().right) {
-                            selectedEntity!!.getRect().right = right + TOLERANCE_X
+                        if (right > selectedEntity!!.rect.right) {
+                            selectedEntity!!.rect.right = right + TOLERANCE_X
                         } else {
-                            selectedEntity!!.getRect().right = right - TOLERANCE_X
+                            selectedEntity!!.rect.right = right - TOLERANCE_X
                         }
                     }
                     val strokeWidth2 = paintCursur!!.strokeWidth * 0.3f
-                    pass = selectedEntity!!.getRect().right < startXLine - strokeWidth2 || selectedEntity!!.getRect().right > startXLine + strokeWidth2
+                    pass = selectedEntity!!.rect.right < startXLine - strokeWidth2 || selectedEntity!!.rect.right > startXLine + strokeWidth2
                     invalidate()
                 }
             } else {
@@ -3036,43 +3040,43 @@ class TrackEntityView @JvmOverloads constructor(
                 lasX = motionEvent.x
                 val x3 = motionEvent.x - selectedEntity!!.getDownX()
                 if (x3 == 0.0f) return false
-                val width12 = selectedEntity!!.getRect().width()
-                var left2 = x3 + selectedEntity!!.getLeft()
+                val width12 = selectedEntity!!.rect.width()
+                var left2 = x3 + selectedEntity!!.left
                 if (left2 < 0.0f) left2 = 0.0f
                 val f39 = left2 + width12
                 // Collision detection for move
                 if (selectedEntity is EntityQuranTimeline) {
                     val eqt = selectedEntity as EntityQuranTimeline
-                    if (eqt.getIndex() > 0) {
-                        val prev = getPreviewOrNextEntityQuran(entityListQuran, eqt.getIndex() - 1, false)
-                        if (prev != null && left2 <= prev.getRect().right) {
-                            selectedEntity!!.setX(prev.getRect().right)
-                            selectedEntity!!.setRight(prev.getRect().right + width12)
+                    if (eqt.index > 0) {
+                        val prev = getPreviewOrNextEntityQuran(entityListQuran, eqt.index - 1, false)
+                        if (prev != null && left2 <= prev.rect.right) {
+                            selectedEntity!!.setX(prev.rect.right)
+                            selectedEntity!!.right = prev.rect.right + width12
                             pass = false
                             invalidate()
                             return true
                         }
                     }
-                    if (eqt.getIndex() + 1 < entityListQuran.size) {
-                        val next = getPreviewOrNextEntityQuran(entityListQuran, eqt.getIndex() + 1, true)
-                        if (next != null && f39 >= next.getRect().left) {
-                            selectedEntity!!.setX(next.getRect().left - width12)
-                            selectedEntity!!.setRight(next.getRect().left)
+                    if (eqt.index + 1 < entityListQuran.size) {
+                        val next = getPreviewOrNextEntityQuran(entityListQuran, eqt.index + 1, true)
+                        if (next != null && f39 >= next.rect.left) {
+                            selectedEntity!!.setX(next.rect.left - width12)
+                            selectedEntity!!.right = next.rect.left
                             pass = false
                             invalidate()
                             return true
                         }
                     }
-                    if (isExist(bismilahTimeline) && left2 <= bismilahTimeline!!.getRect().right) {
-                        selectedEntity!!.setX(bismilahTimeline!!.getRect().right)
-                        selectedEntity!!.setRight(bismilahTimeline!!.getRect().right + width12)
+                    if (isExist(bismilahTimeline) && left2 <= bismilahTimeline!!.rect.right) {
+                        selectedEntity!!.setX(bismilahTimeline!!.rect.right)
+                        selectedEntity!!.right = bismilahTimeline!!.rect.right + width12
                         pass = false
                         invalidate()
                         return true
                     }
-                    if (isExist(mIsi3adaTimeline) && left2 <= mIsi3adaTimeline!!.getRect().right) {
-                        selectedEntity!!.setX(mIsi3adaTimeline!!.getRect().right)
-                        selectedEntity!!.setRight(mIsi3adaTimeline!!.getRect().right + width12)
+                    if (isExist(mIsi3adaTimeline) && left2 <= mIsi3adaTimeline!!.rect.right) {
+                        selectedEntity!!.setX(mIsi3adaTimeline!!.rect.right)
+                        selectedEntity!!.right = mIsi3adaTimeline!!.rect.right + width12
                         pass = false
                         invalidate()
                         return true
@@ -3080,21 +3084,21 @@ class TrackEntityView @JvmOverloads constructor(
                 }
                 if (selectedEntity is EntityTrslTimeline) {
                     val etl = selectedEntity as EntityTrslTimeline
-                    if (etl.getIndex() > 0) {
-                        val prev = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.getIndex() - 1, false)
-                        if (prev != null && left2 <= prev.getRect().right) {
-                            selectedEntity!!.setX(prev.getRect().right)
-                            selectedEntity!!.setRight(prev.getRect().right + width12)
+                    if (etl.index > 0) {
+                        val prev = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.index - 1, false)
+                        if (prev != null && left2 <= prev.rect.right) {
+                            selectedEntity!!.setX(prev.rect.right)
+                            selectedEntity!!.right = prev.rect.right + width12
                             pass = false
                             invalidate()
                             return true
                         }
                     }
-                    if (etl.getIndex() + 1 < entityListTrslQuran.size) {
-                        val next = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.getIndex() + 1, true)
-                        if (next != null && f39 >= next.getRect().left) {
-                            selectedEntity!!.setX(next.getRect().left - width12)
-                            selectedEntity!!.setRight(next.getRect().left)
+                    if (etl.index + 1 < entityListTrslQuran.size) {
+                        val next = getPreviewOrNextEntityTrslQuran(entityListTrslQuran, etl.index + 1, true)
+                        if (next != null && f39 >= next.rect.left) {
+                            selectedEntity!!.setX(next.rect.left - width12)
+                            selectedEntity!!.right = next.rect.left
                             pass = false
                             invalidate()
                             return true
@@ -3103,24 +3107,24 @@ class TrackEntityView @JvmOverloads constructor(
                 }
                 if (selectedEntity is EntityBismilahTimeline) {
                     val ebt = selectedEntity as EntityBismilahTimeline
-                    if (ebt === mIsi3adaTimeline && isExist(bismilahTimeline) && f39 >= bismilahTimeline!!.getRect().left) {
-                        selectedEntity!!.setX(bismilahTimeline!!.getRect().left - width12)
-                        selectedEntity!!.setRight(bismilahTimeline!!.getRect().left)
+                    if (ebt === mIsi3adaTimeline && isExist(bismilahTimeline) && f39 >= bismilahTimeline!!.rect.left) {
+                        selectedEntity!!.setX(bismilahTimeline!!.rect.left - width12)
+                        selectedEntity!!.right = bismilahTimeline!!.rect.left
                         pass = false
                         invalidate()
                         return true
                     }
-                    if (ebt === bismilahTimeline && isExist(mIsi3adaTimeline) && left2 <= mIsi3adaTimeline!!.getRect().right) {
-                        selectedEntity!!.setX(mIsi3adaTimeline!!.getRect().right)
-                        selectedEntity!!.setRight(mIsi3adaTimeline!!.getRect().right + width12)
+                    if (ebt === bismilahTimeline && isExist(mIsi3adaTimeline) && left2 <= mIsi3adaTimeline!!.rect.right) {
+                        selectedEntity!!.setX(mIsi3adaTimeline!!.rect.right)
+                        selectedEntity!!.right = mIsi3adaTimeline!!.rect.right + width12
                         pass = false
                         invalidate()
                         return true
                     }
-                    val next = getPreviewOrNextEntityQuran(entityListQuran, ebt.getIndex(), true)
-                    if (next != null && f39 >= next.getRect().left) {
-                        selectedEntity!!.setX(next.getRect().left - width12)
-                        selectedEntity!!.setRight(next.getRect().left)
+                    val next = getPreviewOrNextEntityQuran(entityListQuran, ebt.index, true)
+                    if (next != null && f39 >= next.rect.left) {
+                        selectedEntity!!.setX(next.rect.left - width12)
+                        selectedEntity!!.right = next.rect.left
                         pass = false
                         invalidate()
                         return true
@@ -3128,21 +3132,21 @@ class TrackEntityView @JvmOverloads constructor(
                 }
                 if (selectedEntity is EntityAudio) {
                     val ea = selectedEntity as EntityAudio
-                    if (ea.getIndex() > 0) {
-                        val prev = getPreviewOrNextEntityAudio(entityListAudio, ea.getIndex() - 1, false)
-                        if (prev != null && left2 <= prev.getRect().right) {
-                            selectedEntity!!.setX(prev.getRect().right)
-                            selectedEntity!!.setRight(prev.getRect().right + width12)
+                    if (ea.index > 0) {
+                        val prev = getPreviewOrNextEntityAudio(entityListAudio, ea.index - 1, false)
+                        if (prev != null && left2 <= prev.rect.right) {
+                            selectedEntity!!.setX(prev.rect.right)
+                            selectedEntity!!.right = prev.rect.right + width12
                             pass = false
                             invalidate()
                             return true
                         }
                     }
-                    if (ea.getIndex() + 1 < entityListAudio.size) {
-                        val next = getPreviewOrNextEntityAudio(entityListAudio, ea.getIndex() + 1, true)
-                        if (next != null && f39 >= next.getRect().left) {
-                            selectedEntity!!.setX(next.getRect().left - width12)
-                            selectedEntity!!.setRight(next.getRect().left)
+                    if (ea.index + 1 < entityListAudio.size) {
+                        val next = getPreviewOrNextEntityAudio(entityListAudio, ea.index + 1, true)
+                        if (next != null && f39 >= next.rect.left) {
+                            selectedEntity!!.setX(next.rect.left - width12)
+                            selectedEntity!!.right = next.rect.left
                             pass = false
                             invalidate()
                             return true
@@ -3150,8 +3154,8 @@ class TrackEntityView @JvmOverloads constructor(
                     }
                 }
                 // Auto-move
-                if (selectedEntity!!.getRect().right < f39) {
-                    if (selectedEntity!!.getRect().left + getCurrentPosition() > DETECT_RIGHT_MOVE) {
+                if (selectedEntity!!.rect.right < f39) {
+                    if (selectedEntity!!.rect.left + getCurrentPosition() > DETECT_RIGHT_MOVE) {
                         if (!isAutoMove) {
                             if (SPEED > 0.0f) SPEED *= -1.0f
                             isAutoMove = true
@@ -3162,7 +3166,7 @@ class TrackEntityView @JvmOverloads constructor(
                         isAutoMove = false
                         autoScrollHandler.removeCallbacks(autoMoveRunnable!!)
                     }
-                } else if (selectedEntity!!.getRect().left > 0.0f && selectedEntity!!.getRect().left + getCurrentPosition() < -DETECT_LEFT_MOVE) {
+                } else if (selectedEntity!!.rect.left > 0.0f && selectedEntity!!.rect.left + getCurrentPosition() < -DETECT_LEFT_MOVE) {
                     if (!isAutoMove) {
                         if (SPEED < 0.0f) SPEED *= -1.0f
                         isAutoMove = true
@@ -3174,11 +3178,11 @@ class TrackEntityView @JvmOverloads constructor(
                     autoScrollHandler.removeCallbacks(autoMoveRunnable!!)
                 }
                 if (!isAutoMove) {
-                    selectedEntity!!.getRect().left = left2
-                    selectedEntity!!.getRect().right = f39
+                    selectedEntity!!.rect.left = left2
+                    selectedEntity!!.rect.right = f39
                     isMove = true
                 }
-                pass = selectedEntity!!.getRect().left < -TOLERANCE_X || selectedEntity!!.getRect().left >= TOLERANCE_X
+                pass = selectedEntity!!.rect.left < -TOLERANCE_X || selectedEntity!!.rect.left >= TOLERANCE_X
                 invalidate()
             }
         }
@@ -3195,10 +3199,10 @@ class TrackEntityView @JvmOverloads constructor(
     fun setFlingY(f: Float) {
         target = f
         if (f <= 0.0f) {
-            if (y + mScrollY >= height) {
+            if (entityY + mScrollY >= height) {
                 val f2 = mScrollY + target / 100.0f
                 mScrollY = f2
-                if (y + f2 < height) mScrollY = (height - y).toFloat()
+                if (entityY + f2 < height) mScrollY = (height - entityY).toFloat()
                 invalidate()
             }
             return
@@ -3295,39 +3299,39 @@ class TrackEntityView @JvmOverloads constructor(
         val audio = getAudio()
         var f: Float = 0.0f
         var f3: Float = 0.0f
-        if (audio == null || audio.getRect() == null) {
+        if (audio == null || audio.rect == null) {
             f = 0.0f
-        } else if (audio.getmScaleFactor() != scaleFactor) {
-            f = audio.getRect().right / audio.getmScaleFactor() * scaleFactor
+        } else if (audio.scaleFactor != scaleFactor) {
+            f = audio.rect.right / audio.scaleFactor * scaleFactor
         } else {
-            f = audio.getRect().right
+            f = audio.rect.right
         }
         val quran = getQuran()
-        if (quran == null || quran.getRect() == null) {
+        if (quran == null || quran.rect == null) {
             if (isExist(bismilahTimeline)) {
-                if (bismilahTimeline!!.getmScaleFactor() != scaleFactor) {
-                    f3 = scaleFactor * bismilahTimeline!!.getRect().right / bismilahTimeline!!.getmScaleFactor()
+                if (bismilahTimeline!!.scaleFactor != scaleFactor) {
+                    f3 = scaleFactor * bismilahTimeline!!.rect.right / bismilahTimeline!!.scaleFactor
                 } else {
-                    f3 = bismilahTimeline!!.getRect().right
+                    f3 = bismilahTimeline!!.rect.right
                 }
             } else if (isExist(mIsi3adaTimeline)) {
-                if (mIsi3adaTimeline!!.getmScaleFactor() != scaleFactor) {
-                    f3 = scaleFactor * mIsi3adaTimeline!!.getRect().right / mIsi3adaTimeline!!.getmScaleFactor()
+                if (mIsi3adaTimeline!!.scaleFactor != scaleFactor) {
+                    f3 = scaleFactor * mIsi3adaTimeline!!.rect.right / mIsi3adaTimeline!!.scaleFactor
                 } else {
-                    f3 = mIsi3adaTimeline!!.getRect().right
+                    f3 = mIsi3adaTimeline!!.rect.right
                 }
             }
-        } else if (quran.getmScaleFactor() != scaleFactor) {
-            f3 = quran.getRect().right / quran.getmScaleFactor() * scaleFactor
+        } else if (quran.scaleFactor != scaleFactor) {
+            f3 = quran.rect.right / quran.scaleFactor * scaleFactor
         } else {
-            f3 = quran.getRect().right
+            f3 = quran.rect.right
         }
         val trslQuran = getTrslQuran()
-        if (trslQuran != null && trslQuran.getRect() != null) {
-            if (trslQuran.getmScaleFactor() != scaleFactor) {
-                f3 = max(trslQuran.getRect().right / trslQuran.getmScaleFactor() * scaleFactor, f3)
+        if (trslQuran != null && trslQuran.rect != null) {
+            if (trslQuran.scaleFactor != scaleFactor) {
+                f3 = max(trslQuran.rect.right / trslQuran.scaleFactor * scaleFactor, f3)
             } else {
-                f3 = max(trslQuran.getRect().right, f3)
+                f3 = max(trslQuran.rect.right, f3)
             }
         }
         val maxVal = max(f3, f)
@@ -3339,19 +3343,19 @@ class TrackEntityView @JvmOverloads constructor(
 
     fun update_current_cursur_position(i: Int) { current_cursur_position = i }
 
-    fun setCurrent_cursur_position(i: Int) { current_cursur_position = i }
 
-    fun getTimeLineW(): Float = timeLineW
+
+
 
     fun unselectEntity() {
         val entity = selectedEntity
         if (entity != null) {
-            entity.setSelect(false)
+            entity.isSelect = false
             selectedEntity = null
         }
     }
 
-    fun getMaxTime(): Int = maxTime
+
 
     fun updateCursur(i: Int) {
         current_cursur_position = i
@@ -3387,20 +3391,23 @@ class TrackEntityView @JvmOverloads constructor(
             val pop = entityList.pop()
             if (pop.second == EntityAction.DELETE) {
                 pop.first.visible(true)
-                if (iTrimLineCallback != null && pop.first.getEntityView() != null) {
-                    iTrimLineCallback!!.onDelete(pop.first.getEntityView())
+                val ev1 = pop.first.getEntityView()
+                if (iTrimLineCallback != null && ev1 != null) {
+                    iTrimLineCallback!!.onDelete(ev1)
                 }
             } else if (pop.second == EntityAction.DELETE_MULTIPLE) {
                 if (iTrimLineCallback != null) {
                     pop.first.visible(true)
-                    if (pop.first.getEntityView() != null) {
-                        iTrimLineCallback!!.onDelete(pop.first.getEntityView())
+                    val ev2 = pop.first.getEntityView()
+                    if (ev2 != null) {
+                        iTrimLineCallback!!.onDelete(ev2)
                     }
                     if (pop.first.getEntitiesGroup() != null) {
                         for (entity in pop.first.getEntitiesGroup()!!) {
                             entity.visible(true)
-                            if (entity.getEntityView() != null) {
-                                iTrimLineCallback!!.onDelete(entity.getEntityView())
+                            val ev3 = entity.getEntityView()
+                            if (ev3 != null) {
+                                iTrimLineCallback!!.onDelete(ev3)
                             }
                         }
                     }
@@ -3415,7 +3422,8 @@ class TrackEntityView @JvmOverloads constructor(
             } else {
                 pop.first.visible(false)
                 if (pop.first.getEntityView() != null) {
-                    pop.first.getEntityView()!!.isVisible = false
+                    val ev = pop.first.getEntityView()!!
+                    ev.isVisible = false
                     iTrimLineCallback?.onUpdate()
                 }
             }
@@ -3442,20 +3450,23 @@ class TrackEntityView @JvmOverloads constructor(
             val pop = undoEntityList.pop()
             if (pop.second == EntityAction.DELETE) {
                 pop.first.visible(false)
-                if (iTrimLineCallback != null && pop.first.getEntityView() != null) {
-                    iTrimLineCallback!!.onDelete(pop.first.getEntityView())
+                val ev1 = pop.first.getEntityView()
+                if (iTrimLineCallback != null && ev1 != null) {
+                    iTrimLineCallback!!.onDelete(ev1)
                 }
             } else if (pop.second == EntityAction.DELETE_MULTIPLE) {
                 if (iTrimLineCallback != null) {
                     pop.first.visible(false)
-                    if (pop.first.getEntityView() != null) {
-                        iTrimLineCallback!!.onDelete(pop.first.getEntityView())
+                    val ev2 = pop.first.getEntityView()
+                    if (ev2 != null) {
+                        iTrimLineCallback!!.onDelete(ev2)
                     }
                     if (pop.first.getEntitiesGroup() != null) {
                         for (entity in pop.first.getEntitiesGroup()!!) {
                             entity.visible(false)
-                            if (entity.getEntityView() != null) {
-                                iTrimLineCallback!!.onDelete(entity.getEntityView())
+                            val ev3 = entity.getEntityView()
+                            if (ev3 != null) {
+                                iTrimLineCallback!!.onDelete(ev3)
                             }
                         }
                     }
@@ -3495,7 +3506,7 @@ class TrackEntityView @JvmOverloads constructor(
         var i = 0
         val z: Boolean
         if (z2 || z3 || z4) {
-            selectedEntity?.setSelect(false)
+            selectedEntity?.isSelect = false
             var processQuranItemsSelection = if (z2) processQuranItemsSelection() else 0
             if (z3) processQuranItemsSelection += processAudioItemsSelection()
             if (z4) processQuranItemsSelection += processTrslQuranItemsSelection()
@@ -3518,23 +3529,23 @@ class TrackEntityView @JvmOverloads constructor(
         var i = 0
         for (eqt in entityListQuran) {
             if (eqt.visible()) {
-                val isSelect = eqt.isSelect()
-                eqt.setSelect(!isSelect)
+                val isSelect = eqt.isSelect
+                eqt.isSelect = !isSelect
                 eqt.setSelectMultiple(!isSelect)
-                if (eqt.isSelect()) i++
+                if (eqt.isSelect) i++
             }
         }
         if (isExist(bismilahTimeline)) {
-            val isSelect2 = bismilahTimeline!!.isSelect()
-            bismilahTimeline!!.setSelect(!isSelect2)
+            val isSelect2 = bismilahTimeline!!.isSelect
+            bismilahTimeline!!.isSelect = !isSelect2
             bismilahTimeline!!.setSelectMultiple(!isSelect2)
-            if (bismilahTimeline!!.isSelect()) i++
+            if (bismilahTimeline!!.isSelect) i++
         }
         if (isExist(mIsi3adaTimeline)) {
-            val isSelect3 = mIsi3adaTimeline!!.isSelect()
-            mIsi3adaTimeline!!.setSelect(!isSelect3)
+            val isSelect3 = mIsi3adaTimeline!!.isSelect
+            mIsi3adaTimeline!!.isSelect = !isSelect3
             mIsi3adaTimeline!!.setSelectMultiple(!isSelect3)
-            if (mIsi3adaTimeline!!.isSelect()) i++
+            if (mIsi3adaTimeline!!.isSelect) i++
         }
         if (i > 0) clr_btn_quran = CLR_SELECT
         else clr_btn_quran = CLR_BTN_DEFAULT
@@ -3545,10 +3556,10 @@ class TrackEntityView @JvmOverloads constructor(
         var i = 0
         for (etl in entityListTrslQuran) {
             if (etl.visible()) {
-                val isSelect = etl.isSelect()
-                etl.setSelect(!isSelect)
+                val isSelect = etl.isSelect
+                etl.isSelect = !isSelect
                 etl.setSelectMultiple(!isSelect)
-                if (etl.isSelect()) i++
+                if (etl.isSelect) i++
             }
         }
         if (i > 0) clr_btn_trsl = CLR_SELECT
@@ -3560,10 +3571,10 @@ class TrackEntityView @JvmOverloads constructor(
         var i = 0
         for (ea in entityListAudio) {
             if (ea.visible()) {
-                val isSelect = ea.isSelect()
-                ea.setSelect(!isSelect)
+                val isSelect = ea.isSelect
+                ea.isSelect = !isSelect
                 ea.setSelectMultiple(!isSelect)
-                if (ea.isSelect()) i++
+                if (ea.isSelect) i++
             }
         }
         if (i > 0) clr_btn_audio = CLR_SELECT
@@ -3573,19 +3584,19 @@ class TrackEntityView @JvmOverloads constructor(
 
     private fun deselectAllQuranItems(): Boolean {
         var z = false
-        if (isExist(bismilahTimeline) && bismilahTimeline!!.isSelect()) {
-            bismilahTimeline!!.setSelect(false)
+        if (isExist(bismilahTimeline) && bismilahTimeline!!.isSelect) {
+            bismilahTimeline!!.isSelect = false
             bismilahTimeline!!.setSelectMultiple(false)
             z = true
         }
-        if (isExist(mIsi3adaTimeline) && mIsi3adaTimeline!!.isSelect()) {
-            mIsi3adaTimeline!!.setSelect(false)
+        if (isExist(mIsi3adaTimeline) && mIsi3adaTimeline!!.isSelect) {
+            mIsi3adaTimeline!!.isSelect = false
             mIsi3adaTimeline!!.setSelectMultiple(false)
             z = true
         }
         for (eqt in entityListQuran) {
-            if (eqt.visible() && eqt.isSelect()) {
-                eqt.setSelect(false)
+            if (eqt.visible() && eqt.isSelect) {
+                eqt.isSelect = false
                 eqt.setSelectMultiple(false)
                 z = true
             }
@@ -3597,8 +3608,8 @@ class TrackEntityView @JvmOverloads constructor(
     private fun deselectAllTrslQuranItems(): Boolean {
         var z = false
         for (etl in entityListTrslQuran) {
-            if (etl.visible() && etl.isSelect()) {
-                etl.setSelect(false)
+            if (etl.visible() && etl.isSelect) {
+                etl.isSelect = false
                 etl.setSelectMultiple(false)
                 z = true
             }
@@ -3610,8 +3621,8 @@ class TrackEntityView @JvmOverloads constructor(
     private fun deselectAllAudioItems(): Boolean {
         var z = false
         for (ea in entityListAudio) {
-            if (ea.visible() && ea.isSelect()) {
-                ea.setSelect(false)
+            if (ea.visible() && ea.isSelect) {
+                ea.isSelect = false
                 ea.setSelectMultiple(false)
                 z = true
             }

@@ -135,7 +135,7 @@ abstract class BaseActivity : AppCompatActivity() {
      * Acquires a screen-on wake lock so the display stays active.
      * Silently catches any exceptions (e.g. if the window is not attached).
      */
-    fun wakeLockAcquire() {
+    open fun wakeLockAcquire() {
         try {
             window.addFlags(WindowManagerFlags.FLAG_KEEP_SCREEN_ON)
         } catch (_: Exception) {

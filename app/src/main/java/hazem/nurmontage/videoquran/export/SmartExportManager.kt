@@ -7,7 +7,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import com.arthenica.ffmpegkit.ExecuteCallback
+import com.arthenica.ffmpegkit.FFmpegSessionCompleteCallback
 import com.arthenica.ffmpegkit.FFmpegKit
 import com.arthenica.ffmpegkit.LogCallback
 import com.arthenica.ffmpegkit.ReturnCode
@@ -129,7 +129,7 @@ class SmartExportManager(context: Context) {
 
         FFmpegKit.executeAsync(
             ffmpegCommand,
-            ExecuteCallback { session ->
+            FFmpegSessionCompleteCallback { session ->
                 // -- Export session completed --
                 isExporting = false
 

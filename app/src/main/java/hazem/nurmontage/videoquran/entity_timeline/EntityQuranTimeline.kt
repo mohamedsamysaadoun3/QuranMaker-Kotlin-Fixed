@@ -47,6 +47,17 @@ class EntityQuranTimeline(
     private val textBound: Rect = Rect()
 
     // ──────────────────────────────────────────────
+    //  Property overrides
+    // ──────────────────────────────────────────────
+
+    override var right: Float
+        get() = super.right
+        set(value) {
+            super.right = value
+            rect.right = value
+        }
+
+    // ──────────────────────────────────────────────
     //  Initialisation
     // ──────────────────────────────────────────────
 
@@ -59,7 +70,7 @@ class EntityQuranTimeline(
         paintText.textSize = rect.height() * 0.27f
         paintText.typeface = quranEntity.getPaintAya().typeface
         paintText.color = COLOR_AYA
-        paintText.getTextBounds(quranEntity.getTxt(), 0, quranEntity.getTxt().length, textBound)
+        paintText.getTextBounds(quranEntity.getTxt() ?: "", 0, (quranEntity.getTxt() ?: "").length, textBound)
         centerY = rect.top + (rect.height() * 0.5f) + (textBound.height() * 0.5f)
         rectFLeft = RectF(0f, 0f, 0.46f * height, height)
         rectFRight = RectF(0f, 0f, rectFLeft.width(), height)
@@ -86,12 +97,6 @@ class EntityQuranTimeline(
     fun setFile_out(fileOut: String?) { file_out = fileOut }
 
     // ──────────────────────────────────────────────
-    //  Entity reference
-    // ──────────────────────────────────────────────
-
-    fun getQuranEntity(): QuranEntity = quranEntity
-
-    // ──────────────────────────────────────────────
     //  Abstract method implementations
     // ──────────────────────────────────────────────
 
@@ -100,8 +105,6 @@ class EntityQuranTimeline(
     override fun setDownX(downX: Float) { this.downX = downX }
 
     override fun getH(): Float = h
-
-    override fun getLeft(): Float = left
 
     override fun setLastLeft(lastLeft: Float) { this.lastLeft = lastLeft }
 
@@ -113,18 +116,9 @@ class EntityQuranTimeline(
         left = clamped
     }
 
-    override fun getRight(): Float = right
-
-    override fun setRight(right: Float) {
-        this.right = right
-        rect.right = right
-    }
-
     override fun onUpRight() { right = lastRight }
 
     override fun onUpLeft() { left = lastLeft }
-
-    override fun getRect(): RectF = rect
 
     override fun setY(y: Float) {
         rect.top = y
@@ -134,19 +128,17 @@ class EntityQuranTimeline(
 
     override fun draw(canvas: Canvas) {
         canvas.drawText(
-            quranEntity.getTxt().replace(NUMBER_CHAR, "..."),
+            (quranEntity.getTxt() ?: "").replace(NUMBER_CHAR, "..."),
             round + rect.left, centerY, paintText
         )
     }
 
     override fun draw(canvas: Canvas, w: Int, h: Int) {
         canvas.drawText(
-            quranEntity.getTxt().replace(NUMBER_CHAR, "..."),
+            (quranEntity.getTxt() ?: "").replace(NUMBER_CHAR, "..."),
             round + rect.left, centerY, paintText
         )
     }
-
-    override fun setSelect(select: Boolean) { isSelect = select }
 
     override fun onTouch(point: PointF): Boolean {
         selectTrim = null
@@ -163,10 +155,6 @@ class EntityQuranTimeline(
         }
         return true
     }
-
-    override fun getTrimType(): Int = trimType
-
-    override fun getSelectTrim(): RectF? = selectTrim
 
     override fun getDownX(): Float = downX
 

@@ -6,6 +6,7 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import hazem.nurmontage.videoquran.entity_timeline.EntityQuranTimeline
 import hazem.nurmontage.videoquran.model.EntityView
+import android.graphics.Paint
 
 /**
  * Simple text entity rendered on the canvas (chapter headings, labels, etc.).
@@ -18,8 +19,8 @@ import hazem.nurmontage.videoquran.model.EntityView
  */
 class TextEntity : EntityView {
 
-    private var entityQuranTimeline: EntityQuranTimeline? = null
-    private var isVisible: Boolean = false
+    override var entityQuran: EntityQuranTimeline? = null
+    override var isVisible: Boolean = false
     private var paintAya: TextPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
     private var staticLayout: StaticLayout? = null
     private var txt: String? = null
@@ -38,8 +39,8 @@ class TextEntity : EntityView {
         this.txt = txt
         this.x = x
         this.y = y
-        setVisible(true)
-        this.entityQuranTimeline = entityQuran
+        isVisible = true
+        this.entityQuran = entityQuran
     }
 
     /**
@@ -49,7 +50,7 @@ class TextEntity : EntityView {
         this.txt = txt
         this.x = x
         this.y = y
-        setVisible(true)
+        isVisible = true
         this.viewWidth = viewWidth
         paintAya.color = -1 // 0xFFFFFFFF
         paintAya.textSize = viewWidth * 0.06f
@@ -105,9 +106,10 @@ class TextEntity : EntityView {
 
     fun getStaticLayout(): StaticLayout? = staticLayout
 
-    override fun setEntityQuran(entityQuran: EntityQuranTimeline?) {
-        this.entityQuranTimeline = entityQuran
-    }
+    // entityQuran and isVisible are already overridden as properties
+
+    fun getEntityQuranTimeline(): EntityQuranTimeline? = entityQuran
+    fun setEntityQuranTimeline(timeline: EntityQuranTimeline?) { entityQuran = timeline }
 
     // ──────────────────────────────────────────────
     //  Drawing
@@ -128,14 +130,6 @@ class TextEntity : EntityView {
     // ──────────────────────────────────────────────
     //  Accessors
     // ──────────────────────────────────────────────
-
-    override fun getEntityQuran(): EntityQuranTimeline? = entityQuranTimeline
-
-    override fun isVisible(): Boolean = isVisible
-
-    override fun setVisible(visible: Boolean) {
-        isVisible = visible
-    }
 
     fun getX(): Float = x
     fun getY(): Float = y

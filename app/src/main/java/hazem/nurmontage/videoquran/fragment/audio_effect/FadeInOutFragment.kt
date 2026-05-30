@@ -88,7 +88,7 @@ class FadeInOutFragment : Fragment {
         val root: LinearLayout = bind.root
 
         val audio = entityAudio
-        if (audio == null || audio.getMediaPlayer() == null) {
+        if (audio == null || audio.mediaPlayer == null) {
             return root
         }
 
@@ -97,12 +97,12 @@ class FadeInOutFragment : Fragment {
         fadeInSeekBar = root.findViewById(R.id.fadeInSeekBar)
         fadeOutSeekBar = root.findViewById(R.id.fadeOutSeekBar)
 
-        val secondInScreen = audio.getSecondInScreen()
-        val halfDuration = ((audio.getRect().right / secondInScreen) - (audio.getRect().left / secondInScreen)) * 0.5f
+        val secondInScreen = audio.secondInScreen
+        val halfDuration = ((audio.rect.right / secondInScreen) - (audio.rect.left / secondInScreen)) * 0.5f
         fadeInSeekBar?.max = halfDuration.toInt()
         fadeOutSeekBar?.max = halfDuration.toInt()
-        fadeInSeekBar?.progress = audio.getEffectAudio().fade_in
-        fadeOutSeekBar?.progress = audio.getEffectAudio().fade_out
+        fadeInSeekBar?.progress = audio.effectAudio.fade_in
+        fadeOutSeekBar?.progress = audio.effectAudio.fade_out
         hint_fade_in?.text = fadeInSeekBar?.progress.toString()
         hint_fade_out?.text = fadeOutSeekBar?.progress.toString()
 
@@ -133,8 +133,8 @@ class FadeInOutFragment : Fragment {
     private fun done() {
         if (iEditMediaCallback != null) {
             val audio = entityAudio ?: return
-            if (audio.getEffectAudio().fade_in != fadeInSeekBar?.progress ||
-                audio.getEffectAudio().fade_out != fadeOutSeekBar?.progress
+            if (audio.effectAudio.fade_in != fadeInSeekBar?.progress ||
+                audio.effectAudio.fade_out != fadeOutSeekBar?.progress
             ) {
                 applyFade(false, false)
             }
@@ -158,7 +158,7 @@ class FadeInOutFragment : Fragment {
     }
 
     private fun applyFade(applyAll: Boolean, isPreview: Boolean) {
-        val effectAudio = entityAudio?.getEffectAudio() ?: return
+        val effectAudio = entityAudio?.effectAudio ?: return
         val audio = entityAudio ?: return
 
         if (audio.getFadeIn().toInt() == fadeInSeekBar?.progress &&

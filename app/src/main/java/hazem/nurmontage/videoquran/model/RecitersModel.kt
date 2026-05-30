@@ -9,8 +9,8 @@ package hazem.nurmontage.videoquran.model
  */
 data class RecitersModel(
     val identifer: String,
-    surahIdx: Int,
-    ayaNum: Int
+    val surahIdx: Int,
+    val ayaNum: Int
 ) {
     val surah_index: String
     val number_aya: String

@@ -23,13 +23,14 @@ class SimpleProgressViewFragment : Fragment() {
 
     companion object {
         @Volatile
-        @JvmStatic var instance: SimpleProgressViewFragment? = null
+        private var _instance: SimpleProgressViewFragment? = null
 
+        @JvmStatic
         fun getInstance(): SimpleProgressViewFragment {
-            if (instance == null) {
-                instance = SimpleProgressViewFragment()
+            if (_instance == null) {
+                _instance = SimpleProgressViewFragment()
             }
-            return instance!!
+            return _instance!!
         }
     }
 
@@ -52,6 +53,6 @@ class SimpleProgressViewFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         fragmentBinding = null
-        instance = null
+        _instance = null
     }
 }

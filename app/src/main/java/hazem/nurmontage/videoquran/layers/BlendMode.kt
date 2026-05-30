@@ -8,9 +8,9 @@ import android.graphics.Xfermode
  * Includes PorterDuff modes and custom shader modes with GLSL code and FFmpeg filter names.
  */
 enum class BlendMode(
-    val porterDuffMode: PorterDuff.Mode?,
-    val ffmpegFilterName: String,
-    val glslName: String
+    @JvmField val porterDuffMode: PorterDuff.Mode?,
+    @JvmField val ffmpegFilterName: String,
+    @JvmField val glslName: String
 ) {
     // Standard PorterDuff modes
     NORMAL(PorterDuff.Mode.SRC_OVER, "normal", "srcOver"),
@@ -30,26 +30,11 @@ enum class BlendMode(
     LINEAR_BURN(null, "linearburn", "linearBurn");
 
     /**
-     * Get the PorterDuff mode if available, null for shader-only modes.
-     */
-    fun getPorterDuffMode(): PorterDuff.Mode? = porterDuffMode
-
-    /**
      * Get the Xfermode for this blend mode.
      */
     fun getXfermode(): Xfermode? {
         return porterDuffMode?.let { PorterDuffXfermode(it) }
     }
-
-    /**
-     * Get the FFmpeg blend filter name for this mode.
-     */
-    fun getFFmpegFilterName(): String = ffmpegFilterName
-
-    /**
-     * Get the GLSL function name for this blend mode.
-     */
-    fun getGLSLName(): String = glslName
 
     /**
      * Get GLSL shader code for this blend mode.

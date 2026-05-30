@@ -139,7 +139,7 @@ class ColorS_NameFragment : Fragment {
             adapter = ColorAdapter(
                 iColor,
                 Constants.MUSLIM_AYA_COLORS,
-                Utils.indexOf(Constants.MUSLIM_AYA_COLORS, entitySelect!!.getClrS_name())
+                Utils.indexOf(Constants.MUSLIM_AYA_COLORS, entitySelect!!.clrS_name)
             )
             recyclerView?.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
             recyclerView?.itemAnimator = null

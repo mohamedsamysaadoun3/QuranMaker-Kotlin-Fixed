@@ -18,7 +18,7 @@ class SplashscreenActivity : BaseActivity() {
     private lateinit var binding: ActivityFullscreenBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen(this)
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         binding = ActivityFullscreenBinding.inflate(layoutInflater)
         setContentView(binding.root)

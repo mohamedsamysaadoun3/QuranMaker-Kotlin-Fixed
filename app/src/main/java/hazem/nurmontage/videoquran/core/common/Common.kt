@@ -26,6 +26,7 @@ object Common {
 
     val COLOR_BLOCK_AUDIO = Constants.COLOR_BLOCK_AUDIO
     val COLOR_BLOCK_QURAN = Constants.COLOR_BLOCK_QURAN
+    val COLOR_BLOCK_TRANSLATION = Constants.COLOR_BLOCK_TRANSLATION
     val COLOR_WAVE_INT = Constants.COLOR_WAVE_INT
     const val ENHANCE_CMD = Constants.ENHANCE_CMD
     val MUSLIM_COLORS = Constants.MUSLIM_COLORS
@@ -166,3 +167,5 @@ object Common {
         Gradient(-5028051, -19559, -6708)
     )
 }
+    const val COLOR_TRANSLATION = -12345678
+    const val TEMPLATE = "template"

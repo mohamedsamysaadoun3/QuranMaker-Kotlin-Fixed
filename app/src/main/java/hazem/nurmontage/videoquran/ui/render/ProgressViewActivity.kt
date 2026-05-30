@@ -174,7 +174,7 @@ class ProgressViewActivity : BaseActivity() {
      * Falls back to window-flag based screen-on if [PowerManager] is
      * unavailable.
      */
-    private fun wakeLockAcquire() {
+    override fun wakeLockAcquire() {
         try {
             val pm = getSystemService(POWER_SERVICE) as? PowerManager ?: run {
                 // Fallback to BaseActivity's window-flag approach
@@ -235,13 +235,15 @@ class ProgressViewActivity : BaseActivity() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             // Step 1: Download / copy all media assets to local storage
-            prepareAllMedia(template.getEntityMediaList(), null)
+            prepareAllMedia(template.entityMediaList, null)
 
             // Step 2: Detect FFmpeg codecs (callback on main thread)
             withContext(Dispatchers.Main) {
-                FfmpegCodecChecker.detectCodecsAsync { codecInfo ->
-                    setupCommand(codecInfo)
-                }
+                FfmpegCodecChecker.detectCodecsAsync(object : FfmpegCodecChecker.CodecCallback {
+                    override fun onResult(codecInfo: FfmpegCodecChecker.CodecInfo) {
+                        setupCommand(codecInfo)
+                    }
+                })
             }
         }
     }
@@ -380,13 +382,13 @@ class ProgressViewActivity : BaseActivity() {
                     }
                 }
             },
+            null, // Log callback
             StatisticsCallback { stats ->
                 if (stats != null) {
                     statistics = stats
                     updateProgressDialog(stats)
                 }
-            },
-            null // Log callback
+            }
         )
 
         id_ffmpeg.add(session.sessionId)

@@ -16,7 +16,7 @@ import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.model.GallerySelected
 import hazem.nurmontage.videoquran.model.PhotoItem
 import hazem.nurmontage.videoquran.model.VideoItem
-import hazem.nurmontage.videoquran.views.SquareImageView
+import hazem.nurmontage.videoquran.views.image.SquareImageView
 import hazem.nurmontage.videoquran.views.text.TextCustumFont
 
 /**

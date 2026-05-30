@@ -78,7 +78,7 @@ class SpeedFragment : Fragment {
         val root: LinearLayout = bind.root
 
         val audio = entityAudio
-        if (audio == null || audio.getMediaPlayer() == null || iVolumeCallback == null) {
+        if (audio == null || audio.mediaPlayer == null || iVolumeCallback == null) {
             return root
         }
 
@@ -89,7 +89,7 @@ class SpeedFragment : Fragment {
         volumeSeekBar = seekBar
         seekBar.max = 375
 
-        val speed = ((audio.getEffectAudio().speed - 0.25f) / 3.75f * seekBar.max).toInt()
+        val speed = ((audio.effectAudio.speed - 0.25f) / 3.75f * seekBar.max).toInt()
         seekBar.progress = speed
         tvProgress?.text = String.format(Locale.US, "%.2fx", (speed / 375.0f) * 3.75f + 0.25f)
 
@@ -168,7 +168,7 @@ class SpeedFragment : Fragment {
     }
 
     fun applyVolume(applyAll: Boolean) {
-        val effectAudio = entityAudio?.getEffectAudio() ?: return
+        val effectAudio = entityAudio?.effectAudio ?: return
         effectAudio.speed = ((volumeSeekBar?.progress ?: 0) / 375.0f) * 3.75f + 0.25f
 
         val start = effectAudio.start / 1000.0f

@@ -54,7 +54,7 @@ class TranslationQuranEntity : EntityView, Serializable {
     internal var ipad_type: Int = 0
     internal var isFadeIn: Boolean = false
     internal var isFadeOut: Boolean = false
-    internal var isVisible: Boolean = false
+    override var isVisible: Boolean = false
     internal var mPreset: Int = 0
     internal var nameFont: String = FONT_QURAN
     internal var number: Int = 0
@@ -99,7 +99,7 @@ class TranslationQuranEntity : EntityView, Serializable {
         this.number = number
         setCanvasWH(canvasW, canvasH)
         rect = RectF(0f, canvasH.toFloat() - rectF.height(), canvasW.toFloat(), canvasH.toFloat())
-        setVisible(true)
+        isVisible = true
         viewWidth = rectF.width().toInt()
         paintAya.typeface = typeface
         paintAya.color = color
@@ -131,7 +131,7 @@ class TranslationQuranEntity : EntityView, Serializable {
         this.nameFont = fontName
         this.number = number
         rect = rectF
-        setVisible(true)
+        isVisible = true
         viewWidth = rectF.width().toInt()
         paintAya.typeface = typeface
         paintAya.color = color
@@ -158,7 +158,7 @@ class TranslationQuranEntity : EntityView, Serializable {
         this.nameFont = fontName
         this.number = number
         rect = RectF(rectF.left, rectF.top, rectF.right, rectF.bottom)
-        setVisible(true)
+        isVisible = true
         viewWidth = rectF.width().toInt()
         paintAya.typeface = typeface
         paintAya.color = color
@@ -187,7 +187,7 @@ class TranslationQuranEntity : EntityView, Serializable {
         this.nameFont = fontName
         this.number = number
         rect = RectF(rectF.left, rectF.top, rectF.right, rectF.bottom)
-        setVisible(true)
+        isVisible = true
         viewWidth = rectF.width().toInt()
         paintAya.typeface = typeface
         paintAya.color = color
@@ -350,7 +350,7 @@ class TranslationQuranEntity : EntityView, Serializable {
      * Calculates the fade animation duration based on the entity's visible time span.
      */
     fun getDuration_fade(): Int {
-        val quran = getEntityQuran() ?: return 0
+        val quran = entityQuran ?: return 0
         return ((abs(quran.rect.right / quran.secondInScreen) -
                 abs(quran.rect.left / quran.secondInScreen)) * 0.2f * 1000f).toInt()
     }
@@ -567,7 +567,7 @@ class TranslationQuranEntity : EntityView, Serializable {
     }
 
     override fun scale(factor: Float, canvasW: Int, canvasH: Int) {
-        setFactorScale(factor)
+        factorScale = factor
         val height = rect.height() * factor
         val halfW = 0.46f * canvasW
         rect.left = rect.centerX() - halfW
@@ -717,7 +717,7 @@ class TranslationQuranEntity : EntityView, Serializable {
         paintAya.alpha = alpha
         paintAyaTrslOutline.alpha = paintAya.alpha
         paintAyaOutline.alpha = paintAya.alpha
-        if (isAnimTest()) {
+        if (isAnimTest) {
             weakBlurredImageView?.get()?.invalidate()
         } else {
             viewWeakReference?.get()?.invalidate()
@@ -746,23 +746,23 @@ class TranslationQuranEntity : EntityView, Serializable {
 
     fun setSlideX(value: Float) {
         offsetX = value
-        paintAya.alpha = round((1f - abs(value)) * 255f)
+        paintAya.alpha = round((1f - abs(value)) * 255f).toInt()
         paintAyaTrslOutline.alpha = paintAya.alpha
         paintAyaOutline.alpha = paintAya.alpha
-        if (isAnimTest()) weakBlurredImageView?.get()?.invalidate()
+        if (isAnimTest) weakBlurredImageView?.get()?.invalidate()
     }
 
     fun setSlideXOut(value: Float) {
         offsetX = value
-        paintAya.alpha = round((1f - abs(value)) * 255f)
+        paintAya.alpha = round((1f - abs(value)) * 255f).toInt()
         paintAyaTrslOutline.alpha = paintAya.alpha
         paintAyaOutline.alpha = paintAya.alpha
-        if (isAnimTest()) weakBlurredImageView?.get()?.invalidate()
+        if (isAnimTest) weakBlurredImageView?.get()?.invalidate()
     }
 
-    fun setFactorSize(factor: Float) {
+    fun setZoomFactorSize(factor: Float) {
         scaleX = factor
-        if (isAnimTest()) weakBlurredImageView?.get()?.invalidate()
+        if (isAnimTest) weakBlurredImageView?.get()?.invalidate()
     }
 
     // ──────────────────────────────────────────────
@@ -802,7 +802,7 @@ class TranslationQuranEntity : EntityView, Serializable {
     }
 
     fun zoomIn_In(duration: Int, repeat: Boolean) {
-        val anim = ObjectAnimator.ofFloat(this, "FactorSize", 0f, 1f)
+        val anim = ObjectAnimator.ofFloat(this, "ZoomFactorSize", 0f, 1f)
         otherAnimation = anim
         anim.duration = duration.toLong()
         if (repeat) { anim.repeatMode = ObjectAnimator.RESTART; anim.repeatCount = -1 }
@@ -867,8 +867,7 @@ class TranslationQuranEntity : EntityView, Serializable {
     //  EntityView overrides
     // ──────────────────────────────────────────────
 
-    override fun getMaxH(): Int = maxH
-    override fun getMaxW(): Int = maxW
+    // maxH and maxW are already properties from EntityView
 
     fun getStaticLayout(): StaticLayout? = staticLayout
 
@@ -950,13 +949,12 @@ class TranslationQuranEntity : EntityView, Serializable {
     //  Visibility & accessors
     // ──────────────────────────────────────────────
 
-    override fun isVisible(): Boolean = isVisible
-    override fun setVisible(visible: Boolean) { isVisible = visible }
+    // isVisible is already overridden as property above
 
     fun getX(): Float = posX
     fun getY(): Float = posY
 
-    override fun setAnimTest(animTest: Boolean) { super.setAnimTest(animTest) }
+    // isAnimTest is already a property from EntityView
 
     fun setUnderLine(underline: Boolean) { paintAya.isUnderlineText = underline }
 }

@@ -43,7 +43,7 @@ class BismilahEntity : EntityView, Serializable {
     internal var ipadType: Int = 0
     internal var isFadeIn: Boolean = false
     internal var isFadeOut: Boolean = false
-    internal var isVisible: Boolean = false
+    override var isVisible: Boolean = false
     internal var mPreset: Int = 0
     internal var objectAnimator: ObjectAnimator? = null
     internal var offsetX: Float = 0f
@@ -67,7 +67,7 @@ class BismilahEntity : EntityView, Serializable {
     constructor(txt: String, rectF: RectF, typeface: Typeface, color: Int) {
         this.txt = txt
         rect = RectF(rectF.left, rectF.top, rectF.right, rectF.bottom)
-        setVisible(true)
+        isVisible = true
         viewWidth = rectF.width().toInt()
         paintAya.typeface = typeface
         paintAya.color = color
@@ -81,7 +81,7 @@ class BismilahEntity : EntityView, Serializable {
     constructor(txt: String, rectF: RectF, typeface: Typeface, color: Int, preset: Int) {
         this.txt = txt
         rect = RectF(rectF.left, rectF.top, rectF.right, rectF.bottom)
-        setVisible(true)
+        isVisible = true
         viewWidth = rectF.width().toInt()
         paintAya.typeface = typeface
         paintAya.color = color
@@ -253,8 +253,8 @@ class BismilahEntity : EntityView, Serializable {
     }
 
     fun calculateTextSize(): Float {
-        val height = ((rect.height() / getFactorScale()) * 0.85f).toInt()
-        return calculateTextSize(txt, paintAya, ((rect.width() / getFactorScale()) * 0.85f).toInt(), height)
+        val height = ((rect.height() / factorScale) * 0.85f).toInt()
+        return calculateTextSize(txt, paintAya, ((rect.width() / factorScale) * 0.85f).toInt(), height)
     }
 
     fun setTextSize(size: Float) { paintAya.textSize = size }
@@ -274,7 +274,7 @@ class BismilahEntity : EntityView, Serializable {
     fun setupScale(factor: Float, canvasW: Int, canvasH: Int) {
         paintAya.textSize = factor * canvasW
         val spannable = SpannableString(txt)
-        viewWidth = maxOf(rect.width(), paintAya.measureText(spannable.toString()).roundToInt())
+        viewWidth = maxOf(rect.width().toInt(), paintAya.measureText(spannable.toString()).toInt())
         val layout = buildStaticLayout(spannable, paintAya, viewWidth)
         staticLayout = layout
         val w = layout.width
@@ -302,7 +302,7 @@ class BismilahEntity : EntityView, Serializable {
     }
 
     override fun scale(factor: Float, canvasW: Int, canvasH: Int) {
-        setFactorScale(factor)
+        factorScale = factor
         val w = rect.width() * factor
         val h = rect.height() * factor
         val halfW = w * 0.5f
@@ -405,7 +405,7 @@ class BismilahEntity : EntityView, Serializable {
     fun setOpacityFade(alpha: Int) {
         paintAya.alpha = alpha
         paintAyaOutline.alpha = paintAya.alpha
-        if (isAnimTest()) {
+        if (isAnimTest) {
             weakBlurredImageView?.get()?.invalidate()
         } else {
             viewWeakReference?.get()?.invalidate()
@@ -435,19 +435,19 @@ class BismilahEntity : EntityView, Serializable {
         offsetX = value
         paintAya.alpha = ((1f - Math.abs(value)) * 255f).roundToInt()
         paintAyaOutline.alpha = paintAya.alpha
-        if (isAnimTest()) weakBlurredImageView?.get()?.invalidate()
+        if (isAnimTest) weakBlurredImageView?.get()?.invalidate()
     }
 
     fun setSlideXOut(value: Float) {
         offsetX = value
         paintAya.alpha = ((1f - Math.abs(value)) * 255f).roundToInt()
         paintAyaOutline.alpha = paintAya.alpha
-        if (isAnimTest()) weakBlurredImageView?.get()?.invalidate()
+        if (isAnimTest) weakBlurredImageView?.get()?.invalidate()
     }
 
-    fun setFactorSize(factor: Float) {
+    fun setZoomFactorSize(factor: Float) {
         scaleX = factor
-        if (isAnimTest()) weakBlurredImageView?.get()?.invalidate()
+        if (isAnimTest) weakBlurredImageView?.get()?.invalidate()
     }
 
     // ──────────────────────────────────────────────
@@ -487,7 +487,7 @@ class BismilahEntity : EntityView, Serializable {
     }
 
     fun zoomInIn(duration: Int, repeat: Boolean) {
-        val anim = ObjectAnimator.ofFloat(this, "FactorSize", 0f, 1f)
+        val anim = ObjectAnimator.ofFloat(this, "ZoomFactorSize", 0f, 1f)
         otherAnimation = anim
         anim.duration = duration.toLong()
         if (repeat) { anim.repeatMode = ObjectAnimator.RESTART; anim.repeatCount = -1 }
@@ -612,8 +612,7 @@ class BismilahEntity : EntityView, Serializable {
     //  Visibility & accessors
     // ──────────────────────────────────────────────
 
-    override fun isVisible(): Boolean = isVisible
-    override fun setVisible(visible: Boolean) { isVisible = visible }
+    // isVisible is already overridden as property above
 
     fun getX(): Float = posX
     fun getY(): Float = posY

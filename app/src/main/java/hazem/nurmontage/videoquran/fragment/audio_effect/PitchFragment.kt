@@ -71,7 +71,7 @@ class PitchFragment : Fragment {
         val root: LinearLayout = bind.root
 
         val audio = entityAudio
-        if (audio == null || audio.getMediaPlayer() == null) {
+        if (audio == null || audio.mediaPlayer == null) {
             return root
         }
 

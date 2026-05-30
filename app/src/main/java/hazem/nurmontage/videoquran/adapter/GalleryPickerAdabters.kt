@@ -15,7 +15,7 @@ import com.bumptech.glide.signature.ObjectKey
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.model.GallerySelected
 import hazem.nurmontage.videoquran.model.PhotoItem
-import hazem.nurmontage.videoquran.views.SquareImageView
+import hazem.nurmontage.videoquran.views.image.SquareImageView
 
 /**
  * RecyclerView adapter for displaying photo items in a grid gallery picker.

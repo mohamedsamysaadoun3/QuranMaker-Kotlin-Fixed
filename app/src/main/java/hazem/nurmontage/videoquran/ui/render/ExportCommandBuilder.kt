@@ -5,7 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.RectF
-import hazem.nurmontage.videoquran.constant.IpadType
+import hazem.nurmontage.videoquran.core.common.Constants.IpadType
 import hazem.nurmontage.videoquran.model.EntityMedia
 import hazem.nurmontage.videoquran.model.SquareBitmapModel
 import hazem.nurmontage.videoquran.model.Template
@@ -77,13 +77,15 @@ object ExportCommandBuilder {
     fun slideX(start: Float, duration: Float, offset: Float, scale: Float, from: Float, to: Float): String {
         val t = "clip((t-$start)/$duration,0,1)"
         val smooth = "($t*$t*(3-2*$t))"
-        return "'$offset+((${from}+(${to - $from})*$smooth)*$scale)'"
+        val diff = to - from
+        return "'$offset+((${from}+(${diff})*$smooth)*$scale)'"
     }
 
     fun mSlideX(start: Float, duration: Float, offset: Float, scale: Float, from: Float, to: Float): String {
         val t = "clip((t-$start)/$duration,0,1)"
         val smooth = "($t*$t*(3-2*$t))"
-        return "$offset+((${from}+(${to - $from})*$smooth)*$scale)"
+        val diff = to - from
+        return "$offset+((${from}+(${diff})*$smooth)*$scale)"
     }
 
     // ════════════════════════════════════════════════════════════════════
@@ -199,7 +201,7 @@ object ExportCommandBuilder {
     ): Pair<Array<String>, String> {
         val outputPath = "${template.folder_template}/timer.mov"
         val maxSeconds = max(durationMs / 1000, 1)
-        val timeModel = template.mTimeModel
+        val timeModel = template.mTimeModel ?: return Pair(emptyArray(), "")
         val fontPath = "${template.folder_template}/NotoNaskhArabic.ttf"
         val bgColor = if (ColorUtils.isColorDark(android.graphics.Color.parseColor(timeModel.color))) "black@0" else "white@0"
 
@@ -415,8 +417,8 @@ object ExportCommandBuilder {
         // ── Apply fade effects on each segment ──
         val mediaList = template.entityMediaList
         for ((index, media) in mediaList.withIndex()) {
-            val fadeIn = media.fadeIn
-            val fadeOut = media.fadeOut
+            val fadeIn = media.duration_fade_in
+            val fadeOut = media.duration_fade_out
             if (fadeIn > 0f) {
                 filterBuilder.insert(0, fadeFilter(index + 1, 0f, fadeIn, true))
             }
@@ -569,7 +571,7 @@ object ExportCommandBuilder {
         timerInputIndex: Int,
         lastLabel: String
     ): String {
-        val posY = template.height - template.mTimeModel.height_bitmap_progress
+        val posY = template.height - (template.mTimeModel?.height_bitmap_progress ?: 0)
         return "[$lastLabel][$timerInputIndex:v]overlay=0:$posY:format=auto[timer];"
     }
 
@@ -585,13 +587,13 @@ object ExportCommandBuilder {
         sb.append("[$inputIndex:v]scale=$w:$h:force_original_aspect_ratio=increase,")
         sb.append("crop=$w:$h:(iw-$w)/2:(ih-$h)/2")
 
-        if (media.fadeIn > 0f) {
-            sb.append(",${mFadeFilter(0f, media.fadeIn, true)}")
+        if (media.duration_fade_in > 0f) {
+            sb.append(",${mFadeFilter(0f, media.duration_fade_in, true)}")
         }
-        if (media.fadeOut > 0f) {
-            val endTimeSec = (media.end - media.start) / 1000f - media.fadeOut
+        if (media.duration_fade_out > 0f) {
+            val endTimeSec = (media.end - media.start) / 1000f - media.duration_fade_out
             if (endTimeSec > 0f) {
-                sb.append(",${mFadeFilter(endTimeSec, media.fadeOut, false)}")
+                sb.append(",${mFadeFilter(endTimeSec, media.duration_fade_out, false)}")
             }
         }
 

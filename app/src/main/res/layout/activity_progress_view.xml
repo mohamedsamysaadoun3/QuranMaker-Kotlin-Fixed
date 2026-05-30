@@ -68,7 +68,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:text="@string/tv_error"/>
-        <hazem.nurmontage.videoquran.views.widget.ButtonCustumFont
+        <hazem.nurmontage.videoquran.views.ButtonCustumFont
             android:textSize="14sp"
             android:textColor="#ff030904"
             android:id="@+id/btn_support_team"

@@ -130,8 +130,8 @@ class CropViewHint @JvmOverloads constructor(
                     cropRect = rect
                     radius = Math.min(rect.width(), rect.height()) * 0.10800001f
                     arrowHeadSize = (bmp.width * 0.1f).toInt()
-                    endX = width - ipad.width
-                    endY = y_bitmap + bmp.height
+                    endX = (width - ipad.width).toFloat()
+                    endY = (y_bitmap + bmp.height).toFloat()
                     val height2 = ipad.height * 0.28f
                     val width2 = ipad.width * 0.3f
                     endLineY_arrow = endY + height2

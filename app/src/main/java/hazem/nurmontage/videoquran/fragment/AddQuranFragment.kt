@@ -21,11 +21,11 @@ import hazem.nurmontage.videoquran.adapter.IconQuranAdabters
 import hazem.nurmontage.videoquran.databinding.FragmentAddQuranBinding
 import hazem.nurmontage.videoquran.model.RecitersModel
 import hazem.nurmontage.videoquran.utils.LocaleHelper
-import hazem.nurmontage.videoquran.utils.MyPrefereces
+import hazem.nurmontage.videoquran.utils.MyPreferences
 import hazem.nurmontage.videoquran.utils.NetworkUtils
 import hazem.nurmontage.videoquran.utils.QuranPreference
 import hazem.nurmontage.videoquran.utils.QuranReader
-import hazem.nurmontage.videoquran.views.widget.CheckboxCustumFont
+import hazem.nurmontage.videoquran.views.CheckboxCustumFont
 import hazem.nurmontage.videoquran.views.text.TextCustumFont
 
 /**
@@ -45,7 +45,7 @@ import hazem.nurmontage.videoquran.views.text.TextCustumFont
  * - Bismillah inclusion checkbox
  * - Upload recitation support (custom audio + reader name)
  * - Recursive ayah processing with automatic chunk splitting
- * - State persistence via QuranPreference and MyPrefereces
+ * - State persistence via QuranPreference and MyPreferences
  *
  * Originally: AddQuranFragment.java (616 lines)
  */
@@ -308,7 +308,7 @@ class AddQuranFragment : Fragment {
 
             val checkbox = root.findViewById<CheckboxCustumFont>(R.id.checkbox)
             includeBismilah = checkbox
-            checkbox.isChecked = MyPrefereces.isIncludeBismilah(requireContext())
+            checkbox.isChecked = MyPreferences.isIncludeBismilah(requireContext())
 
             root.findViewById<View>(R.id.add_bismilah).setOnClickListener {
                 includeBismilah?.isChecked = !(includeBismilah?.isChecked ?: false)
@@ -454,7 +454,7 @@ class AddQuranFragment : Fragment {
 
         val iconList = arrayListOf("hafes", "shamerli", "nour_hode", "amiri")
         val adapter = IconQuranAdabters(
-            iconQuranCallback, iconList, MyPrefereces.getLastIconIndex(requireContext())
+            iconQuranCallback, iconList, MyPreferences.getLastIconIndex(requireContext())
         )
         iconQuranAdabters = adapter
         icon = iconList[adapter.getSelect()]
@@ -476,7 +476,7 @@ class AddQuranFragment : Fragment {
     override fun onResume() {
         super.onResume()
         try {
-            if (NetworkUtils.isNetworkAvailable(context)) {
+            if (NetworkUtils.isNetworkAvailable(requireContext())) {
                 spinnerReciters?.visibility = View.VISIBLE
                 spinnerReciters?.isEnabled = true
                 layoutConnection?.visibility = View.GONE
@@ -717,10 +717,10 @@ class AddQuranFragment : Fragment {
             spinnerTranslation?.selectedItemPosition ?: 0
         )
         try {
-            MyPrefereces.putIndexLastIcon(requireContext(), iconQuranAdabters?.getSelect() ?: 0)
+            MyPreferences.putIndexLastIcon(requireContext(), iconQuranAdabters?.getSelect() ?: 0)
         } catch (_: Exception) {}
         try {
-            MyPrefereces.putIncludeBismilah(requireContext(), includeBismilah?.isChecked ?: false)
+            MyPreferences.putIncludeBismilah(requireContext(), includeBismilah?.isChecked ?: false)
         } catch (_: Exception) {}
     }
 

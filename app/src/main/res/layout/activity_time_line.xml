@@ -73,7 +73,7 @@
                     android:src="@drawable/arrow_spinner"
                     android:scaleType="centerInside"/>
             </LinearLayout>
-            <hazem.nurmontage.videoquran.views.widget.ButtonCustumFont
+            <hazem.nurmontage.videoquran.views.ButtonCustumFont
                 android:textSize="12sp"
                 android:textColor="#ffffffff"
                 android:layout_gravity="end"

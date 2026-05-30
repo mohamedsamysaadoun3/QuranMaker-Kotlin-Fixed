@@ -48,7 +48,7 @@ class EntityAudio : Entity {
     internal var isStartFadeOut: Boolean = false
     internal var lastLeft: Float = 0f
     internal var lastRight: Float = 0f
-    var mediaPlayer: MediaPlayer? = null
+    internal var mediaPlayer: MediaPlayer? = null
     internal var minDuration: Int = 0
     internal var objectAnimator: ObjectAnimator? = null
     internal var paintLine: Paint? = null
@@ -59,11 +59,23 @@ class EntityAudio : Entity {
     internal var pathsHttp: MutableList<String>? = null
     internal var renderer: WaveformBitmapRenderer? = null
     internal var scaleEffect: Float = 0f
-    internal var secondInScreen: Float = 0f
     internal var tmpOffset: Float = 0f
     internal var uri: Uri? = null
     internal var videoPath: String? = null
     var waveformValues: ByteArray? = null
+
+    // ── Property overrides ───────────────────────────────────────────
+
+    override var secondInScreen: Float
+        get() = super.secondInScreen * scaleFactor
+        set(value) { super.secondInScreen = value }
+
+    override var right: Float
+        get() = super.right
+        set(value) {
+            super.right = value
+            rect.right = value
+        }
 
     // ── Constructors ─────────────────────────────────────────────────
 
@@ -83,12 +95,12 @@ class EntityAudio : Entity {
     ) : super(secondInScreen) {
         this.effectAudio = EffectAudio()
         setOffsetRight(offsetRight)
-        setOffset(offset)
+        this.offset = offset
         setOffsetLeft(offsetLeft)
         this.duration = durationSec * 1000
         this.end = durationSec.toFloat()
         this.secondInScreen = secondInScreen
-        setVisible(true)
+        isVisible = true
         this.uri = uri
         this.max = max
         this.h = h
@@ -112,11 +124,11 @@ class EntityAudio : Entity {
     ) : super(secondInScreen) {
         this.effectAudio = EffectAudio()
         setOffsetRight(0f)
-        setOffset(0f)
+        this.offset = 0f
         this.duration = durationSec * 1000
         this.end = durationSec.toFloat()
         this.secondInScreen = secondInScreen
-        setVisible(true)
+        isVisible = true
         this.uri = uri
         this.max = max
         this.h = h
@@ -153,15 +165,13 @@ class EntityAudio : Entity {
 
     // ── EffectAudio delegation ───────────────────────────────────────
 
-    fun getEffectAudio(): EffectAudio = effectAudio
-
     fun updateEffect() {
         effectAudio.start = start
         effectAudio.end = end
         effectAudio.duration = (end - start).toInt()
     }
 
-    fun setEffectAudio(newEffect: EffectAudio?) {
+    fun copyEffectAudio(newEffect: EffectAudio?) {
         if (newEffect == null) return
         effectAudio.reverbPreset = newEffect.reverbPreset
         effectAudio.speed = newEffect.speed
@@ -178,11 +188,6 @@ class EntityAudio : Entity {
         effectAudio.isEnhance = newEffect.isEnhance
         effectAudio.reverbPreset_index_list = newEffect.reverbPreset_index_list
     }
-
-    // ── MediaPlayer ──────────────────────────────────────────────────
-
-    fun setMediaPlayer(mp: MediaPlayer?) { mediaPlayer = mp }
-    fun getMediaPlayer(): MediaPlayer? = mediaPlayer
 
     // ── FFmpeg paths ─────────────────────────────────────────────────
 
@@ -300,13 +305,7 @@ class EntityAudio : Entity {
     //  Entity overrides — position, trim, hit-test
     // ══════════════════════════════════════════════════════════════════
 
-    override fun setSecondInScreen(sis: Float) { this.secondInScreen = sis }
-
-    override fun getSecondInScreen(): Float = secondInScreen * getScaleFactor()
-
     override fun getH(): Float = h
-
-    override fun getLeft(): Float = left
 
     override fun setLastLeft(ll: Float) { lastLeft = ll }
     override fun setLastRight(lr: Float) { lastRight = lr }
@@ -317,32 +316,20 @@ class EntityAudio : Entity {
         rect.left = clamped
     }
 
-    override fun getRight(): Float = right
-
-    override fun setRight(r: Float) {
-        rect.right = r
-        right = r
-    }
-
     override fun setY(y: Float) {
         rect.top = y
         rect.bottom = h + rect.top
     }
 
-    override fun getRect(): RectF = rect
-
+    override fun setDownX(downX: Float) { this.downX = downX }
     override fun getDownX(): Float = downX
-
-    override fun getTrimType(): Int = trimType
-
-    override fun getSelectTrim(): RectF? = selectTrim
 
     // ── Trim logic ───────────────────────────────────────────────────
 
     override fun onUpRight() {
-        val round = (Math.round(getRect().right / getSecondInScreen()) * 1000).toFloat() - getOnTapTime()
+        val round = (Math.round(rect.right / secondInScreen) * 1000).toFloat() - getOnTapTime()
         setOffsetRight(
-            ((getRect().left / getScaleFactor()) - getOffsetLeft()) + getMax() - (getRect().right / getScaleFactor())
+            ((rect.left / scaleFactor) - getOffsetLeft()) + max - (rect.right / scaleFactor)
         )
         end += round
         if (end > duration) end = duration.toFloat()
@@ -350,13 +337,13 @@ class EntityAudio : Entity {
     }
 
     override fun updateStartTrim() {
-        tmpOffset = Math.abs(getRect().left / getScaleFactor()) - Math.abs(getOnDown() / getScaleFactor())
+        tmpOffset = Math.abs(rect.left / scaleFactor) - Math.abs(getOnDown() / scaleFactor)
     }
 
     override fun onUpLeft() {
         start = Math.round(
-            (Math.abs(Math.round((getRect().left / getSecondInScreen()) * 1000f)) - getOnTapTime()).toFloat() + start
-        )
+            (Math.abs(Math.round((rect.left / secondInScreen) * 1000f)) - getOnTapTime()).toFloat() + start
+        ).toFloat()
         setOffsetLeft(getOffsetLeft() + tmpOffset)
         tmpOffset = 0f
         if (start < minDuration) start = minDuration.toFloat()
@@ -387,21 +374,17 @@ class EntityAudio : Entity {
         return isSelect
     }
 
-    // ── Selection ────────────────────────────────────────────────────
-
-    override fun setSelect(select: Boolean) { isSelect = select }
-
     // ── Split ────────────────────────────────────────────────────────
 
     fun split(cursorX: Float): EntityAudio {
         return EntityAudio(
-            null, uri, cursorX, getRect().top, h, getRect().right,
-            ((getRect().right / getScaleFactor()) + getOffsetRight()) - (cursorX / getScaleFactor()),
-            getSecondInScreen(), (duration / 1000), 0f, 0f, 0f
+            null, uri, cursorX, rect.top, h, rect.right,
+            ((rect.right / scaleFactor) + getOffsetRight()) - (cursorX / scaleFactor),
+            secondInScreen, (duration / 1000), 0f, 0f, 0f
         ).also { split ->
             split.setFadeOut(getFadeOut())
             split.setFadeIn(getFadeIn())
-            split.getRect().bottom = getRect().bottom
+            split.rect.bottom = rect.bottom
         }
     }
 
@@ -411,8 +394,8 @@ class EntityAudio : Entity {
 
     private fun drawWave(canvas: Canvas, rect: RectF) {
         if (amps == null || renderer == null) return
-        val offset = getOffset() + getOffsetLeft() + tmpOffset
-        renderer!!.draw(canvas, rect, getScaleFactor() + scaleEffect, offset)
+        val offset = offset + getOffsetLeft() + tmpOffset
+        renderer!!.draw(canvas, rect, scaleFactor + scaleEffect, offset)
     }
 
     override fun draw(canvas: Canvas, w: Int, h: Int) {
@@ -423,16 +406,9 @@ class EntityAudio : Entity {
         try { drawWave(canvas, rect) } catch (_: Exception) {}
     }
 
-    // ── Visibility ───────────────────────────────────────────────────
+    // ── Visibility helper ────────────────────────────────────────────
 
-    fun isVisible(): Boolean = isVisible
-
-    override fun setVisible(visible: Boolean) { isVisible = visible }
-
-    // ── Max ──────────────────────────────────────────────────────────
-
-    fun setMax(max: Float) { this.max = max }
-    fun getMax(): Float = max
+    fun isEntityVisible(): Boolean = isVisible
 
     // ── Start/End overrides ──────────────────────────────────────────
 

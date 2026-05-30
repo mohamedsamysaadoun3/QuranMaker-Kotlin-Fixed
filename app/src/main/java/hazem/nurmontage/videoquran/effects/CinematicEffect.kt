@@ -164,28 +164,5 @@ class CinematicEffect {
         return "0x%02X%02X%02X%02X".format(a, r, g, b)
     }
 
-    // === Getters and Setters (kept for Java interop) ===
-
-    fun getName(): String = name
-    fun setName(name: String) { this.name = name }
-    fun getShadowColor(): Int = shadowColor
-    fun setShadowColor(shadowColor: Int) { this.shadowColor = shadowColor }
-    fun getShadowOffsetX(): Int = shadowOffsetX
-    fun setShadowOffsetX(shadowOffsetX: Int) { this.shadowOffsetX = shadowOffsetX }
-    fun getShadowOffsetY(): Int = shadowOffsetY
-    fun setShadowOffsetY(shadowOffsetY: Int) { this.shadowOffsetY = shadowOffsetY }
-    fun getShadowBlur(): Int = shadowBlur
-    fun setShadowBlur(shadowBlur: Int) { this.shadowBlur = shadowBlur }
-    fun getGlowColor(): Int = glowColor
-    fun setGlowColor(glowColor: Int) { this.glowColor = glowColor }
-    fun getGlowRadius(): Int = glowRadius
-    fun setGlowRadius(glowRadius: Int) { this.glowRadius = glowRadius }
-    fun getGlowOpacity(): Int = glowOpacity
-    fun setGlowOpacity(glowOpacity: Int) { this.glowOpacity = glowOpacity }
-    fun getDepthLayers(): Int = depthLayers
-    fun setDepthLayers(depthLayers: Int) { this.depthLayers = depthLayers }
-    fun getDepthSpread(): Float = depthSpread
-    fun setDepthSpread(depthSpread: Float) { this.depthSpread = depthSpread }
-    fun isEnabled(): Boolean = enabled
-    fun setEnabled(enabled: Boolean) { this.enabled = enabled }
+    // Kotlin properties auto-generate JVM getters/setters; no explicit accessors needed
 }

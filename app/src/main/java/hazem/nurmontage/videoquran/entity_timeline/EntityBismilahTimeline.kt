@@ -47,6 +47,17 @@ class EntityBismilahTimeline(
     private val textBound: Rect = Rect()
 
     // ──────────────────────────────────────────────
+    //  Property overrides
+    // ──────────────────────────────────────────────
+
+    override var right: Float
+        get() = super.right
+        set(value) {
+            super.right = value
+            rect.right = value
+        }
+
+    // ──────────────────────────────────────────────
     //  Initialisation
     // ──────────────────────────────────────────────
 
@@ -86,12 +97,6 @@ class EntityBismilahTimeline(
     fun setFile_out(fileOut: String?) { file_out = fileOut }
 
     // ──────────────────────────────────────────────
-    //  Entity reference
-    // ──────────────────────────────────────────────
-
-    fun getQuranEntity(): BismilahEntity = quranEntity
-
-    // ──────────────────────────────────────────────
     //  Abstract method implementations
     // ──────────────────────────────────────────────
 
@@ -100,8 +105,6 @@ class EntityBismilahTimeline(
     override fun setDownX(downX: Float) { this.downX = downX }
 
     override fun getH(): Float = h
-
-    override fun getLeft(): Float = left
 
     override fun setLastLeft(lastLeft: Float) { this.lastLeft = lastLeft }
 
@@ -113,18 +116,9 @@ class EntityBismilahTimeline(
         left = clamped
     }
 
-    override fun getRight(): Float = right
-
-    override fun setRight(right: Float) {
-        this.right = right
-        rect.right = right
-    }
-
     override fun onUpRight() { right = lastRight }
 
     override fun onUpLeft() { left = lastLeft }
-
-    override fun getRect(): RectF = rect
 
     override fun setY(y: Float) {
         rect.top = y
@@ -146,8 +140,6 @@ class EntityBismilahTimeline(
         )
     }
 
-    override fun setSelect(select: Boolean) { isSelect = select }
-
     override fun onTouch(point: PointF): Boolean {
         selectTrim = null
         downX = point.x
@@ -163,10 +155,6 @@ class EntityBismilahTimeline(
         }
         return true
     }
-
-    override fun getTrimType(): Int = trimType
-
-    override fun getSelectTrim(): RectF? = selectTrim
 
     override fun getDownX(): Float = downX
 

@@ -26,7 +26,7 @@ import hazem.nurmontage.videoquran.views.TypefaceCache
  *
  * @see TypefaceCache
  */
-class TextCustumFont : AppCompatTextView {
+open class TextCustumFont : AppCompatTextView {
 
     constructor(context: Context) : super(context) { init() }
 

@@ -15,7 +15,7 @@ import com.arthenica.ffmpegkit.FFmpegSessionCompleteCallback
 import com.arthenica.ffmpegkit.ReturnCode
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.core.base.BaseActivity
-import hazem.nurmontage.videoquran.core.common.Common
+import hazem.nurmontage.videoquran.core.common.Constants
 import hazem.nurmontage.videoquran.ui.engine.EngineActivity
 import hazem.nurmontage.videoquran.ui.home.WorkUserActivity
 import hazem.nurmontage.videoquran.utils.AudioUploadHelper
@@ -31,9 +31,9 @@ import java.io.InputStream
  * Converted to: ShareWithMeActivity.kt — full logic match with JADX source
  *
  * Accepts SEND intent with the following MIME types:
- *   - image/* — Image files (backgrounds, overlays)
- *   - audio/* — Audio files (recitations, nasheeds)
- *   - video/* — Video files (extracts audio track via FFmpeg, then uses as background)
+ *   - image (all types) — Image files (backgrounds, overlays)
+ *   - audio (all types) — Audio files (recitations, nasheeds)
+ *   - video (all types) — Video files (extracts audio track via FFmpeg, then uses as background)
  *
  * Flow:
  *   1. Receives the shared content URI from the intent
@@ -64,10 +64,10 @@ class ShareWithMeActivity : BaseActivity() {
         insetsController.isAppearanceLightStatusBars = true
         insetsController.isAppearanceLightNavigationBars = true
 
-        progressBar = findViewById(R.id.progressHorizontal)
+        progressBar = findViewById(R.id.progress_horizontal)
 
         // Clean up any previous template data
-        LocalPersistence.deleteTemplate(this, Common.TEMPLATE_TMP)
+        LocalPersistence.deleteTemplate(this, Constants.TEMPLATE_TMP)
 
         // Route the intent to the appropriate handler
         handleIntent(intent)
@@ -87,7 +87,7 @@ class ShareWithMeActivity : BaseActivity() {
         }
 
         // Clean up any previous temporary template
-        LocalPersistence.deleteTemplate(this, Common.TEMPLATE_TMP)
+        LocalPersistence.deleteTemplate(this, Constants.TEMPLATE_TMP)
 
         when {
             type.startsWith("image/") -> handleImg(intent)
@@ -297,23 +297,5 @@ class ShareWithMeActivity : BaseActivity() {
     //  BaseActivity compat methods
     // ═══════════════════════════════════════════════
 
-    /**
-     * Sets the status bar color.
-     * Delegates to BaseActivity if available, otherwise uses window directly.
-     */
-    private fun setStatusBarColor(color: Int) {
-        try {
-            window.statusBarColor = color
-        } catch (_: Exception) {}
-    }
-
-    /**
-     * Sets the navigation bar color.
-     * Delegates to BaseActivity if available, otherwise uses window directly.
-     */
-    private fun setNavigationBarColor(color: Int) {
-        try {
-            window.navigationBarColor = color
-        } catch (_: Exception) {}
-    }
+    // setStatusBarColor and setNavigationBarColor inherited from BaseActivity
 }

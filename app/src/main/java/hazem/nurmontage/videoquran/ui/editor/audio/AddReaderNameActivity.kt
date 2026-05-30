@@ -1,6 +1,7 @@
 package hazem.nurmontage.videoquran.ui.editor.audio
 
 import android.content.Intent
+import hazem.nurmontage.videoquran.views.EditTextCustumFont
 import android.os.Bundle
 import android.widget.Toast
 import hazem.nurmontage.videoquran.R

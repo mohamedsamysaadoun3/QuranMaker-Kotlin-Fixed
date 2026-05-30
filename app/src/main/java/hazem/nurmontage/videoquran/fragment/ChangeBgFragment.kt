@@ -110,7 +110,7 @@ class ChangeBgFragment : Fragment {
     private fun setupRecycler() {
         val bgData = getBgData()
         adapter = BgAdapter(
-            AppUtils.getAppVersionName(context),
+            AppUtils.getAppVersionName(requireContext()),
             callback,
             bgData,
             (ScreenUtils.getScreenWidth(requireActivity()) * 0.2f).toInt(),

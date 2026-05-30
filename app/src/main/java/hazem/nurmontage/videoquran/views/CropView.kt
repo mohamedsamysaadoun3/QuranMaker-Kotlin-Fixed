@@ -10,7 +10,6 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import androidx.appcompat.widget.AppCompatView
 
 /**
  * Custom view that displays a bitmap with a movable crop region overlay.
@@ -27,7 +26,7 @@ class CropView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : AppCompatView(context, attrs, defStyleAttr) {
+) : View(context, attrs, defStyleAttr) {
 
     /** The source bitmap to crop. */
     var bitmap: Bitmap? = null

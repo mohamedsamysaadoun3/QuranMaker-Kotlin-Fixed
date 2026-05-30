@@ -44,8 +44,8 @@ class TransitionEntityAdabters(
      * this adapter should import it from there.
      */
     interface ITransition {
-        fun in(type: String, entity: EntityQuranTimeline)
-        fun out(type: String, entity: EntityQuranTimeline)
+        fun `in`(type: String, entity: EntityQuranTimeline)
+        fun `out`(type: String, entity: EntityQuranTimeline)
         fun applyAll(index: Int, entity: EntityQuranTimeline)
         fun destroy(entity: EntityQuranTimeline)
         fun onHideFragment(entity: EntityQuranTimeline)
@@ -132,9 +132,9 @@ class TransitionEntityAdabters(
 
                 val item = list[pos]
                 if (type == "in") {
-                    iTransition.in(item.type, entityQuranTimeline)
+                    iTransition.`in`(item.type, entityQuranTimeline)
                 } else if (type == "out") {
-                    iTransition.out(item.type, entityQuranTimeline)
+                    iTransition.`out`(item.type, entityQuranTimeline)
                 }
             }
         }

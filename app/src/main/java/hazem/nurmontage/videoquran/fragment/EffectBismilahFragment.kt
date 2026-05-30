@@ -91,7 +91,7 @@ class EffectBismilahFragment : Fragment {
         this.resourcesRef = resources
         this.iTransition = iTransition
         this.transition = transition
-        this.time = (entityBismilahTimeline.getRect().width() / entityBismilahTimeline.getSecondInScreen()) * 0.5f
+        this.time = (entityBismilahTimeline.rect.width() / entityBismilahTimeline.secondInScreen) * 0.5f
         this.entityQuranTimeline = entityBismilahTimeline
     }
 
@@ -307,12 +307,12 @@ class EffectBismilahFragment : Fragment {
                         iTransition?.updateDurationIn(tr.duration_in, entityQuranTimeline!!)
                         btnUnEffect?.setBackgroundResource(R.drawable.circle_effect)
                     } else {
-                        entityQuranTimeline?.getQuranEntity()?.endAnimator()
+                        entityQuranTimeline?.quranEntity?.endAnimator()
                         invisibleSeekbar()
                         btnUnEffect?.setBackgroundResource(R.drawable.circle_item_menu_select)
                     }
                 } else {
-                    entityQuranTimeline?.getQuranEntity()?.endAnimator()
+                    entityQuranTimeline?.quranEntity?.endAnimator()
                     invisibleSeekbar()
                     btnUnEffect?.setBackgroundResource(R.drawable.circle_item_menu_select)
                 }
@@ -335,12 +335,12 @@ class EffectBismilahFragment : Fragment {
                         iTransition?.updateDurationOut(tr.duration_out, entityQuranTimeline!!)
                         btnUnEffect?.setBackgroundResource(R.drawable.circle_effect)
                     } else {
-                        entityQuranTimeline?.getQuranEntity()?.endAnimator()
+                        entityQuranTimeline?.quranEntity?.endAnimator()
                         invisibleSeekbar()
                         btnUnEffect?.setBackgroundResource(R.drawable.circle_item_menu_select)
                     }
                 } else {
-                    entityQuranTimeline?.getQuranEntity()?.endAnimator()
+                    entityQuranTimeline?.quranEntity?.endAnimator()
                     invisibleSeekbar()
                     btnUnEffect?.setBackgroundResource(R.drawable.circle_item_menu_select)
                 }

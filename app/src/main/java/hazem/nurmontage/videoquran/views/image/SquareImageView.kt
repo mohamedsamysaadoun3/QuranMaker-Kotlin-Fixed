@@ -38,7 +38,7 @@ import hazem.nurmontage.videoquran.views.TypefaceCache
  *
  * @see TypefaceCache
  */
-class SquareImageView : AppCompatImageView {
+open class SquareImageView : AppCompatImageView {
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val paintRect = Paint(Paint.ANTI_ALIAS_FLAG)

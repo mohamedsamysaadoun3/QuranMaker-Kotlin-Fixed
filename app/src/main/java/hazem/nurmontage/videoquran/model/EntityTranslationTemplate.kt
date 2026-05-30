@@ -28,6 +28,11 @@ data class EntityTranslationTemplate(
     var x: Float = 0f
     var y: Float = 0f
     var scale: Float = 1.0f
+    var scaleFactor: Float
+        get() = scale
+        set(value) { scale = value }
+    fun setFactor_scale(fs: Float) { scale = fs }
+    fun getFactor_scale(): Float = scale
     var factor_size: Float = 1.0f
     var factor_sizeTrl: Float = 1.0f
     var height: Float = 0f

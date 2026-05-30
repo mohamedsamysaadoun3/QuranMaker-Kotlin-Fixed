@@ -15,6 +15,7 @@ import hazem.nurmontage.videoquran.adapter.ColorAdapter
 import hazem.nurmontage.videoquran.constant.AyaTextPreset
 import hazem.nurmontage.videoquran.core.common.Constants
 import hazem.nurmontage.videoquran.databinding.FragmentColorAyaBinding
+import hazem.nurmontage.videoquran.fragment.EditTrslEntityFragment
 import hazem.nurmontage.videoquran.model.data.TranslationQuranEntity
 import hazem.nurmontage.videoquran.utils.Utils
 import hazem.nurmontage.videoquran.views.TextCustumFont
@@ -39,7 +40,7 @@ class ColorTrslAyaFragment : Fragment {
         @JvmStatic var instance: ColorTrslAyaFragment? = null
 
         fun getInstance(
-            callback: IEditEntityCallback?,
+            callback: EditTrslEntityFragment.IEditEntityCallback?,
             entity: TranslationQuranEntity?,
             resources: Resources?
         ): ColorTrslAyaFragment {
@@ -50,22 +51,20 @@ class ColorTrslAyaFragment : Fragment {
         }
     }
 
-    // IEditEntityCallback is now defined in EditTrslEntityFragment.
-    // This typealias preserves backward compatibility for existing callers.
-    typealias IEditEntityCallback = EditTrslEntityFragment.IEditEntityCallback
+
 
     private var adapter: ColorAdapter? = null
     private var binding: FragmentColorAyaBinding? = null
     private var entitySelect: TranslationQuranEntity? = null
     private var iColor: ColorAdapter.IColor? = null
-    private var iEditEntityCallback: IEditEntityCallback? = null
+    private var iEditEntityCallback: EditTrslEntityFragment.IEditEntityCallback? = null
     private var recyclerView: RecyclerView? = null
     private var resourcesRef: Resources? = null
 
     constructor()
 
     constructor(
-        iEditEntityCallback: IEditEntityCallback?,
+        iEditEntityCallback: EditTrslEntityFragment.IEditEntityCallback?,
         entity: TranslationQuranEntity?,
         resources: Resources?
     ) {
@@ -100,7 +99,7 @@ class ColorTrslAyaFragment : Fragment {
 
         // Determine which preset is currently active
         val entity = entitySelect ?: return
-        val currentPreset = entity.get(entity.getmPreset())
+        val currentPreset = AyaTextPreset.values()[entity.get(entity.getmPreset()).ordinal]
         val selectedIndex = when (currentPreset) {
             AyaTextPreset.OUTLINE -> 1
             AyaTextPreset.SHADOW -> 2
@@ -139,7 +138,7 @@ class ColorTrslAyaFragment : Fragment {
             adapter = ColorAdapter(
                 iColor,
                 Constants.MUSLIM_AYA_COLORS,
-                Utils.indexOf(Constants.MUSLIM_AYA_COLORS, entitySelect!!.getClrAya())
+                Utils.indexOf(Constants.MUSLIM_AYA_COLORS, entitySelect!!.clrAya)
             )
             recyclerView?.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
             recyclerView?.itemAnimator = null

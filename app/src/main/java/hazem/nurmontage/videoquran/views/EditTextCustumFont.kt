@@ -1,4 +1,4 @@
-package hazem.nurmontage.videoquran.views.text
+package hazem.nurmontage.videoquran.views
 
 import android.content.Context
 import android.util.AttributeSet

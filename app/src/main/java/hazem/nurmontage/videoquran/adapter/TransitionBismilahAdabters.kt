@@ -46,8 +46,8 @@ class TransitionBismilahAdabters(
      * this adapter should import it from there.
      */
     interface ITransition {
-        fun in(type: String, entity: EntityBismilahTimeline)
-        fun out(type: String, entity: EntityBismilahTimeline)
+        fun `in`(type: String, entity: EntityBismilahTimeline)
+        fun `out`(type: String, entity: EntityBismilahTimeline)
         fun applyAll(entity: EntityBismilahTimeline)
         fun destroy(entity: EntityBismilahTimeline)
         fun onHideFragment(entity: EntityBismilahTimeline)
@@ -132,9 +132,9 @@ class TransitionBismilahAdabters(
 
                 val item = list[pos]
                 if (type == "in") {
-                    iTransition.in(item.type, entityQuranTimeline)
+                    iTransition.`in`(item.type, entityQuranTimeline)
                 } else if (type == "out") {
-                    iTransition.out(item.type, entityQuranTimeline)
+                    iTransition.`out`(item.type, entityQuranTimeline)
                 }
             }
         }

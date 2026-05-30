@@ -30,7 +30,7 @@
                 android:layout_alignParentStart="true"
                 app:tint="#ffffffff" />
 
-            <hazem.nurmontage.videoquran.views.widget.ButtonCustumFont
+            <hazem.nurmontage.videoquran.views.ButtonCustumFont
                 android:id="@+id/btn_done"
                 android:textSize="12sp"
                 android:textColor="#ffffffff"

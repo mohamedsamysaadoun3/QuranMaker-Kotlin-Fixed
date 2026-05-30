@@ -60,9 +60,9 @@ class SmoothVideoAnimator(
         mIsPlaying = true
         currentFrameIndex = Math.max(
             1,
-            Math.round((trackViewEntity.getCurrent_cursur_position() / 1000.0f) * fps)
+            Math.round((trackViewEntity.current_cursur_position / 1000.0f) * fps)
         )
-        maxFrameIndex = mTemplate.getDuration_video_media() * fps
+        maxFrameIndex = mTemplate.duration_video_media * fps
         lastFrameTimeNanos = 0L
         Choreographer.getInstance().postFrameCallback(this)
     }
@@ -98,7 +98,7 @@ class SmoothVideoAnimator(
             lastFrameTimeNanos = frameTimeNanos
 
             val framePath = File(
-                mTemplate.getFolder_template() + "/VideoFrame",
+                mTemplate.folder_template + "/VideoFrame",
                 buildFrameFilePath(currentFrameIndex)
             ).absolutePath
 

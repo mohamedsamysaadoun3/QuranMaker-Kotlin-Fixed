@@ -1,5 +1,6 @@
 package hazem.nurmontage.videoquran.utils
 
+import com.bumptech.glide.Glide
 import android.content.Context
 import android.graphics.Bitmap
 import com.bumptech.glide.load.Transformation
@@ -57,29 +58,7 @@ class StoryCropTransformation(
      *
      * Note: Some Glide versions call the 4-parameter overload directly.
      */
-    override fun transform(context: Context, resource: Resource<Bitmap>, outWidth: Int, outHeight: Int): Resource<Bitmap>? {
-        return null
-    }
-
-    /**
-     * Crop the bitmap to the target aspect ratio with center-crop behavior.
-     *
-     * Algorithm:
-     * 1. Calculate the source and target aspect ratios
-     * 2. If source is wider -> crop the left/right sides (keep full height)
-     * 3. If source is taller -> crop the top/bottom (keep full width)
-     * 4. If matching -> return the original resource unchanged
-     *
-     * The resulting bitmap is obtained via [BitmapResource.obtain], which
-     * allows Glide's [BitmapPool] to recycle it when no longer needed.
-     *
-     * @param pool      The bitmap pool for recycling
-     * @param resource  The source bitmap resource
-     * @param outWidth  The target output width (unused -- targetWidth is used instead)
-     * @param outHeight The target output height (unused -- targetHeight is used instead)
-     * @return A new [Resource] containing the cropped bitmap, or the original if no crop needed
-     */
-    fun transform(pool: BitmapPool, resource: Resource<Bitmap>, outWidth: Int, outHeight: Int): Resource<Bitmap> {
+    override fun transform(context: Context, resource: Resource<Bitmap>, outWidth: Int, outHeight: Int): Resource<Bitmap> {
         val bitmap = resource.get()
         val width = bitmap.width
         val height = bitmap.height
@@ -89,22 +68,19 @@ class StoryCropTransformation(
 
         val croppedBitmap: Bitmap = when {
             sourceRatio > targetRatio -> {
-                // Source is wider than target -> crop sides
                 val newWidth = (height.toFloat() * targetRatio).toInt()
                 Bitmap.createBitmap(bitmap, (width - newWidth) / 2, 0, newWidth, height)
             }
             sourceRatio < targetRatio -> {
-                // Source is taller than target -> crop top/bottom
                 val newHeight = (width.toFloat() / targetRatio).toInt()
                 Bitmap.createBitmap(bitmap, 0, (height - newHeight) / 2, width, newHeight)
             }
             else -> {
-                // Already matches target ratio
                 return resource
             }
         }
 
-        return BitmapResource.obtain(croppedBitmap, pool)
+        return BitmapResource.obtain(croppedBitmap, Glide.get(context).bitmapPool)!!
     }
 
     /**

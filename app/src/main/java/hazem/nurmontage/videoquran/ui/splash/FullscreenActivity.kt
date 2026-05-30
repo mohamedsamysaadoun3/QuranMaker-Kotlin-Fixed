@@ -1,6 +1,7 @@
 package hazem.nurmontage.videoquran.ui.splash
 
 import android.annotation.SuppressLint
+import hazem.nurmontage.videoquran.views.TextCustumFontBold
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler

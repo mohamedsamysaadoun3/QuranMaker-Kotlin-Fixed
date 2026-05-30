@@ -66,7 +66,7 @@ class ReverbeAdabter(
          * @param cmdFfmpeg The FFmpeg filter string (e.g., "aecho=0.8:0.88:60:0.4")
          * @param position  The adapter position of the selected preset
          */
-        fun cmd(cmdFfmpeg: String, position: Int)
+        fun cmd(cmdFfmpeg: String?, position: Int)
 
         /**
          * Pause the current audio preview playback.

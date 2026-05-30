@@ -1,6 +1,7 @@
 package hazem.nurmontage.videoquran.ui.settings
 
 import android.os.Bundle
+import hazem.nurmontage.videoquran.views.ButtonCustumFont
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity

@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.model.GallerySelected
-import hazem.nurmontage.videoquran.views.SquareImageView
+import hazem.nurmontage.videoquran.views.image.SquareImageView
 import hazem.nurmontage.videoquran.views.text.TextCustumFont
 
 /**
@@ -115,7 +115,7 @@ class GallerySelctedAdabters(
      */
     fun addItemVideo(gallerySelected: GallerySelected) {
         gallerySelecteds.add(gallerySelected)
-        gallerySelected.videoItem?.setGallerySelected(gallerySelected)
+        gallerySelected.videoItem?.gallerySelected = gallerySelected
         notifyItemInserted(gallerySelecteds.size - 1)
     }
 

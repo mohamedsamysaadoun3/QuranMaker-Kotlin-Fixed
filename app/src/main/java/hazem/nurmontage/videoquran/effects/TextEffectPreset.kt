@@ -22,20 +22,20 @@ enum class TextEffectPreset(
         GLOW           -> CinematicEffect.softGlow()
         SHADOW         -> CinematicEffect.deepShadow()
         OUTLINE        -> CinematicEffect().apply {
-            setName("Outline")
-            setShadowOffsetX(1)
-            setShadowOffsetY(1)
-            setShadowBlur(1)
-            setDepthLayers(0)
+            name = "Outline"
+            shadowOffsetX = 1
+            shadowOffsetY = 1
+            shadowBlur = 1
+            depthLayers = 0
         }
         NEON           -> CinematicEffect.neonGlow(0xFF00FFFF.toInt())
         CINEMATIC_FADE -> CinematicEffect.cinematic()
         TYPEWRITER     -> CinematicEffect().apply {
-            setName("Typewriter")
-            setShadowOffsetX(1)
-            setShadowOffsetY(1)
-            setShadowBlur(2)
-            setDepthLayers(0)
+            name = "Typewriter"
+            shadowOffsetX = 1
+            shadowOffsetY = 1
+            shadowBlur = 2
+            depthLayers = 0
         }
     }
 

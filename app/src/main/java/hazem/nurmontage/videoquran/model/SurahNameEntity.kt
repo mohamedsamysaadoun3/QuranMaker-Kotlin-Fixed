@@ -54,22 +54,22 @@ class SurahNameEntity : EntityView, Serializable {
     // ── State fields (names preserved for serialization) ─────────────
     private var alignment: Layout.Alignment = Layout.Alignment.ALIGN_CENTER
     var clrBg: Int = 0
-        private set
+        internal set
     var clrS_name: Int = 0
         private set
-    private var entityQuran: EntityQuranTimeline? = null
+    override var entityQuran: EntityQuranTimeline? = null
     var index_surah: Int = 0
-        private set
+        internal set
     var ipad_type: Int = 0
         private set
     var isHaveBg: Boolean = false
-        private set
+        internal set
     var mPreset: Int = 0
         private set
     var name: String = ""
-        private set
+        internal set
     var nameFont: String = "خط الإبل.otf"
-        private set
+        internal set
     private var name_style: String = ""
     var style: Int = 0
         private set
@@ -77,9 +77,9 @@ class SurahNameEntity : EntityView, Serializable {
     private var viewWidth: Int = 0
     private var x: Float = 0f
     private var y: Float = 0f
-    private var isVisible: Boolean = false
+    override var isVisible: Boolean = false
     var reader: String = ""
-        private set
+        internal set
 
     // ── Static layouts (rendered text) ───────────────────────────────
     private var staticLayout: StaticLayout? = null
@@ -130,7 +130,7 @@ class SurahNameEntity : EntityView, Serializable {
         this.name = name
         this.reader = reader
         this.nameFont = fontName
-        setFactorScale(factorScale)
+        this.factorScale = factorScale
         this.clrBg = bgColor
         this.isHaveBg = haveBg
         this.ipad_type = ipadType
@@ -144,7 +144,7 @@ class SurahNameEntity : EntityView, Serializable {
         this.x = rectF.left
         this.y = rectF.top
         rect = rectF
-        setVisible(true)
+        isVisible = true
         this.viewWidth = rectF.width().toInt()
         paintAya.typeface = typeface
         paintAya.color = color
@@ -153,8 +153,8 @@ class SurahNameEntity : EntityView, Serializable {
         paintBg.alpha = ALPHA_BG
         setClrS_name(color)
         paintAya.textSize = 0.05f
-        if (getFactorScale() != 1.0f) {
-            scale(getFactorScale(), 1, 1)
+        if (factorScale != 1.0f) {
+            scale(factorScale, 1, 1)
         } else {
             createStaticLayout()
         }
@@ -191,7 +191,6 @@ class SurahNameEntity : EntityView, Serializable {
     }
 
     fun setClrS_name(color: Int) { clrS_name = color }
-    fun getClrS_name(): Int = clrS_name
 
     fun setColor(color: Int) {
         setClrS_name(color)
@@ -310,7 +309,7 @@ class SurahNameEntity : EntityView, Serializable {
     // ═══════════════════════════════════════════════════════════════════
 
     override fun scale(factor: Float, canvasW: Int, canvasH: Int) {
-        setFactorScale(factor)
+        factorScale = factor
         val width = rect.width() * factor
         val height = rect.height() * factor
         val halfW = width * 0.5f
@@ -471,7 +470,7 @@ class SurahNameEntity : EntityView, Serializable {
         createStaticLayout()
     }
 
-    fun setRect(rectF: RectF) {
+    fun setRectBounds(rectF: RectF) {
         rect = rectF
         y = rectF.top
         x = rectF.left
@@ -539,19 +538,12 @@ class SurahNameEntity : EntityView, Serializable {
 
     override fun endAnimator() { /* No animations in this entity */ }
 
-    override fun getEntityQuran(): EntityQuranTimeline? = entityQuran
-
-    override fun setEntityQuran(entityQuran: EntityQuranTimeline?) {
-        this.entityQuran = entityQuran
-    }
-
-    override fun isVisible(): Boolean = isVisible
-    override fun setVisible(visible: Boolean) { isVisible = visible }
+    // entityQuran and isVisible are already overridden as properties
 
     fun getX(): Float = x
     fun getY(): Float = y
     fun getStaticLayout(): StaticLayout? = staticLayout
     fun getPaintAya(): TextPaint = paintAya
-    fun getNameFont(): String = nameFont
+
     fun getmPreset(): Int = mPreset
 }

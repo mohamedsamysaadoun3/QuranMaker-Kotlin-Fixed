@@ -110,7 +110,7 @@ class GalleryPhotosFragment : Fragment {
         recyclerView.itemAnimator = null
 
         val adapter = GalleryVideoAdabters(
-            AppUtils.getAppVersionName(context),
+            AppUtils.getAppVersionName(requireContext()),
             resources,
             gallerySelecteds,
             (ScreenUtils.getScreenWidth(requireActivity()) * 0.24f).toInt(),

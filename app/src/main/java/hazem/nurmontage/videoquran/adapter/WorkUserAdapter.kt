@@ -12,6 +12,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.ObjectKey
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.model.Template
+import hazem.nurmontage.videoquran.utils.MFileUtils
 
 /**
  * RecyclerView adapter for displaying saved project templates with video thumbnails.
@@ -87,9 +88,9 @@ class WorkUserAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val template = images[position]
-        if (template.fileInfo != null) {
-            holder.tvName.text = template.fileInfo.formattedDate
-            holder.tvDate.text = template.fileInfo.timedDate
+        if (template.fileInfo is MFileUtils.FileInfo) {
+            holder.tvName.text = (template.fileInfo as MFileUtils.FileInfo).formattedDate
+            holder.tvDate.text = (template.fileInfo as MFileUtils.FileInfo).timedDate
         }
         Glide.with(holder.imageView)
             .asBitmap()

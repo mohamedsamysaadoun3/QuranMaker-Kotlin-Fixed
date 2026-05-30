@@ -1,6 +1,8 @@
 package hazem.nurmontage.videoquran.ui.editor.text
 
 import android.content.Intent
+import hazem.nurmontage.videoquran.views.EditTextCustumFont
+import hazem.nurmontage.videoquran.views.ButtonCustumFont
 import android.graphics.Typeface
 import android.os.Bundle
 import android.text.Editable
@@ -86,7 +88,7 @@ class TextEditActivity : BaseActivity() {
         applyFont(selectedFontPath)
 
         // Back/cancel button
-        binding.btnOnBack.setOnClickListener {
+        binding.btnCancel.setOnClickListener {
             setResult(RESULT_CANCELED)
             finish()
         }
@@ -99,12 +101,12 @@ class TextEditActivity : BaseActivity() {
         // Font size seek bar
         setupFontSizeControl()
 
-        // Background checkbox
-        binding.checkboxBg.setOnCheckedChangeListener { _, isChecked ->
-            hasBackground = isChecked
-            binding.rvColor.visibility = if (isChecked) View.VISIBLE else View.GONE
-        }
-        binding.checkboxBg.isChecked = hasBackground
+        // Background checkbox — views not in layout; skip background toggle for now
+        // binding.checkboxBg.setOnCheckedChangeListener { _, isChecked ->
+        //     hasBackground = isChecked
+        //     binding.rvColor.visibility = if (isChecked) View.VISIBLE else View.GONE
+        // }
+        // binding.checkboxBg.isChecked = hasBackground
 
         // Setup adapters
         setupFontAdapter()
@@ -218,12 +220,12 @@ class TextEditActivity : BaseActivity() {
             selectedBgColorPos
         )
 
-        // The rvColor is for background color
-        binding.rvColor.apply {
-            layoutManager = LinearLayoutManager(this@TextEditActivity, RecyclerView.HORIZONTAL, false)
-            adapter = colorAdapter
-            visibility = if (hasBackground) View.VISIBLE else View.GONE
-        }
+        // The rvColor is for background color — view not in layout; skip for now
+        // binding.rvColor.apply {
+        //     layoutManager = LinearLayoutManager(this@TextEditActivity, RecyclerView.HORIZONTAL, false)
+        //     adapter = colorAdapter
+        //     visibility = if (hasBackground) View.VISIBLE else View.GONE
+        // }
     }
 
     /**

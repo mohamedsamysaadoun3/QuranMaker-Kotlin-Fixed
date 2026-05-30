@@ -110,7 +110,7 @@ class UserTemplateManager(context: Context) {
         return null
     }
 
-    fun loadAllTemplates(): List<UserTemplate> {
+    fun loadAllTemplates(): MutableList<UserTemplate> {
         val json = prefs.getString(KEY_TEMPLATES, "[]")
         val templates = mutableListOf<UserTemplate>()
         try {
@@ -157,7 +157,7 @@ class UserTemplateManager(context: Context) {
         return false
     }
 
-    private fun saveTemplatesList(templates: List<UserTemplate>): Boolean {
+    private fun saveTemplatesList(templates: MutableList<UserTemplate>): Boolean {
         try {
             val arr = JSONArray()
             for (t in templates) {

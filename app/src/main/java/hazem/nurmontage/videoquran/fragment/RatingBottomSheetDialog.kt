@@ -12,7 +12,7 @@ import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.views.text.TextCustumFont
-import hazem.nurmontage.videoquran.views.widget.ButtonCustumFont
+import hazem.nurmontage.videoquran.views.ButtonCustumFont
 
 /**
  * BottomSheet dialog for requesting the user to rate the app on the Play Store.

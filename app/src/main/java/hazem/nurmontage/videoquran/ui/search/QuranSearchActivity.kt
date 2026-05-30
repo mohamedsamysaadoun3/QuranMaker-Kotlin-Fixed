@@ -12,7 +12,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.activity.EdgeToEdge
 import androidx.activity.OnBackPressedCallback
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
@@ -30,7 +29,7 @@ import hazem.nurmontage.videoquran.utils.LocaleHelper
 import hazem.nurmontage.videoquran.utils.QuranPreference
 import hazem.nurmontage.videoquran.utils.RemoveTashkeel
 import hazem.nurmontage.videoquran.utils.Utils
-import hazem.nurmontage.videoquran.views.widget.ButtonCustumFont
+import hazem.nurmontage.videoquran.views.ButtonCustumFont
 import hazem.nurmontage.videoquran.views.text.TextCustumFont
 import java.io.BufferedReader
 import java.io.IOException
@@ -134,7 +133,7 @@ class QuranSearchActivity : BaseActivity() {
     @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        EdgeToEdge.enable(this)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         setContentView(R.layout.activity_quran_search)
@@ -319,7 +318,7 @@ class QuranSearchActivity : BaseActivity() {
             if (javaBM == null) {
                 javaBM = JavaBM()
             }
-            javaBM!!.setmPattern(RemoveTashkeel.removeTashkeel(lastSearchKey))
+            javaBM!!.setPattern(RemoveTashkeel.removeTashkeel(lastSearchKey) ?: "")
             searchAllQuran()
         }
     }
@@ -396,7 +395,7 @@ class QuranSearchActivity : BaseActivity() {
                         ayaText
                     }
 
-                    val cleanText = RemoveTashkeel.removeTashkeel(textToSearch)
+                    val cleanText = RemoveTashkeel.removeTashkeel(textToSearch) ?: ""
                     val matchPos = javaBM?.match(cleanText) ?: -1
 
                     if (matchPos != -1) {
@@ -414,7 +413,7 @@ class QuranSearchActivity : BaseActivity() {
                                         countIndex,
                                         Utils.countIndex(
                                             countIndex,
-                                            Utils.countSpace(javaBM!!.getmPattern()),
+                                            Utils.countSpace(javaBM!!.getPattern()),
                                             ayaText
                                         )
                                     )

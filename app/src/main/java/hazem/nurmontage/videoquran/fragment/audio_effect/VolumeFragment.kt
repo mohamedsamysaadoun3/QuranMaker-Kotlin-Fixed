@@ -75,12 +75,12 @@ class VolumeFragment : Fragment {
         val root: LinearLayout = bind.root
 
         val audio = entityAudio
-        if (audio == null || audio.getMediaPlayer() == null) {
+        if (audio == null || audio.mediaPlayer == null) {
             return root
         }
 
         tvProgress = root.findViewById(R.id.tv_volume_size)
-        val volume = (audio.getEffectAudio().volume * 100f).toInt()
+        val volume = (audio.effectAudio.volume * 100f).toInt()
         tvProgress?.text = volume.toString()
 
         val seekBar = root.findViewById<SeekBar>(R.id.volumeSeekBar)
@@ -134,7 +134,7 @@ class VolumeFragment : Fragment {
     }
 
     fun applyVolume(applyAll: Boolean) {
-        val effectAudio = entityAudio?.getEffectAudio() ?: return
+        val effectAudio = entityAudio?.effectAudio ?: return
         effectAudio.volume = (volumeSeekBar?.progress ?: 0) / 100.0f
 
         val start = effectAudio.start / 1000.0f

@@ -47,7 +47,7 @@ class WordProcessor {
         var i = 0
         while (i < list.size) {
             val end = i + 4
-            val group = ArrayList(list.subList(i, minOf(end, list.size())))
+            val group = ArrayList(list.subList(i, minOf(end, list.size)))
             group.reverse()
             result.addAll(group)
             i = end

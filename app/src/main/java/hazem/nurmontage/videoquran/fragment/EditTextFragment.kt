@@ -111,7 +111,7 @@ class EditTextFragment : Fragment {
                             selectedAya = substring
                         }
                     }
-                    entity.setTxt(selectedAya)
+                    entity.txt = selectedAya
                     entity.initPreset(entity.getmPreset())
                     this@EditTextFragment.iEditEntityCallback?.onUpdate(entity)
                 }
@@ -131,7 +131,7 @@ class EditTextFragment : Fragment {
         if (quranEntity != null && iEditEntityCallback != null) {
             init(root)
             root.findViewById<View>(R.id.btn_close).setOnClickListener {
-                iEditEntityCallback?.onDone(quranEntity?.getEntityQuran())
+                iEditEntityCallback?.onDone(quranEntity?.entityQuran)
             }
         }
         return root
@@ -158,8 +158,8 @@ class EditTextFragment : Fragment {
         val txt = buildDisplayText(entity)
 
         val completeAya = entity.getComplete_aya() ?: ""
-        val startWordIndex = entity.getStartWord_index()
-        val endWordIndex = entity.getEndWord_index()
+        val startWordIndex = entity.startWord_index
+        val endWordIndex = entity.endWord_index
         val split = completeAya
             .trim()
             .replace("\\s*([\u06D6-\u06ED])".toRegex(), "$1")
@@ -230,8 +230,8 @@ class EditTextFragment : Fragment {
         val txt = buildDisplayText(quranEntity)
 
         val completeAya = this.quranEntity?.getComplete_aya() ?: ""
-        val startWordIndex = this.quranEntity?.getStartWord_index() ?: 0
-        val endWordIndex = this.quranEntity?.getEndWord_index() ?: 0
+        val startWordIndex = this.quranEntity?.startWord_index ?: 0
+        val endWordIndex = this.quranEntity?.endWord_index ?: 0
         val split = completeAya
             .trim()
             .replace("\\s*([\u06D6-\u06ED])".toRegex(), "$1")
@@ -289,10 +289,10 @@ class EditTextFragment : Fragment {
     private fun buildDisplayText(entity: QuranEntity): String {
         val indexNumber = entity.getIndexNumber()
         return if (indexNumber >= 0) {
-            entity.getTxt()?.substring(0, minOf(indexNumber, entity.getTxt()?.length ?: 0))
+            entity.txt?.substring(0, minOf(indexNumber, entity.txt?.length ?: 0))
                 .orEmpty() + " " + entity.getNumber()
         } else {
-            entity.getTxt().orEmpty()
+            entity.txt.orEmpty()
         }
     }
 
@@ -308,7 +308,7 @@ class EditTextFragment : Fragment {
         val sb = StringBuilder()
         val sb2 = StringBuilder()
         val list = wordAyaAdabter?.getList() ?: return ""
-        val split = quranEntity?.getTranslation_complete()?.split(",")
+        val split = quranEntity?.translation_complete?.split(",")
 
         var startIndex = -1
         var selectedCount = 0
@@ -327,17 +327,17 @@ class EditTextFragment : Fragment {
         }
 
         if (sb2.isNotEmpty()) {
-            quranEntity?.setTranslation(sb2.toString())
+            quranEntity?.translation = sb2.toString()
         } else {
-            quranEntity?.setTranslation(null)
+            quranEntity?.translation = null
         }
 
         var endWordIndex = selectedCount + startIndex
         if (quranEntity?.getNumber() != -1) {
             endWordIndex++
         }
-        quranEntity?.setEndWord_index(endWordIndex)
-        quranEntity?.setStartWord_index(startIndex)
+        quranEntity?.endWord_index = endWordIndex
+        quranEntity?.startWord_index = startIndex
 
         return sb.toString().trim()
     }

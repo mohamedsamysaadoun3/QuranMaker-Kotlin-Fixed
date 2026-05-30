@@ -39,7 +39,7 @@ class SoundAdapter(
          * @param cmd The FFmpeg filter command string
          * @param position The adapter position of the selected preset
          */
-        fun cmd(cmd: String, position: Int)
+        fun cmd(cmd: String?, position: Int)
 
         /** Pauses current audio playback before applying a new preset. */
         fun pause()

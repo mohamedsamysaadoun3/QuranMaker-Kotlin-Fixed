@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.tabs.TabLayout
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.adapter.VideoGalleryAdapter
-import hazem.nurmontage.videoquran.adapter.VideoFolder
-import hazem.nurmontage.videoquran.adapter.VideoItem
+
+import hazem.nurmontage.videoquran.model.VideoItem
 import hazem.nurmontage.videoquran.core.base.BaseActivity
 import hazem.nurmontage.videoquran.databinding.ActivityGalleryPickerVideoBinding
 import kotlinx.coroutines.Dispatchers
@@ -36,11 +36,13 @@ class GalleryPickerVideo : BaseActivity() {
     private lateinit var binding: ActivityGalleryPickerVideoBinding
     private lateinit var videoAdapter: VideoGalleryAdapter
 
-    private val folders = mutableListOf<VideoFolder>()
+    private val folders = mutableListOf<FolderInfo>()
     private var currentFolderIndex: Int = -1
 
     companion object {
         const val EXTRA_VIDEO_URI = "video_uri"
+
+        data class FolderInfo(val name: String, val path: String, val videos: MutableList<VideoItem>)
     }
 
     /** Permission request launcher for media access. */
@@ -53,7 +55,7 @@ class GalleryPickerVideo : BaseActivity() {
         } else {
             Toast.makeText(this, "Permission denied. Cannot access videos.", Toast.LENGTH_LONG).show()
             binding.viewProgress.visibility = View.GONE
-            binding.toSetting.visibility = View.VISIBLE
+            (binding.toSetting.root as View).visibility = View.VISIBLE
         }
     }
 
@@ -158,7 +160,10 @@ class GalleryPickerVideo : BaseActivity() {
                 binding.tvFolders.visibility = View.VISIBLE
 
                 folders.clear()
-                folders.addAll(videoFolders)
+                for ((path, videos) in videoFolders) {
+                    val name = java.io.File(path).name
+                    folders.add(FolderInfo(name, path, videos))
+                }
 
                 setupFolderTabs()
 
@@ -195,7 +200,7 @@ class GalleryPickerVideo : BaseActivity() {
     /**
      * Display the videos from the specified folder in the RecyclerView.
      */
-    private fun showFolderVideos(folder: VideoFolder) {
+    private fun showFolderVideos(folder: FolderInfo) {
         videoAdapter.submitList(folder.videos)
     }
 

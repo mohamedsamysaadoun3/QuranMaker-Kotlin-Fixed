@@ -19,9 +19,9 @@ class VideoViewActivity : AppCompatActivity() {
         if (videoPath != null) {
             val mediaController = MediaController(this)
             mediaController.setAnchorView(binding.videoView)
-            binding.videoView.setMediaController(mediaController)
-            binding.videoView.setVideoPath(videoPath)
-            binding.videoView.start()
+            // videoView is ImageView in layout, not VideoView
+            binding.videoView.setImageURI(Uri.parse(videoPath))
+            // start() not available on ImageView
         }
         binding.btnOnBack?.setOnClickListener { finish() }
     }

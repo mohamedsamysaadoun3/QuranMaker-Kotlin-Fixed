@@ -23,13 +23,14 @@ class ProgressViewFragment : Fragment() {
 
     companion object {
         @Volatile
-        @JvmStatic var instance: ProgressViewFragment? = null
+        private var _instance: ProgressViewFragment? = null
 
+        @JvmStatic
         fun getInstance(): ProgressViewFragment {
-            if (instance == null) {
-                instance = ProgressViewFragment()
+            if (_instance == null) {
+                _instance = ProgressViewFragment()
             }
-            return instance!!
+            return _instance!!
         }
     }
 
@@ -50,7 +51,7 @@ class ProgressViewFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        instance = null
+        _instance = null
     }
 
     /**

@@ -112,7 +112,7 @@ class SnapHelper {
         if (!isSnapToGrid) return position
         val gridStep = gridSize.coerceAtLeast(1)
         val snapped = round(position.toFloat() / gridStep) * gridStep
-        return snapped.coerceAtLeast(0)
+        return snapped.toInt().coerceAtLeast(0)
     }
 
     /**

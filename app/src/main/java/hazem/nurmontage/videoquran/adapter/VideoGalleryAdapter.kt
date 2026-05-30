@@ -12,7 +12,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.ObjectKey
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.model.VideoItem
-import hazem.nurmontage.videoquran.views.SquareImageView
+import hazem.nurmontage.videoquran.views.image.SquareImageView
 import hazem.nurmontage.videoquran.views.text.TextCustumFont
 import java.io.File
 import java.util.Locale
@@ -37,7 +37,6 @@ import java.util.Locale
  * @see GalleryVideoAdabters
  */
 class VideoGalleryAdapter(
-    private val appVersion: String,
     private val onItemClick: (VideoItem) -> Unit
 ) : RecyclerView.Adapter<VideoGalleryAdapter.ViewHolder>() {
 
@@ -100,7 +99,7 @@ class VideoGalleryAdapter(
         Glide.with(holder.itemView)
             .load(item.path)
             .centerCrop()
-            .signature(ObjectKey(appVersion))
+            .signature(ObjectKey("1"))
             .diskCacheStrategy(DiskCacheStrategy.NONE)
             .into(holder.imageView)
 

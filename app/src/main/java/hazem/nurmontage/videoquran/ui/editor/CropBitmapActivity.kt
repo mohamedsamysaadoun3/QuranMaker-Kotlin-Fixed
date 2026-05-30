@@ -1,6 +1,7 @@
 package hazem.nurmontage.videoquran.ui.editor
 
 import android.content.Intent
+import hazem.nurmontage.videoquran.views.ButtonCustumFont
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri

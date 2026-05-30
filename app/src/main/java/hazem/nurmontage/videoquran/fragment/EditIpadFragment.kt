@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.adapter.FrameAdapter
-import hazem.nurmontage.videoquran.constant.IpadType
+import hazem.nurmontage.videoquran.core.common.Constants.IpadType
 import hazem.nurmontage.videoquran.databinding.FragmentEditIpadBinding
 import hazem.nurmontage.videoquran.model.IpadItem
 import hazem.nurmontage.videoquran.views.text.TextCustumFont

@@ -10,8 +10,9 @@ import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import androidx.core.content.ContextCompat
 import hazem.nurmontage.videoquran.R
+import hazem.nurmontage.videoquran.model.data.TranslationQuranEntity
 import hazem.nurmontage.videoquran.utils.LocaleHelper
-import hazem.nurmontage.videoquran.utils.FileUtils
+import hazem.nurmontage.videoquran.utils.UtilsFileLast
 
 /**
  * Renders the selection overlay (scale handle + "Apply All" button) around
@@ -72,7 +73,7 @@ class EntitySelectTool(canvasSize: Int, context: Context) {
 
     init {
         // Load the font for "Apply All" text
-        val applyAllFont = FileUtils.loadFontFromAsset(context, "fonts/arabic/خط الإبل.otf")
+        val applyAllFont = UtilsFileLast.loadFontFromAsset(context, "fonts/arabic/خط الإبل.otf")
         val applyAllText = if (LocaleHelper.getLanguage(context) == "ar") "تطبيق على الكل" else "ApplyAll"
 
         // Initialize paint for selection border and handle rendering
@@ -179,10 +180,10 @@ class EntitySelectTool(canvasSize: Int, context: Context) {
      */
     fun isApply(entityView: EntityView, x: Float, y: Float): Boolean {
         if (!isApply_all) return false
-        rectApplyAll.left = entityView.getRect().right - bitmapApplyAll.width
-        rectApplyAll.right = entityView.getRect().right
-        rectApplyAll.top = entityView.getRect().top - bitmapApplyAll.height - offsetYApply
-        rectApplyAll.bottom = entityView.getRect().top
+        rectApplyAll.left = entityView.rect.right - bitmapApplyAll.width
+        rectApplyAll.right = entityView.rect.right
+        rectApplyAll.top = entityView.rect.top - bitmapApplyAll.height - offsetYApply
+        rectApplyAll.bottom = entityView.rect.top
         return rectApplyAll.contains(x, y)
     }
 
@@ -195,11 +196,11 @@ class EntitySelectTool(canvasSize: Int, context: Context) {
      */
     fun isScale(entityView: EntityView, x: Float, y: Float): Boolean {
         if (entityView is TranslationQuranEntity) {
-            rectFScale.top = entityView.getRect().top - offsetY * 2.0f
-            rectFScale.left = entityView.getRect().left - offsetX
+            rectFScale.top = entityView.rect.top - offsetY * 2.0f
+            rectFScale.left = entityView.rect.left - offsetX
         } else {
-            rectFScale.left = entityView.getRect().left - offsetX * 2.0f
-            rectFScale.top = entityView.getRect().bottom - offsetY * 2.0f
+            rectFScale.left = entityView.rect.left - offsetX * 2.0f
+            rectFScale.top = entityView.rect.bottom - offsetY * 2.0f
         }
         rectFScale.right = rectFScale.left + bitmapScale.width * 1.5f
         rectFScale.bottom = rectFScale.top + bitmapScale.height * 1.5f
@@ -220,22 +221,22 @@ class EntitySelectTool(canvasSize: Int, context: Context) {
      *   3. "Apply All" button bitmap (if [isApply_all] is true)
      */
     fun draw(canvas: Canvas, entityView: EntityView) {
-        val rect = entityView.getRect()
+        val rect = entityView.rect
         canvas.drawRoundRect(rect, round, round, paint)
 
         // Scale handle position depends on entity type
         if (entityView is TranslationQuranEntity) {
             canvas.drawBitmap(
                 bitmapScale,
-                entityView.getRect().left,
-                entityView.getRect().top - offsetY,
+                entityView.rect.left,
+                entityView.rect.top - offsetY,
                 null
             )
         } else {
             canvas.drawBitmap(
                 bitmapScale,
-                entityView.getRect().left - offsetX,
-                entityView.getRect().bottom - offsetY,
+                entityView.rect.left - offsetX,
+                entityView.rect.bottom - offsetY,
                 null
             )
         }
@@ -244,8 +245,8 @@ class EntitySelectTool(canvasSize: Int, context: Context) {
         if (isApply_all) {
             canvas.drawBitmap(
                 bitmapApplyAll,
-                entityView.getRect().right - bitmapApplyAll.width,
-                entityView.getRect().top - bitmapApplyAll.height - offsetYApply,
+                entityView.rect.right - bitmapApplyAll.width,
+                entityView.rect.top - bitmapApplyAll.height - offsetYApply,
                 null
             )
         }

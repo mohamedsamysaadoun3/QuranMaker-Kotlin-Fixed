@@ -11,6 +11,7 @@ import android.os.Environment
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
+import android.view.Window
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
@@ -19,7 +20,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import hazem.nurmontage.videoquran.common.Common
+import hazem.nurmontage.videoquran.core.common.Common
 import hazem.nurmontage.videoquran.model.FreeElement
 import java.io.File
 import java.io.FileOutputStream
@@ -64,7 +65,7 @@ class FreeLayerActivity : AppCompatActivity(), View.OnTouchListener, View.OnClic
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestWindowFeature(FEATURE_NO_TITLE)
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
         window.addFlags(1024) // FLAG_KEEP_SCREEN_ON
 
         // Build UI programmatically — same as original Java
