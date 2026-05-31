@@ -7,7 +7,7 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.fragment.audio_effect.Reverbe
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 
 /**
  * RecyclerView adapter for displaying audio reverb/effect presets.

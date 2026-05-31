@@ -26,7 +26,7 @@ import hazem.nurmontage.videoquran.utils.NetworkUtils
 import hazem.nurmontage.videoquran.utils.QuranPreference
 import hazem.nurmontage.videoquran.utils.QuranReader
 import hazem.nurmontage.videoquran.views.CheckboxCustumFont
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 
 /**
  * Fragment for adding Quran ayahs to the video project.

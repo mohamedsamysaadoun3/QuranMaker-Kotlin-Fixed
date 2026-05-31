@@ -17,7 +17,7 @@ import hazem.nurmontage.videoquran.model.GallerySelected
 import hazem.nurmontage.videoquran.model.PhotoItem
 import hazem.nurmontage.videoquran.model.VideoItem
 import hazem.nurmontage.videoquran.views.image.SquareImageView
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 
 /**
  * RecyclerView adapter for displaying video items in a grid gallery picker.

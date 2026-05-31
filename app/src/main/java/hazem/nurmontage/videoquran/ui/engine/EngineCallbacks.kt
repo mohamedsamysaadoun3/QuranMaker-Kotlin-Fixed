@@ -68,8 +68,7 @@ import hazem.nurmontage.videoquran.adapter.TransitionBismilahAdabters
 import hazem.nurmontage.videoquran.adapter.TransitionEntityAdabters
 import hazem.nurmontage.videoquran.views.BlurredImageView
 import hazem.nurmontage.videoquran.views.ButtonCustumFont
-import hazem.nurmontage.videoquran.views.TextCustumFont as TextCustumFontViews
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 import hazem.nurmontage.videoquran.views.TrackEntityView
 import hazem.nurmontage.videoquran.views.blurred.updateIpad
 import hazem.nurmontage.videoquran.views.blurred.setupBitmapDraw

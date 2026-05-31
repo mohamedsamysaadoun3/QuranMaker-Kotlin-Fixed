@@ -12,7 +12,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.constant.ResizeType
 import hazem.nurmontage.videoquran.model.ItemDimension
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 
 /**
  * RecyclerView Adapter for displaying and selecting video/image dimension presets.

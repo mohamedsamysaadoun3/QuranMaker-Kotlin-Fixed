@@ -14,7 +14,7 @@ import com.bumptech.glide.Glide
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.model.GallerySelected
 import hazem.nurmontage.videoquran.views.image.SquareImageView
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 
 /**
  * RecyclerView adapter for displaying currently selected gallery items

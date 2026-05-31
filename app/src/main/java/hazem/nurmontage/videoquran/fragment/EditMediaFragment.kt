@@ -17,7 +17,7 @@ import hazem.nurmontage.videoquran.databinding.FragmentEditMediaBinding
 import hazem.nurmontage.videoquran.entity_timeline.EntityAudio
 import hazem.nurmontage.videoquran.model.EffectAudio
 import hazem.nurmontage.videoquran.utils.MyPreferences
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 
 /**
  * Fragment that provides the horizontal toolbar of audio editing actions:

@@ -16,7 +16,7 @@ import hazem.nurmontage.videoquran.adapter.FrameAdapter
 import hazem.nurmontage.videoquran.core.common.Constants.IpadType
 import hazem.nurmontage.videoquran.databinding.FragmentEditIpadBinding
 import hazem.nurmontage.videoquran.model.IpadItem
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 
 /**
  * Fragment for selecting Quran verse frame styles (iPad-style containers)

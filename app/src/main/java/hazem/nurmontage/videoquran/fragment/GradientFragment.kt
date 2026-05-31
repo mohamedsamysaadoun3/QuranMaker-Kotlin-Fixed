@@ -14,7 +14,7 @@ import hazem.nurmontage.videoquran.adapter.PresetAdapter
 import hazem.nurmontage.videoquran.core.common.Common
 import hazem.nurmontage.videoquran.databinding.FragmentGradientBinding
 import hazem.nurmontage.videoquran.model.Gradient
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 
 /**
  * Child fragment displaying a horizontal gradient palette and

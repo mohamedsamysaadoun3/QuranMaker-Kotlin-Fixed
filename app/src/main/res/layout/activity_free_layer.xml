@@ -44,7 +44,7 @@
                 android:textAllCaps="false"
                 android:layout_alignParentEnd="true" />
 
-            <hazem.nurmontage.videoquran.views.text.TextCustumFont
+            <hazem.nurmontage.videoquran.views.TextCustumFont
                 android:textColor="@color/white"
                 android:id="@+id/tv_title"
                 android:layout_width="wrap_content"
@@ -105,7 +105,7 @@
                     android:src="@drawable/image_24px"
                     android:scaleType="centerInside"
                     app:tint="#ffd3d3d3" />
-                <hazem.nurmontage.videoquran.views.text.TextCustumFont
+                <hazem.nurmontage.videoquran.views.TextCustumFont
                     android:textSize="@dimen/menu_text_size"
                     android:textColor="#ffd3d3d3"
                     android:layout_gravity="center"
@@ -138,7 +138,7 @@
                     android:src="@drawable/text_fields_24px"
                     android:scaleType="centerInside"
                     app:tint="#ffd3d3d3" />
-                <hazem.nurmontage.videoquran.views.text.TextCustumFont
+                <hazem.nurmontage.videoquran.views.TextCustumFont
                     android:textSize="@dimen/menu_text_size"
                     android:textColor="#ffd3d3d3"
                     android:layout_gravity="center"
@@ -172,7 +172,7 @@
                     android:src="@drawable/image_24px"
                     android:scaleType="centerInside"
                     app:tint="#ffd3d3d3" />
-                <hazem.nurmontage.videoquran.views.text.TextCustumFont
+                <hazem.nurmontage.videoquran.views.TextCustumFont
                     android:textSize="@dimen/menu_text_size"
                     android:textColor="#ffd3d3d3"
                     android:layout_gravity="center"
@@ -206,7 +206,7 @@
                     android:src="@drawable/delete_24px"
                     android:scaleType="centerInside"
                     app:tint="#ffd3d3d3" />
-                <hazem.nurmontage.videoquran.views.text.TextCustumFont
+                <hazem.nurmontage.videoquran.views.TextCustumFont
                     android:textSize="@dimen/menu_text_size"
                     android:textColor="#ffd3d3d3"
                     android:layout_gravity="center"

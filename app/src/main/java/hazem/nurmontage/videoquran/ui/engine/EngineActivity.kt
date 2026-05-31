@@ -41,7 +41,7 @@ import hazem.nurmontage.videoquran.utils.video.SmoothVideoAnimator
 import hazem.nurmontage.videoquran.views.BlurredImageView
 import hazem.nurmontage.videoquran.views.ButtonCustumFont
 import hazem.nurmontage.videoquran.views.CustomDiscreteSeekBar
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 import hazem.nurmontage.videoquran.views.TrackEntityView
 import androidx.media3.common.MimeTypes
 

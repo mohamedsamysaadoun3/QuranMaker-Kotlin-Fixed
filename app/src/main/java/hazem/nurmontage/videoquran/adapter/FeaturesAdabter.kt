@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.model.ModelFeatures
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 
 /**
  * RecyclerView Adapter for displaying a features comparison list.

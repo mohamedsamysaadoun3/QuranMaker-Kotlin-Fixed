@@ -14,7 +14,7 @@
         android:layout_marginBottom="75dp"
         android:indeterminate="true"
         android:indeterminateDrawable="@drawable/progress_gradient"/>
-    <hazem.nurmontage.videoquran.views.text.TextCustumFont
+    <hazem.nurmontage.videoquran.views.TextCustumFont
         android:textSize="12sp"
         android:textColor="@color/white"
         android:gravity="center"
@@ -30,7 +30,7 @@
         android:id="@+id/progress_horizontal"
         android:layout_width="match_parent"
         android:layout_height="350dp"/>
-    <hazem.nurmontage.videoquran.views.text.TextCustumFont
+    <hazem.nurmontage.videoquran.views.TextCustumFont
         android:textSize="12sp"
         android:textColor="@color/white"
         android:gravity="center"
@@ -56,7 +56,7 @@
             android:layout_margin="10dp"
             android:src="@drawable/ic_error"
             app:tint="#ffe91e63"/>
-        <hazem.nurmontage.videoquran.views.text.TextCustumFont
+        <hazem.nurmontage.videoquran.views.TextCustumFont
             android:textSize="12sp"
             android:textColor="@color/white"
             android:gravity="center"

@@ -13,7 +13,7 @@ import com.bumptech.glide.signature.ObjectKey
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.model.VideoItem
 import hazem.nurmontage.videoquran.views.image.SquareImageView
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 import java.io.File
 import java.util.Locale
 

@@ -30,7 +30,7 @@ import hazem.nurmontage.videoquran.utils.QuranPreference
 import hazem.nurmontage.videoquran.utils.RemoveTashkeel
 import hazem.nurmontage.videoquran.utils.Utils
 import hazem.nurmontage.videoquran.views.ButtonCustumFont
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream

@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.utils.FontProvider
 import hazem.nurmontage.videoquran.fragment.FontFragment
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 
 /**
  * RecyclerView Adapter for displaying and selecting Ottoman/Arabic font families.

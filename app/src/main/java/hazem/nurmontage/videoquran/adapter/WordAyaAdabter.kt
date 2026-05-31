@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.model.WordModel
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 
 /**
  * RecyclerView Adapter for displaying Quran ayah words in a Karaoke-style layout.

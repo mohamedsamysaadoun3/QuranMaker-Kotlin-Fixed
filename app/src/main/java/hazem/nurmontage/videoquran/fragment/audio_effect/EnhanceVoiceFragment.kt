@@ -16,7 +16,7 @@ import hazem.nurmontage.videoquran.databinding.FragmentRemoveNoiceBinding
 import hazem.nurmontage.videoquran.entity_timeline.EntityAudio
 import hazem.nurmontage.videoquran.fragment.EditMediaFragment
 import hazem.nurmontage.videoquran.model.EffectAudio
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 import java.util.Locale
 
 /**

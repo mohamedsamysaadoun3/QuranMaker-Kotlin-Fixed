@@ -12,7 +12,7 @@ import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.databinding.FragmentVolumeBinding
 import hazem.nurmontage.videoquran.entity_timeline.EntityAudio
 import hazem.nurmontage.videoquran.fragment.EditMediaFragment
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 
 /**
  * Fragment for adjusting audio pitch.

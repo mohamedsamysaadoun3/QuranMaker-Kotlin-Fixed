@@ -99,7 +99,7 @@
         android:padding="4dp" />
 
     <!-- Empty state text -->
-    <hazem.nurmontage.videoquran.views.text.TextCustumFont
+    <hazem.nurmontage.videoquran.views.TextCustumFont
         android:id="@+id/tv_empty"
         android:textSize="14sp"
         android:textColor="#ff808080"

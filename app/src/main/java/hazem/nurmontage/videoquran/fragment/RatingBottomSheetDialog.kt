@@ -11,7 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import hazem.nurmontage.videoquran.R
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
+import hazem.nurmontage.videoquran.views.TextCustumFont
 import hazem.nurmontage.videoquran.views.ButtonCustumFont
 
 /**
