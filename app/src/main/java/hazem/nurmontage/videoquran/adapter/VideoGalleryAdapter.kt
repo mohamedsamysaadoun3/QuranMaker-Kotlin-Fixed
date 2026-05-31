@@ -151,7 +151,7 @@ class VideoGalleryAdapter(
          * the last segment of the folder path.
          *
          * This method MUST be called on a background thread as it performs
-         * I/O operations (ContentResolver query + File.exists checks).
+         * I/O operations (ContentResolver query).
          *
          * @param context A context for accessing the ContentResolver
          * @return A map of folder paths to their video lists
@@ -189,8 +189,6 @@ class VideoGalleryAdapter(
                         val data = cursor.getString(dataCol) ?: continue
                         val duration = cursor.getInt(durationCol)
                         val bucketName = cursor.getString(bucketCol) ?: "Videos"
-
-                        if (!File(data).exists()) continue
 
                         val contentUri = ContentUris.withAppendedId(
                             MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id

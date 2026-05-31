@@ -513,7 +513,14 @@ object ExportCommandBuilder {
 
                 // Generate timer overlay
                 val timerPath = preRenderExecutor.executeGenerateTimer(durationMs, countDownLatch, semaphore)
-                args.addAll(listOf("-i", timerPath ?: ""))
+                if (timerPath == null) {
+                    // Timer pre-render failed (e.g. missing font file in template folder).
+                    // Previously this used an empty string for the -i argument which caused
+                    // FFmpeg to fail silently.  Now we fail fast so the caller can report
+                    // the error properly.
+                    return null
+                }
+                args.addAll(listOf("-i", timerPath))
 
                 // Overlay timer on background
                 val timeModel = template.mTimeModel ?: return null

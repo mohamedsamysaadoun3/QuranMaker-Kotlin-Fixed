@@ -274,7 +274,7 @@ class EngineActivity : BaseActivity() {
                 mTemplate = template2
                 if (template2 != null) {
                     if (template2.name_drawable != null) {
-                        uri_bg = "android.resource://$packageName/drawable/${DrawableHelper.getIDDrawableByName(template2.name_drawable!!)}"
+                        uri_bg = "android.resource://$packageName/drawable/${template2.name_drawable!!}"
                     } else {
                         uri_bg = template2.uri_bg
                     }
@@ -293,7 +293,7 @@ class EngineActivity : BaseActivity() {
                 mTemplate!!.uri_bg = imgBg
             } else {
                 val randomEntry = DrawableHelper.getRandomDrawableEntry()
-                val bgUri = "android.resource://$packageName/drawable/${randomEntry.value}"
+                val bgUri = "android.resource://$packageName/drawable/${randomEntry.key}"
                 uri_bg = bgUri
                 mTemplate!!.uri_bg = bgUri
                 mTemplate!!.name_drawable = randomEntry.key
@@ -301,7 +301,7 @@ class EngineActivity : BaseActivity() {
             mTemplate!!.setWidthAndHeight(720, 1280)
         } else {
             if (template3.name_drawable != null) {
-                uri_bg = "android.resource://$packageName/drawable/${DrawableHelper.getIDDrawableByName(template3.name_drawable!!)}"
+                uri_bg = "android.resource://$packageName/drawable/${template3.name_drawable!!}"
             } else {
                 uri_bg = template3.uri_bg
             }
@@ -883,7 +883,7 @@ class EngineActivity : BaseActivity() {
                 ChangeBgFragment.instance!!.scrollToSelected()
             }
             mTemplate!!.name_drawable = bgItem.name_drawable
-            uri_bg = "android.resource://" + packageName + "/drawable/" + bgItem.id
+            uri_bg = "android.resource://" + packageName + "/drawable/" + bgItem.name_drawable
             showProgressSimple()
             executor.execute {
                 var engineActivity: EngineActivity
@@ -916,6 +916,7 @@ class EngineActivity : BaseActivity() {
                                 BitmapCropper.cropTo16x9(blurredImageView.bitmapOriginal, blurredImageView.getW(), blurredImageView.getH())
                             }
                             blurredImageView.updatePosCanvas(cropTo16x9)
+                            blurredImageView.bitmapBlured = cropTo16x9
                             blurredImageView.updateIpad(cropTo16x9!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
                             if (mTemplate!!.ipad_type == IpadType.IPAD_NEOMORPHIC.ordinal) {
                                 val width = (blurredImageView.ipad_rect!!.width() * 0.6f).toInt()
@@ -1107,6 +1108,7 @@ class EngineActivity : BaseActivity() {
 
                         // Step 3: Update canvas position and iPad rect
                         blurredImageView.updatePosCanvas(cropTo16x9)
+                        blurredImageView.bitmapBlured = cropTo16x9  // Must set bitmapBlured BEFORE updateIpad (matches Java original)
                         blurredImageView.updateIpad(cropTo16x9!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
 
                         // Step 4: Recalculate the iPad square bitmap based on type
@@ -2588,6 +2590,7 @@ private fun iniTypeImg() {
             blurredImageView.isGlass = mTemplate!!.isGlass
             blurredImageView.isVideo = false
             blurredImageView.updatePosCanvas(cropTo16x9)
+            blurredImageView.bitmapBlured = cropTo16x9
             blurredImageView.updateIpad(cropTo16x9!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
 
             if (mTemplate!!.ipad_type == IpadType.IPAD_NEOMORPHIC.ordinal) {
@@ -2705,6 +2708,7 @@ private fun iniTypeImg() {
             addEntityFromTemplate()
         } catch (e: Exception) {
             Log.e("Tag : ", "init ${e.message}")
+            runOnUiThread { hideProgressFragment() }
         }
     })
 }
@@ -3037,6 +3041,7 @@ internal fun save() {
                         else -> BitmapCropper.cropTo16x9(blurredImageView.bitmapOriginal)
                     }
                     blurredImageView.updatePosCanvas(mTemplate!!.width, mTemplate!!.height, cropTo16x92)
+                    blurredImageView.bitmapBlured = cropTo16x92
                     blurredImageView.updateIpad(cropTo16x92!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
                     val width = (blurredImageView.ipad_rect!!.width() * 1.0f).toInt()
                     val height = (cropTo16x92!!.height * 0.5355f).toInt()
@@ -3083,6 +3088,7 @@ internal fun save() {
                     }
                     val bitmap = cropTo16x9
                     blurredImageView.updatePosCanvas(mTemplate!!.width, mTemplate!!.height, bitmap)
+                    blurredImageView.bitmapBlured = bitmap
                     blurredImageView.updateIpad(bitmap!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
 
                     var rect: Rect
@@ -3229,6 +3235,7 @@ internal fun save() {
                 val createBitmap = Bitmap.createBitmap(mTemplate!!.width, mTemplate!!.height, Bitmap.Config.RGB_565)
                 createBitmap.eraseColor(ViewCompat.MEASURED_STATE_MASK)
                 blurredImageView.updatePosCanvas(mTemplate!!.width, mTemplate!!.height, createBitmap)
+                blurredImageView.bitmapBlured = createBitmap
                 blurredImageView.updateIpad(createBitmap, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
                 mTemplate!!.uri_bg_ffmpeg = blurredImageView.setupBitmapDraw(createBitmap, Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888), mTemplate!!)
                 saveTemplate()
@@ -6273,7 +6280,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
 
     fun pickVideoFromGallery() {
         if (Build.VERSION.SDK_INT >= 34) {
-            if (ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_VISUAL_USER_SELECTED") != 0 &&
+            if (ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_VISUAL_USER_SELECTED") != 0 ||
                 ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_VIDEO") != 0
             ) {
                 ActivityCompat.requestPermissions(
@@ -6654,6 +6661,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
                     )
                 }
                 blurredImageView.updatePosCanvas(cropTo16x9)
+                blurredImageView.bitmapBlured = cropTo16x9
                 blurredImageView.updateIpad(cropTo16x9!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
                 if (mTemplate!!.ipad_type != IpadType.BLACK_LAYER.ordinal &&
                     mTemplate!!.ipad_type != IpadType.GRADIENT.ordinal &&
@@ -6991,6 +6999,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
                             )
                         }
                         blurredImageView.updatePosCanvas(cropTo16x9)
+                        blurredImageView.bitmapBlured = cropTo16x9
                         blurredImageView.updateIpad(cropTo16x9!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
                         val min = Math.min(
                             blurredImageView.bitmapOriginal!!.width,
@@ -7619,10 +7628,12 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
             btnNo.setOnClickListener {
                 LocalPersistence.deleteTemplate(this@EngineActivity, Constants.TEMPLATE_TMP)
                 cancelDialog()
-                // Navigate back to WorkUserActivity (home screen) instead of just finishing
-                // Since WorkUserActivity calls finish() when launching EngineActivity,
-                // we must explicitly start it again before finishing this activity
-                startActivity(Intent(this@EngineActivity, hazem.nurmontage.videoquran.ui.home.WorkUserActivity::class.java))
+                // Navigate back to WorkUserActivity (home screen)
+                // Must use CLEAR_TOP + SINGLE_TOP because WorkUserActivity finish()es itself
+                // when launching EngineActivity, so nothing is in the back stack
+                val intent = Intent(this@EngineActivity, hazem.nurmontage.videoquran.ui.home.WorkUserActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                startActivity(intent)
                 finish()
             }
             val btnYes = inflate.findViewById<ButtonCustumFont>(R.id.dialog_yes)
@@ -8002,7 +8013,9 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
     }
 
     internal fun initTypeVideo() {
-        // TODO: implement
+        // TODO: implement video-type template initialization
+        // At minimum, dismiss the progress overlay so the user isn't stuck
+        runOnUiThread { hideProgressFragment() }
     }
 
     private val isSubscribed: Boolean

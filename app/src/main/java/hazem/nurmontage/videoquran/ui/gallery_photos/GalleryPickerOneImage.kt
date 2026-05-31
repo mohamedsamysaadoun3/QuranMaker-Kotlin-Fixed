@@ -101,9 +101,11 @@ class GalleryPickerOneImage : AppCompatActivity() {
             }
 
             withContext(Dispatchers.Main) {
-                binding.rv.adapter = GalleryImageAdapter(images) { imageItem ->
+                val adapter = GalleryImageAdapter(images, { imageItem, position ->
                     selectedImageUri = imageItem.uri
-                }
+                    (binding.rv.adapter as? GalleryImageAdapter)?.setSelectedPosition(position)
+                })
+                binding.rv.adapter = adapter
                 binding.viewProgress.visibility = View.GONE
             }
         }
@@ -120,39 +122,73 @@ class GalleryPickerOneImage : AppCompatActivity() {
 
     /**
      * RecyclerView adapter for displaying image thumbnails in a grid.
+     * Supports visual selection feedback with a semi-transparent overlay
+     * on the currently selected item.
      */
     private class GalleryImageAdapter(
         private val images: List<ImageItem>,
-        private val onSelect: (ImageItem) -> Unit
+        private val onSelect: (ImageItem, Int) -> Unit,
+        private var selectedPosition: Int = -1
     ) : androidx.recyclerview.widget.RecyclerView.Adapter<GalleryImageAdapter.ViewHolder>() {
 
         class ViewHolder(view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view)
+
+        fun setSelectedPosition(position: Int) {
+            val oldPos = selectedPosition
+            selectedPosition = position
+            if (oldPos >= 0) notifyItemChanged(oldPos)
+            if (position >= 0) notifyItemChanged(position)
+        }
 
         override fun onCreateViewHolder(
             parent: android.view.ViewGroup,
             viewType: Int
         ): ViewHolder {
-            val imageView = android.widget.ImageView(parent.context).apply {
+            val frameLayout = android.widget.FrameLayout(parent.context).apply {
                 layoutParams = androidx.recyclerview.widget.GridLayoutManager.LayoutParams(
                     androidx.recyclerview.widget.GridLayoutManager.LayoutParams.MATCH_PARENT,
                     300
                 )
+            }
+            val imageView = android.widget.ImageView(parent.context).apply {
+                layoutParams = android.widget.FrameLayout.LayoutParams(
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+                )
                 scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
                 setPadding(2, 2, 2, 2)
             }
-            return ViewHolder(imageView)
+            frameLayout.addView(imageView)
+
+            // Selection overlay
+            val overlay = android.view.View(parent.context).apply {
+                layoutParams = android.widget.FrameLayout.LayoutParams(
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+                )
+                setBackgroundColor(0x40000000.toInt()) // semi-transparent black
+                visibility = android.view.View.GONE
+                id = android.view.View.generateViewId()
+            }
+            frameLayout.addView(overlay)
+
+            return ViewHolder(frameLayout)
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val imageView = holder.itemView as android.widget.ImageView
-            val image = images[position]
+            val frameLayout = holder.itemView as android.widget.FrameLayout
+            val imageView = frameLayout.getChildAt(0) as android.widget.ImageView
+            val overlay = frameLayout.getChildAt(1)
 
+            val image = images[position]
             com.bumptech.glide.Glide.with(holder.itemView.context)
                 .load(image.uri)
                 .centerCrop()
                 .into(imageView)
 
-            holder.itemView.setOnClickListener { onSelect(image) }
+            overlay.visibility = if (position == selectedPosition) android.view.View.VISIBLE else android.view.View.GONE
+
+            holder.itemView.setOnClickListener { onSelect(image, position) }
         }
 
         override fun getItemCount() = images.size

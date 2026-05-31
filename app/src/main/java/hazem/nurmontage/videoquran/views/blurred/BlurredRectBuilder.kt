@@ -390,11 +390,12 @@ fun BlurredImageView.updateIpad() {
  */
 fun BlurredImageView.createRect() {
     this.updatePosSurahName()
-    val ipad = this.ipad_rect!!
-    val bmSq = this.bitmapSquare!!
+    val ipad = this.ipad_rect ?: return
+    val bmSq = this.bitmapSquare
 
     // ── IPAD_CLASSIC ──────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.IPAD_CLASSIC.ordinal) {
+        if (bmSq == null) return  // can't create rects without square bitmap
         val height = ipad.height() - bmSq.height
         val blurRadius = height * 0.03f
         val centerX = ipad.centerX() - (bmSq.width * 0.5f)
@@ -418,6 +419,7 @@ fun BlurredImageView.createRect() {
     // ── IPAD_NEOMORPHIC ───────────────────────────────────────────────────
     if (this.mIpadType == IpadType.IPAD_NEOMORPHIC.ordinal) {
         val height3 = ipad.height() * 0.6f
+        if (bmSq == null) return  // can't create rects without square bitmap
         val f6 = height3 * 0.03f
         val width2 = ipad.top + (ipad.width() * 0.3f * 2.4f)
         this.rectFSurahName = RectF()
@@ -442,6 +444,7 @@ fun BlurredImageView.createRect() {
 
     // ── IPAD / IPAD_UNBLUR ───────────────────────────────────────────────
     if (this.mIpadType == IpadType.IPAD.ordinal || this.mIpadType == IpadType.IPAD_UNBLUR.ordinal) {
+        if (bmSq == null) return  // can't create rects without square bitmap
         val height4 = ipad.height() - bmSq.height
         val f11 = height4 * 0.03f
         val centerX2 = ipad.centerX() - (bmSq.width * 0.5f)
@@ -802,6 +805,7 @@ fun BlurredImageView.createRect() {
 
     // ── BORDER ────────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.BORDER.ordinal) {
+        if (bmSq == null) return  // can't create rects without square bitmap
         val height27 = ipad.height() - bmSq.height
         val f94 = height27 * 0.03f
         val width33 = ipad.width() * 0.8f
@@ -846,11 +850,12 @@ fun BlurredImageView.createRect() {
  * Original: BlurredImageView.java line 1691
  */
 fun BlurredImageView.createRectWithoutSurahName() {
-    val ipad = this.ipad_rect!!
-    val bmSq = this.bitmapSquare!!
+    val ipad = this.ipad_rect ?: return
+    val bmSq = this.bitmapSquare
 
     // ── IPAD_CLASSIC ──────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.IPAD_CLASSIC.ordinal) {
+        if (bmSq == null) return  // can't create rects without square bitmap
         val height = ipad.height() - bmSq.height
         val blurRadius = height * 0.03f
         val centerX = ipad.centerX() - (bmSq.width * 0.5f)
@@ -873,6 +878,7 @@ fun BlurredImageView.createRectWithoutSurahName() {
 
     // ── IPAD_NEOMORPHIC ───────────────────────────────────────────────────
     if (this.mIpadType == IpadType.IPAD_NEOMORPHIC.ordinal) {
+        if (bmSq == null) return  // can't create rects without square bitmap
         val height3 = ipad.height() * 0.6f
         val f6 = height3 * 0.03f
         val width2 = ipad.top + (ipad.width() * 0.3f * 2.4f)
@@ -898,6 +904,7 @@ fun BlurredImageView.createRectWithoutSurahName() {
 
     // ── IPAD / IPAD_UNBLUR ───────────────────────────────────────────────
     if (this.mIpadType == IpadType.IPAD.ordinal || this.mIpadType == IpadType.IPAD_UNBLUR.ordinal) {
+        if (bmSq == null) return  // can't create rects without square bitmap
         val height4 = ipad.height() - bmSq.height
         val f11 = height4 * 0.03f
         val centerX2 = ipad.centerX() - (bmSq.width * 0.5f)
@@ -1258,6 +1265,7 @@ fun BlurredImageView.createRectWithoutSurahName() {
 
     // ── BORDER ────────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.BORDER.ordinal) {
+        if (bmSq == null) return  // can't create rects without square bitmap
         val height27 = ipad.height() - bmSq.height
         val f94 = height27 * 0.03f
         val width33 = ipad.width() * 0.8f

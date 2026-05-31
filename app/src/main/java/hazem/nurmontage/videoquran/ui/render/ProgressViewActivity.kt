@@ -37,12 +37,14 @@ import hazem.nurmontage.videoquran.utils.LocalPersistence
 import hazem.nurmontage.videoquran.utils.LocaleHelper
 import hazem.nurmontage.videoquran.utils.audio.AudioUtils
 import hazem.nurmontage.videoquran.utils.audio.FfmpegCodecChecker
+import hazem.nurmontage.videoquran.core.common.Constants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.apache.commons.io.FileUtils
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Semaphore
@@ -249,6 +251,9 @@ class ProgressViewActivity : BaseActivity(), ExportCommandBuilder.PreRenderExecu
         mUri = template.uri_video ?: template.uri_media_video
 
         lifecycleScope.launch(Dispatchers.IO) {
+            // Step 0: Ensure required asset files (font) exist in template folder
+            ensureTemplateAssets(template)
+
             // Step 1: Download / copy all media assets to local storage
             prepareAllMedia(template.entityMediaList, null)
 
@@ -298,6 +303,45 @@ class ProgressViewActivity : BaseActivity(), ExportCommandBuilder.PreRenderExecu
     }
 
     /**
+     * Ensure required asset files are present in the template folder.
+     *
+     * The FFmpeg timer overlay (`drawtext`) requires the font file to exist at
+     * `${template.folder_template}/NotoNaskhArabic.ttf`.  The original Java code
+     * relied on `FontUtils.copyFontToInternalStorage()` which copies the font to
+     * `context.filesDir`, but the FFmpeg command references the template folder
+     * path.  If the font is missing, the timer pre-render fails, `timerPath`
+     * becomes null, an empty `-i ""` argument is added, and the entire export
+     * fails with an FFmpeg error.
+     *
+     * This method copies the font (and any other required assets) into the
+     * template folder so the FFmpeg command can find them.
+     */
+    private fun ensureTemplateAssets(template: Template) {
+        val folder = template.folder_template ?: return
+        val fontTarget = File(folder, Constants.FONT_NUMBER)
+        if (fontTarget.exists()) return
+
+        try {
+            // Try copying from the app's internal files dir first (may have been
+            // placed there by FontUtils.copyFontToInternalStorage during save)
+            val internalFont = File(filesDir, Constants.FONT_NUMBER)
+            if (internalFont.exists()) {
+                internalFont.copyTo(fontTarget, overwrite = false)
+                return
+            }
+
+            // Fallback: copy directly from assets
+            assets.open("fonts/arabic/${Constants.FONT_NUMBER}").use { input ->
+                FileOutputStream(fontTarget).use { output ->
+                    input.copyTo(output)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
      * Set up the complete FFmpeg export command.
      *
      * Delegates to [ExportCommandBuilder.buildCommand] which builds
@@ -322,6 +366,49 @@ class ProgressViewActivity : BaseActivity(), ExportCommandBuilder.PreRenderExecu
                 }
             }.also { it.start() }
         } else {
+            // buildCommand returned null — one or more pre-render steps failed
+            // (e.g. timer overlay failed because font file was missing).
+            // Show the error UI instead of silently navigating back.
+            showBuildCommandError()
+        }
+    }
+
+    /**
+     * Show error UI when [ExportCommandBuilder.buildCommand] returns null.
+     *
+     * This happens when a required pre-render step fails (e.g. the timer font
+     * file is missing from the template folder).  Previously the export would
+     * silently navigate back to the editor; now the user sees the same error
+     * layout that FFmpeg failures produce.
+     */
+    private fun showBuildCommandError() {
+        if (isDestroy) return
+        try {
+            val errorLayout = binding.root.findViewById<LinearLayout>(R.id.layout_error)
+            if (errorLayout != null) {
+                errorLayout.visibility = View.VISIBLE
+            }
+            val errorText = binding.root.findViewById<android.widget.TextView>(R.id.tv_error)
+            val supportBtn = binding.root.findViewById<android.widget.Button>(R.id.btn_support_team)
+            val isArabic = LocaleHelper.getLanguage(this) == "ar"
+
+            if (isArabic) {
+                supportBtn?.text = "فريق الدعم"
+                errorText?.text = "فشل تجهيز الفيديو للتصدير. تحقق من وجود جميع الملفات المطلوبة."
+            } else {
+                supportBtn?.text = "Support Team"
+                errorText?.text = "Failed to prepare video for export. Please check that all required files are available."
+            }
+
+            supportBtn?.setOnClickListener {
+                Feadback.reportBug(this@ProgressViewActivity,
+                    "buildCommand returned null. folder_template=${mTemplate?.folder_template}, " +
+                    "mTimeModel=${mTemplate?.mTimeModel != null}, " +
+                    "entityProgressTemplate=${mTemplate?.entityProgressTemplate != null}, " +
+                    "uri_bg_ffmpeg=${mTemplate?.uri_bg_ffmpeg}",
+                    supportBtn.text.toString())
+            }
+        } catch (e: Exception) {
             toStudio()
         }
     }
