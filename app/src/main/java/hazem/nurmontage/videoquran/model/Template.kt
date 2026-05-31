@@ -116,6 +116,10 @@ class Template : Serializable {
     fun setWidthAndHeight(w: Int, h: Int) { width = w; height = h }
     fun setDrawingTranslation(dx: Float, dy: Float) { mDrawingTranslationX = dx; mDrawingTranslationY = dy }
 
+    /** Mark this template as newly created (isNewCode = true).
+     *  Called during save to ensure a fresh template ID is generated on load. */
+    fun setNewCode() { isNewCode = true }
+
     // ── Convenience helpers (non-clashing names) ──────────────────
     /** Returns [isVideoSquare] via JavaBeans-style `getIsXxx` naming. */
     fun getIsVideoSquare(): Boolean = isVideoSquare

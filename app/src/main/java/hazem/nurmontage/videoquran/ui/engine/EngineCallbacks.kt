@@ -1638,9 +1638,6 @@ fun EngineActivity.createIIpadEditCallback(): EditIpadFragment.IIpadEditCallback
             blurredImageView.invalidate()
         }
 
-        fun onDialogPremium() {
-            dialogPremium(0)
-        }
 
         override fun onGlassType(z: Boolean) {
             mTemplate!!.isGlass = z

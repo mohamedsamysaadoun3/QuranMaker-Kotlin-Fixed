@@ -719,10 +719,7 @@ fun BlurredImageView.getBitmapDraw(isFlag: Boolean, file: File?): Bitmap {
         drawIpad(canvas, false, isFlag)
     }
 
-    if (!isPro()) {
-        resetWatermark()
-        drawWattermark(canvas, true)
-    }
+    // Billing removed — no watermark for any user
 
     if (surahNameEntity != null) {
         surahNameEntity!!.rect = RectF(

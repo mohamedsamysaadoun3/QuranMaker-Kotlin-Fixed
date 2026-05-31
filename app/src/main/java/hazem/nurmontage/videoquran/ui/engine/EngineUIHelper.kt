@@ -408,16 +408,11 @@ fun EngineActivity.initViews() {
             iTrimLineCallback!!.onEmptySelect()
         }
         override fun onWattermark() {
-            dialogWatermark()
+            /* Watermark removed — all users are pro */
         }
     })
-    if (blurredImageView.isPro) {
-        findViewById<View>(R.id.to_pro).visibility = View.GONE
-    } else {
-        findViewById<View>(R.id.to_pro).setOnClickListener {
-            toProVersion()
-        }
-    }
+    // Billing removed — all users are pro; hide the pro button
+    findViewById<View>(R.id.to_pro).visibility = View.GONE
     blurredImageView.post {
         if (mTemplate!!.isVideoSquare) {
             initTypeVideo()
@@ -474,29 +469,17 @@ fun EngineActivity.initViews() {
     ivResize = findViewById(R.id.iv_ratio)
     ivIpod = findViewById(R.id.iv_ipod)
     btnChangeResize = findViewById(R.id.btn_change_aspect)
-    if (blurredImageView.isPro) {
-        btnChangeResize?.setOnClickListener {
-            stop()
-            try {
-                val beginTransaction = supportFragmentManager.beginTransaction()
-                mCurrentFragment = ResizeFragment.getInstance(iDimensionCallback, mResources, "16")
-                beginTransaction.replace(R.id.m_container, mCurrentFragment!!)
-                beginTransaction.commit()
-                setupShowFragment(null)
-            } catch (unused: Exception) {
-            }
+    // Billing removed — all features available to everyone
+    btnChangeResize?.setOnClickListener {
+        stop()
+        try {
+            val beginTransaction = supportFragmentManager.beginTransaction()
+            mCurrentFragment = ResizeFragment.getInstance(iDimensionCallback, mResources, "16")
+            beginTransaction.replace(R.id.m_container, mCurrentFragment!!)
+            beginTransaction.commit()
+            setupShowFragment(null)
+        } catch (unused: Exception) {
         }
-    } else {
-        textChangeResize?.setTextColor(-8355712)
-        ivResize?.setColorFilter(-8355712, android.graphics.PorterDuff.Mode.SRC_IN)
-        btnChangeResize?.setBackgroundColor(0)
-        btnChangeResize?.setOnClickListener {
-            stop()
-            dialogPremium(R.drawable.iv_layout_ipod)
-        }
-        textCustumFont.setTextColor(-8355712)
-        ivIpod?.setColorFilter(-8355712, android.graphics.PorterDuff.Mode.SRC_IN)
-        btnIpod?.setBackgroundColor(0)
     }
     btnIpod?.setOnClickListener {
         stop()
@@ -679,114 +662,8 @@ fun EngineActivity.dialogCopyRight() {
     }
 }
 
-fun EngineActivity.dialogWatermark() {
-    try {
-        if (dialog != null) {
-            cancelDialog()
-        }
-        isSaveTmpTemplate = false
-        isToCrop = true
-        val dialog = Dialog(this)
-        this.dialog = dialog
-        dialog.setCancelable(true)
-        this.dialog!!.requestWindowFeature(1)
-        this.dialog!!.window!!.setLayout(-1, -2)
-        this.dialog!!.window!!.setBackgroundDrawable(ColorDrawable(0))
-        val inflate = LayoutInflater.from(this).inflate(R.layout.layout_dialog, null)
-        this.dialog!!.setContentView(inflate)
-        inflate.findViewById<View>(R.id.dialog_title).visibility = 8
-        inflate.findViewById<View>(R.id.img_pro).visibility = 0
-        val textCustumFont = inflate.findViewById<TextCustumFont>(R.id.dialog_message)
-        textCustumFont.text = mResources!!.getString(R.string.do_want_delete_watermark)
-        textCustumFont.gravity = 17
-        val buttonCustumFont = inflate.findViewById<ButtonCustumFont>(R.id.dialog_no)
-        buttonCustumFont.text = mResources!!.getString(R.string.no)
-        buttonCustumFont.setOnClickListener {
-            cancelDialog()
-        }
-        val buttonCustumFont2 = inflate.findViewById<ButtonCustumFont>(R.id.dialog_yes)
-        buttonCustumFont2.text = mResources!!.getString(R.string.yes)
-        buttonCustumFont2.setOnClickListener {
-            toProVersion()
-            cancelDialog()
-        }
-        this.dialog!!.show()
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-}
 
-fun EngineActivity.dialogPremium(i: Int) {
-    try {
-        if (dialog != null) {
-            cancelDialog()
-        }
-        isSaveTmpTemplate = false
-        val dialog = Dialog(this)
-        this.dialog = dialog
-        dialog.setCancelable(true)
-        this.dialog!!.requestWindowFeature(1)
-        this.dialog!!.window!!.setLayout(-1, -2)
-        this.dialog!!.window!!.setBackgroundDrawable(ColorDrawable(0))
-        val inflate = LayoutInflater.from(this).inflate(R.layout.layout_dialog, null)
-        this.dialog!!.setContentView(inflate)
-        inflate.findViewById<View>(R.id.dialog_title).visibility = 8
-        inflate.findViewById<View>(R.id.img_pro).visibility = 0
-        val textCustumFont = inflate.findViewById<TextCustumFont>(R.id.dialog_message)
-        textCustumFont.text = mResources!!.getString(R.string.unlock_premium)
-        textCustumFont.gravity = 17
-        val buttonCustumFont = inflate.findViewById<ButtonCustumFont>(R.id.dialog_no)
-        buttonCustumFont.text = mResources!!.getString(R.string.no)
-        buttonCustumFont.setOnClickListener {
-            cancelDialog()
-        }
-        val buttonCustumFont2 = inflate.findViewById<ButtonCustumFont>(R.id.dialog_yes)
-        buttonCustumFont2.text = mResources!!.getString(R.string.yes)
-        buttonCustumFont2.setOnClickListener {
-            toProVersion()
-            cancelDialog()
-        }
-        this.dialog!!.show()
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-}
 
-fun EngineActivity.dialogPremiumIpad() {
-    isSaveTmpTemplate = false
-    try {
-        val dialog = Dialog(this)
-        this.dialog = dialog
-        dialog.setCancelable(true)
-        this.dialog!!.requestWindowFeature(1)
-        this.dialog!!.window!!.setLayout(-1, -2)
-        this.dialog!!.window!!.setBackgroundDrawable(ColorDrawable(0))
-        val inflate = LayoutInflater.from(this).inflate(R.layout.layout_dialog_premuim, null)
-        this.dialog!!.setContentView(inflate)
-        inflate.findViewById<View>(R.id.dialog_title).visibility = 8
-        val textCustumFont = inflate.findViewById<TextCustumFont>(R.id.dialog_message)
-        val textCustumFont2 = inflate.findViewById<TextCustumFont>(R.id.tv_subscribe)
-        inflate.findViewById<View>(R.id.dialog_no).setOnClickListener {
-            cancelDialog()
-        }
-        val relativeLayout = inflate.findViewById<RelativeLayout>(R.id.dialog_yes)
-        relativeLayout.setBackgroundResource(R.drawable.btn_dialog_premium_state)
-        relativeLayout.setOnClickListener {
-            toProVersion()
-            cancelDialog()
-        }
-        if (LocaleHelper.getLanguage(this) == "ar") {
-            textCustumFont.text = "🎁 هذه الميزة فقط للمشتركين في التطبيق."
-            textCustumFont2.text = "النسخة المدفوعة"
-        } else {
-            textCustumFont.text = "🎁 This feature is only for app subscribers."
-            textCustumFont2.text = "Upgrade premium"
-        }
-        this.dialog!!.show()
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-}
 
 fun EngineActivity.dialogNoInternet(uri: Uri) {
     try {
@@ -959,9 +836,6 @@ fun EngineActivity.cancelDialogInternet() {
     }
 }
 
-fun EngineActivity.toProVersion() {
-    // Billing removed - pro version is always unlocked
-}
 
 fun EngineActivity.updateHitRatio(i: Int, str: String) {
     if (i == ResizeType.SOCIAL_STORY.ordinal) {
@@ -1428,22 +1302,114 @@ fun EngineActivity.onVideoExtractActivityResult(activityResult: ActivityResult) 
     }
 }
 
+/**
+ * Result from ChoiceBgFromVideoActivity — sets the chosen background bitmap.
+ * Maps to Java lambda$new$8 (launchChoiceBgActivity handler).
+ * Same logic as onCropActivityResult: the bg bitmap is delivered via Common.bitmap.
+ */
 fun EngineActivity.onChoiceBgResult(activityResult: ActivityResult) {
-    // TODO: implement
+    var cropTo16x9: Bitmap?
+    if (activityResult.resultCode != -1 || activityResult.data == null ||
+        Common.bitmap == null || Common.bitmap!!.isRecycled
+    ) {
+        return
+    }
+    Common.bitmap = Bitmap.createScaledBitmap(
+        Common.bitmap!!, blurredImageView.getH(), blurredImageView.getH(), false
+    )
+    blurredImageView.bitmapOriginal = Common.bitmap
+    cropTo16x9 = when (mTemplate!!.geTypeResize()) {
+        ResizeType.SOCIAL_STORY.ordinal -> BitmapCropper.cropTo9x16(
+            blurredImageView.bitmapOriginal, blurredImageView.getW(), blurredImageView.getH()
+        )
+        ResizeType.SQUARE.ordinal -> BitmapCropper.cropTo1x1(
+            blurredImageView.bitmapOriginal, blurredImageView.getW(), blurredImageView.getH()
+        )
+        else -> BitmapCropper.cropTo16x9(
+            blurredImageView.bitmapOriginal, blurredImageView.getW(), blurredImageView.getH()
+        )
+    }
+    blurredImageView.bitmapBlured = UtilsBitmap.blur(this, cropTo16x9!!, 20, 1)!!
+    blurredImageView.invalidate()
 }
 
+/**
+ * Result from CropBitmapActivity — receives crop region coordinates.
+ * Maps to Java lambda$new$9 (launchCropActivity handler).
+ * Same logic as onCropDataActivityResult.
+ */
 fun EngineActivity.onCropResult(activityResult: ActivityResult) {
-    // TODO: implement
+    if (activityResult.resultCode == -1) {
+        val data = activityResult.data ?: return
+        mTemplate!!.x_square = data.getFloatExtra("x", 0.3f)
+        mTemplate!!.y_square = data.getFloatExtra("y", 0.4f)
+        mTemplate!!.width_square = data.getFloatExtra("w", 1.0f)
+        mTemplate!!.height_square = data.getFloatExtra("h", 0.5f)
+        blurredImageView.bitmapSquare = Common.bitmap
+        blurredImageView.rectSquare = Common.rect
+        blurredImageView.invalidate()
+    }
+    isToCrop = false
 }
 
+/**
+ * Result from GalleryPickerOneImage — user picked an image.
+ * Maps to Java lambda$new$10 (launchImg handler).
+ * Same logic as onImgActivityResult.
+ */
 fun EngineActivity.onImgResult(activityResult: ActivityResult) {
-    // TODO: implement
+    val data: Intent?
+    if (activityResult.resultCode != -1) return
+    data = activityResult.data ?: return
+    if (data.data == null) return
+    handleImg(data.data!!)
 }
 
+/**
+ * Result from GalleryPickerVideo — user picked a video for background.
+ * Maps to Java lambda$new$11 (launchVideo handler).
+ * Same logic as onVideoActivityResult.
+ */
 fun EngineActivity.onVideoResult(activityResult: ActivityResult) {
-    // TODO: implement
+    val data: Intent?
+    if (activityResult.resultCode != -1) return
+    data = activityResult.data ?: return
+    if (data.data == null) return
+    val data2 = data.data!!
+    try {
+        contentResolver.takePersistableUriPermission(data2, 1)
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    handleVideo(data2)
 }
 
+/**
+ * Result from GalleryPickerVideo — user picked a video for audio extraction.
+ * Maps to Java lambda$new$12 (launchVideoExtract handler).
+ * Same logic as onVideoExtractActivityResult.
+ */
 fun EngineActivity.onVideoExtractResult(activityResult: ActivityResult) {
-    // TODO: implement
+    val data: Intent?
+    isToCrop = false
+    if (activityResult.resultCode != -1) return
+    data = activityResult.data ?: return
+    if (data.data == null) return
+    try {
+        val data2 = data.data!!
+        try {
+            contentResolver.takePersistableUriPermission(data2, 1)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        runOnUiThread {
+            showProgress()
+        }
+        mTemplate!!.uri_upload_extract_audio_video = data2.toString()
+        val copyFromUri = hazem.nurmontage.videoquran.utils.audio.AudioUtils.copyFromUri(this, data2, mTemplate!!.folder_template!!)!!
+        start_extenstion = 0
+        extractAudioFromVideoRecursive(copyFromUri, 0, false, 0)
+    } catch (e2: Exception) {
+        e2.printStackTrace()
+    }
 }

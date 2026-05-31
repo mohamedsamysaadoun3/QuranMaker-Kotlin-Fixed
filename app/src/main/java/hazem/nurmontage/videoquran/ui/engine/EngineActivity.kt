@@ -1295,9 +1295,7 @@ class EngineActivity : BaseActivity() {
             blurredImageView.invalidate()
         }
 
-        fun onDialogPremium() {
-            dialogPremium(0)
-        }
+
 
         override fun onGlassType(z: Boolean) {
             mTemplate!!.isGlass = z
@@ -2906,16 +2904,11 @@ private fun initViews() {
             iTrimLineCallback.onEmptySelect()
         }
         override fun onWattermark() {
-            dialogWatermark()
+            // Billing removed — watermark dialog suppressed
         }
     })
-    if (blurredImageView.isPro) {
-        findViewById<View>(R.id.to_pro).visibility = View.GONE
-    } else {
-        findViewById<View>(R.id.to_pro).setOnClickListener {
-            toProVersion()
-        }
-    }
+    // Billing removed — all users are pro; hide the pro button
+    findViewById<View>(R.id.to_pro).visibility = View.GONE
     blurredImageView.post {
         if (mTemplate!!.isVideoSquare) {
             initTypeVideo()
@@ -2972,29 +2965,17 @@ private fun initViews() {
     ivResize = findViewById(R.id.iv_ratio)
     ivIpod = findViewById(R.id.iv_ipod)
     btnChangeResize = findViewById(R.id.btn_change_aspect)
-    if (blurredImageView.isPro) {
-        btnChangeResize?.setOnClickListener {
-            stop()
-            try {
-                val beginTransaction = supportFragmentManager.beginTransaction()
-                mCurrentFragment = ResizeFragment.getInstance(iDimensionCallback, mResources, "16")
-                beginTransaction.replace(R.id.m_container, mCurrentFragment!!)
-                beginTransaction.commit()
-                setupShowFragment(null)
-            } catch (unused: Exception) {
-            }
+    // Billing removed — all users have resize access
+    btnChangeResize?.setOnClickListener {
+        stop()
+        try {
+            val beginTransaction = supportFragmentManager.beginTransaction()
+            mCurrentFragment = ResizeFragment.getInstance(iDimensionCallback, mResources, "16")
+            beginTransaction.replace(R.id.m_container, mCurrentFragment!!)
+            beginTransaction.commit()
+            setupShowFragment(null)
+        } catch (unused: Exception) {
         }
-    } else {
-        textChangeResize?.setTextColor(-8355712)
-        ivResize?.setColorFilter(-8355712, PorterDuff.Mode.SRC_IN)
-        btnChangeResize?.setBackgroundColor(0)
-        btnChangeResize?.setOnClickListener {
-            stop()
-            dialogPremium(R.drawable.iv_layout_ipod)
-        }
-        textCustumFont.setTextColor(-8355712)
-        ivIpod?.setColorFilter(-8355712, PorterDuff.Mode.SRC_IN)
-        btnIpod?.setBackgroundColor(0)
     }
     btnIpod?.setOnClickListener {
         stop()
@@ -3020,9 +3001,7 @@ internal fun save() {
     trackViewEntity.finishScroll()
     trackViewEntity.setOnProgress(true)
     blurredImageView.setNotDraw(true)
-    if (!blurredImageView.isPro) {
-        blurredImageView.isRemoveWattermark = false
-    }
+    // Billing removed — no watermark for any user
     stop()
     showProgress()
     executor.execute(Runnable {
@@ -3334,7 +3313,7 @@ private fun saveTemplateTmp() {
         if (mTemplate == null) {
             mTemplate = Template()
         }
-        // mTemplate!!.setNewCode() // TODO: fix
+        mTemplate!!.setNewCode()
         mTemplate!!.isGlass = blurredImageView.isGlass
         mTemplate!!.currentCursur = trackViewEntity.current_cursur_position
         mTemplate!!.scale_timeline = trackViewEntity.scaleFactor
@@ -3572,8 +3551,8 @@ private fun saveTemplate() {
         if (engineActivity.mTemplate == null) {
             engineActivity.mTemplate = Template()
         }
-        // engineActivity.mTemplate!!.setNewCode() // TODO: fix
-        // // TODO: mTemplate?.isGlass = blurredImageView.isGlass // TODO: fix isGlass assignment
+        engineActivity.mTemplate!!.setNewCode()
+        engineActivity.mTemplate!!.isGlass = engineActivity.blurredImageView.isGlass
         engineActivity.mTemplate!!.currentCursur = engineActivity.trackViewEntity.current_cursur_position
         engineActivity.mTemplate!!.scale_timeline = engineActivity.trackViewEntity.scaleFactor
         engineActivity.mTemplate!!.duration = engineActivity.trackViewEntity.maxTime
@@ -6130,78 +6109,9 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         launchCropActivity!!.launch(Intent(this, CropBitmapActivity::class.java))
     }
 
-    fun dialogWatermark() {
-        try {
-            if (dialog != null) {
-                cancelDialog()
-            }
-            isSaveTmpTemplate = false
-            isToCrop = true
-            val dialog = Dialog(this)
-            this.dialog = dialog
-            dialog.setCancelable(true)
-            this.dialog!!.requestWindowFeature(1)
-            this.dialog!!.window!!.setLayout(-1, -2)
-            this.dialog!!.window!!.setBackgroundDrawable(ColorDrawable(0))
-            val inflate = LayoutInflater.from(this).inflate(R.layout.layout_dialog, null)
-            this.dialog!!.setContentView(inflate)
-            inflate.findViewById<View>(R.id.dialog_title).visibility = 8
-            inflate.findViewById<View>(R.id.img_pro).visibility = 0
-            val textCustumFont = inflate.findViewById<TextCustumFont>(R.id.dialog_message)
-            textCustumFont.text = mResources!!.getString(R.string.do_want_delete_watermark)
-            textCustumFont.gravity = 17
-            val buttonCustumFont = inflate.findViewById<ButtonCustumFont>(R.id.dialog_no)
-            buttonCustumFont.text = mResources!!.getString(R.string.no)
-            buttonCustumFont.setOnClickListener {
-                cancelDialog()
-            }
-            val buttonCustumFont2 = inflate.findViewById<ButtonCustumFont>(R.id.dialog_yes)
-            buttonCustumFont2.text = mResources!!.getString(R.string.yes)
-            buttonCustumFont2.setOnClickListener {
-                toProVersion()
-                cancelDialog()
-            }
-            this.dialog!!.show()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
+    // dialogWatermark() removed — billing stripped
 
-    fun dialogPremium(i: Int) {
-        try {
-            if (dialog != null) {
-                cancelDialog()
-            }
-            isSaveTmpTemplate = false
-            val dialog = Dialog(this)
-            this.dialog = dialog
-            dialog.setCancelable(true)
-            this.dialog!!.requestWindowFeature(1)
-            this.dialog!!.window!!.setLayout(-1, -2)
-            this.dialog!!.window!!.setBackgroundDrawable(ColorDrawable(0))
-            val inflate = LayoutInflater.from(this).inflate(R.layout.layout_dialog, null)
-            this.dialog!!.setContentView(inflate)
-            inflate.findViewById<View>(R.id.dialog_title).visibility = 8
-            inflate.findViewById<View>(R.id.img_pro).visibility = 0
-            val textCustumFont = inflate.findViewById<TextCustumFont>(R.id.dialog_message)
-            textCustumFont.text = mResources!!.getString(R.string.unlock_premium)
-            textCustumFont.gravity = 17
-            val buttonCustumFont = inflate.findViewById<ButtonCustumFont>(R.id.dialog_no)
-            buttonCustumFont.text = mResources!!.getString(R.string.no)
-            buttonCustumFont.setOnClickListener {
-                cancelDialog()
-            }
-            val buttonCustumFont2 = inflate.findViewById<ButtonCustumFont>(R.id.dialog_yes)
-            buttonCustumFont2.text = mResources!!.getString(R.string.yes)
-            buttonCustumFont2.setOnClickListener {
-                toProVersion()
-                cancelDialog()
-            }
-            this.dialog!!.show()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
+    // dialogPremium(i: Int) removed — billing stripped
 
         fun updateHitRatio(i: Int, str: String) {
         if (i == ResizeType.SOCIAL_STORY.ordinal) {
@@ -6214,41 +6124,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         ivResize!!.setImageResource(DrawableHelper.getIdResource(str))
     }
 
-        fun dialogPremiumIpad() {
-        isSaveTmpTemplate = false
-        try {
-            val dialog = Dialog(this)
-            this.dialog = dialog
-            dialog.setCancelable(true)
-            this.dialog!!.requestWindowFeature(1)
-            this.dialog!!.window!!.setLayout(-1, -2)
-            this.dialog!!.window!!.setBackgroundDrawable(ColorDrawable(0))
-            val inflate = LayoutInflater.from(this).inflate(R.layout.layout_dialog_premuim, null)
-            this.dialog!!.setContentView(inflate)
-            inflate.findViewById<View>(R.id.dialog_title).visibility = 8
-            val textCustumFont = inflate.findViewById<TextCustumFont>(R.id.dialog_message)
-            val textCustumFont2 = inflate.findViewById<TextCustumFont>(R.id.tv_subscribe)
-            inflate.findViewById<View>(R.id.dialog_no).setOnClickListener {
-                cancelDialog()
-            }
-            val relativeLayout = inflate.findViewById<RelativeLayout>(R.id.dialog_yes)
-            relativeLayout.setBackgroundResource(R.drawable.btn_dialog_premium_state)
-            relativeLayout.setOnClickListener {
-                toProVersion()
-                cancelDialog()
-            }
-            if (LocaleHelper.getLanguage(this) == "ar") {
-                textCustumFont.text = "🎁 هذه الميزة فقط للمشتركين في التطبيق."
-                textCustumFont2.text = "النسخة المدفوعة"
-            } else {
-                textCustumFont.text = "🎁 This feature is only for app subscribers."
-                textCustumFont2.text = "Upgrade premium"
-            }
-            this.dialog!!.show()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
+    // dialogPremiumIpad() removed — billing stripped
 
     fun pickVideoForAudio() {
         if (Build.VERSION.SDK_INT >= 34) {
@@ -7604,10 +7480,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    internal fun toProVersion() {
-        // Billing removed - pro version is always unlocked
-        // Originally navigated to ProVersionActivity; now a no-op
-    }
+    // toProVersion() removed — billing stripped
 
     internal fun showExitDialog() {
         try {
@@ -8013,9 +7886,173 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
     }
 
     internal fun initTypeVideo() {
-        // TODO: implement video-type template initialization
-        // At minimum, dismiss the progress overlay so the user isn't stuck
-        runOnUiThread { hideProgressFragment() }
+        executor.execute {
+            try {
+                blurredImageView.initCanvasDimension(
+                    blurredImageView.getW(), blurredImageView.getH(), mTemplate!!.geTypeResize()
+                )
+                val height = blurredImageView.getH()
+
+                // Copy the original video to local storage, then extract a frame for the background
+                AudioUtils.copyToLocalAsync(
+                    this,
+                    mTemplate!!.uri_original_upload_video!!,
+                    mTemplate!!.folder_template!!
+                ) { localVideoPath ->
+                    try {
+                        mTemplate!!.uri_media_video = localVideoPath
+                        val fileVideo = FileUtils.getFileVideo(mTemplate!!.folder_template!!)!!
+                        val framePattern = File(fileVideo, "frame_%04d.jpg")
+                        val firstFrame = File(fileVideo, "frame_0001.jpg")
+
+                        endFrame = Math.min(Math.round(trackViewEntity.maxTime / 1000.0f), 4)
+                        if (endFrame == 0) endFrame = 4
+
+                        // Extract initial frames from video for background
+                        id_ffmpeg.add(
+                            FFmpegKit.executeWithArgumentsAsync(
+                                arrayOf(
+                                    "-i", localVideoPath, "-ss", "0", "-t", "$endFrame",
+                                    "-r", "25", "-vf",
+                                    "scale=$height:$height:force_original_aspect_ratio=increase",
+                                    "-q:v", "0", "-threads", "4", "-an", "-y",
+                                    framePattern.absolutePath
+                                )
+                            ) { _ ->
+                                try {
+                                    mTemplate!!.frame_bg = firstFrame.absolutePath
+                                    val bitmap = Glide.with(this as androidx.fragment.app.FragmentActivity)
+                                        .asBitmap()
+                                        .load(mTemplate!!.frame_bg)
+                                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                        .skipMemoryCache(true)
+                                        .override(height, height)
+                                        .submit().get()
+
+                                    blurredImageView.isGlass = mTemplate!!.isGlass
+                                    blurredImageView.isVideo = true
+                                    blurredImageView.bitmapOriginal = bitmap
+
+                                    val cropTo16x9 = when (mTemplate!!.geTypeResize()) {
+                                        ResizeType.SOCIAL_STORY.ordinal -> BitmapCropper.cropTo9x16(
+                                            blurredImageView.bitmapOriginal, blurredImageView.getW(), blurredImageView.getH()
+                                        )
+                                        ResizeType.SQUARE.ordinal -> BitmapCropper.cropTo1x1(
+                                            blurredImageView.bitmapOriginal, blurredImageView.getW(), blurredImageView.getH()
+                                        )
+                                        else -> BitmapCropper.cropTo16x9(
+                                            blurredImageView.bitmapOriginal, blurredImageView.getW(), blurredImageView.getH()
+                                        )
+                                    }
+
+                                    blurredImageView.updatePosCanvas(cropTo16x9!!)
+                                    blurredImageView.updateIpad(cropTo16x9, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
+
+                                    // Set blurred background based on ipad type
+                                    val isLayeredType = mTemplate!!.ipad_type == IpadType.BLACK_LAYER.ordinal ||
+                                            mTemplate!!.ipad_type == IpadType.GRADIENT.ordinal ||
+                                            mTemplate!!.ipad_type == IpadType.MASK_BRUSH.ordinal ||
+                                            mTemplate!!.ipad_type == IpadType.BLUE_TYPE.ordinal ||
+                                            mTemplate!!.ipad_type == IpadType.CASSET_IMG.ordinal ||
+                                            mTemplate!!.ipad_type == IpadType.CASSET_IMG_BLUR.ordinal
+
+                                    if (isLayeredType) {
+                                        // These types don't need a square crop — set bitmap directly
+                                        if (mTemplate!!.gradient != null) {
+                                            blurredImageView.setBitmap(
+                                                UtilsBitmap.blur(this, cropTo16x9!!, 20, 1),
+                                                null, mTemplate!!.gradient!!,
+                                                mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), null
+                                            )
+                                        } else {
+                                            blurredImageView.setBitmap(
+                                                UtilsBitmap.blur(this, cropTo16x9!!, 20, 1),
+                                                null, mTemplate!!.color_ipad,
+                                                mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), null
+                                            )
+                                        }
+                                        val width8 = (blurredImageView.ipad_rect!!.width() * 1.0f).toInt()
+                                        val height7 = (cropTo16x9!!.height * 0.5355f).toInt()
+                                        var round7 = Math.round(blurredImageView.bitmapOriginal!!.width * mTemplate!!.x_square)
+                                        var round8 = Math.round(blurredImageView.bitmapOriginal!!.height * mTemplate!!.y_square)
+                                        var i11 = width8 + round7
+                                        if (i11 > blurredImageView.bitmapOriginal!!.width) {
+                                            round7 -= i11 - blurredImageView.bitmapOriginal!!.width
+                                            i11 = blurredImageView.bitmapOriginal!!.width
+                                        }
+                                        var i12 = height7 + round8
+                                        if (i12 > blurredImageView.bitmapOriginal!!.height) {
+                                            round8 -= i12 - blurredImageView.bitmapOriginal!!.height
+                                            i12 = blurredImageView.bitmapOriginal!!.height
+                                        }
+                                        if (round7 < 0) round7 = 0
+                                        if (round8 < 0) round8 = 0
+                                        val rect3 = android.graphics.Rect(round7, round8, i11, i12)
+                                        if (mTemplate!!.ipad_type == IpadType.CASSET_IMG_BLUR.ordinal) {
+                                            blurredImageView.bitmapSquare = blurredImageView.bitmapBlured
+                                        } else {
+                                            blurredImageView.bitmapSquare = cropTo16x9
+                                        }
+                                        blurredImageView.radius_square = 0
+                                        blurredImageView.rectSquare = rect3
+                                    } else {
+                                        // Standard ipad types — delegate to changeBitmap for the full flow
+                                        changeBitmap(firstFrame.absolutePath)
+                                    }
+
+                                    val clrTrsl = if (mTemplate!!.ipad_type == IpadType.BLUE_TYPE.ordinal) {
+                                        blurredImageView.paintLecture.color
+                                    } else {
+                                        if (blurredImageView.paintLecture.color == -1) androidx.core.view.InputDeviceCompat.SOURCE_ANY else Constants.COLOR_TRANSLATION
+                                    }
+                                    blurredImageView.clr_trsl = clrTrsl
+                                    blurredImageView.clr_aya = blurredImageView.paintLecture.color
+                                    addEntityFromTemplate()
+
+                                    // Start background extraction for remaining frames
+                                    id_ffmpeg.add(
+                                        FFmpegKit.executeWithArgumentsAsync(
+                                            arrayOf(
+                                                "-i", localVideoPath, "-ss", "$endFrame",
+                                                "-r", "25", "-vf",
+                                                "scale=$height:$height:force_original_aspect_ratio=increase",
+                                                "-start_number", "${endFrame * 25}",
+                                                "-q:v", "0", "-threads", "4", "-an", "-y",
+                                                framePattern.absolutePath
+                                            )
+                                        ) { _ ->
+                                        }.sessionId
+                                    )
+
+                                    runOnUiThread {
+                                        trackViewEntity.invalidate()
+                                        updateTime()
+                                        if (mTemplate!!.quranEntityList.isEmpty()) {
+                                            blurredImageView.invalidate()
+                                        }
+                                        hideProgressFragment()
+                                    }
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                    runOnUiThread { hideProgressFragment() }
+                                }
+                            }.sessionId
+                        )
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        runOnUiThread { hideProgressFragment() }
+                    }
+                }
+            } catch (e: Exception) {
+                // Fallback: if video init fails, treat as image
+                uri_bg = "android.resource://$packageName/drawable/${R.drawable.bg_1}"
+                mTemplate!!.name_drawable = "bg_1"
+                mTemplate!!.color_ipad = -1
+                mTemplate!!.isVideoSquare = false
+                iniTypeImg()
+                android.util.Log.e("Tag : ", "initTypeVideo fallback: ${e.message}")
+            }
+        }
     }
 
     private val isSubscribed: Boolean

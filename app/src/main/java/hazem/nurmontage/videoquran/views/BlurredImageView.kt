@@ -120,7 +120,6 @@ class BlurredImageView @JvmOverloads constructor(
     internal var isNotDraw: Boolean = false
     internal var isOnScale: Boolean = false
     internal var isPlaying: Boolean = false
-    internal var isPro: Boolean = false
     internal var isRemoveWattermark: Boolean = false
     internal var isSquare: Boolean = false
     internal var isVideo: Boolean = false
@@ -178,9 +177,7 @@ class BlurredImageView @JvmOverloads constructor(
     private val gestureListener: GestureDetector.SimpleOnGestureListener =
         object : GestureDetector.SimpleOnGestureListener() {
             override fun onDown(e: MotionEvent): Boolean {
-                if (!isPro && mRectWattermark != null && mRectWattermark!!.contains(e.x, e.y)) {
-                    isWattermark = true
-                }
+                // Billing removed — watermark click guard removed; all users are pro
                 if (entity_select != null && entity_select!!.isVisible && !isWattermark) {
                     if (selectTool!!.isApply(entity_select!!, e.x, e.y)) {
                         if (selectTool!!.isApply_Move) {
@@ -301,8 +298,8 @@ class BlurredImageView @JvmOverloads constructor(
     fun isDrawingSquareVideo(): Boolean = this.isDrawingSquareVideo
     fun setPlaying(z: Boolean) { this.isPlaying = z }
     fun isPlaying(): Boolean = this.isPlaying
-    fun setPro(z: Boolean) { this.isPro = z }
-    fun isPro(): Boolean = this.isPro
+    fun setPro(z: Boolean) { /* Billing removed — always pro */ }
+    fun isPro(): Boolean = true // Billing removed
     fun setBitmapOriginal(bitmap: Bitmap?) { this.bitmapOriginal = bitmap }
     fun getBitmapOriginal(): Bitmap? = this.bitmapOriginal
     fun setGlass(z: Boolean) { this.isGlass = z }

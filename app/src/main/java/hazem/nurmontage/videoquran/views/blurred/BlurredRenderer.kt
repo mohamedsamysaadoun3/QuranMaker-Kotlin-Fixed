@@ -248,9 +248,7 @@ fun BlurredImageView.onDrawExt(canvas: Canvas) {
             }
         }
 
-        if (!isPro() && !isRemoveWattermark()) {
-            this.drawWattermark(canvas, false)
-        }
+        // Billing removed — no watermark for any user
 
         canvas.restore()
 
