@@ -169,6 +169,10 @@ import hazem.nurmontage.videoquran.ui.editor.ChoiceBgFromVideoActivity
 import hazem.nurmontage.videoquran.ui.gallery.GalleryPickerVideo
 import hazem.nurmontage.videoquran.ui.gallery_photos.GalleryPickerOneImage
 import hazem.nurmontage.videoquran.ui.render.ProgressViewActivity
+// Extension function modules (split files) — class members take precedence,
+// so these are available as fallback when methods are removed from the class body.
+// See: EngineAudioManager.kt, EngineEntityManager.kt, EngineUIHelper.kt,
+//       EngineCallbacks.kt, EngineTimelineManager.kt, FfmpegCommandBuilder.kt
 
 @Suppress("TYPE_CHECKING_HAS_RUN_INTO_RECURSIVE_PROBLEM")
 class EngineActivity : BaseActivity() {

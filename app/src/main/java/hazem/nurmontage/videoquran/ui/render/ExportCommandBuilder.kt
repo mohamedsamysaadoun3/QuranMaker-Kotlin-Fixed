@@ -45,6 +45,14 @@ import kotlin.math.min
  */
 object ExportCommandBuilder {
 
+    /**
+     * Stores the last overlay filter_complex string built by [buildCommand].
+     * Used by [ProgressViewActivity.showError] to include the filter chain
+     * in the bug report, matching the original Java's `this.overlay` field.
+     */
+    var lastOverlayFilter: String = ""
+        private set
+
     // ════════════════════════════════════════════════════════════════════
     //  Fade filter builders — preserved from ProgressViewActivity.java
     // ════════════════════════════════════════════════════════════════════
@@ -55,12 +63,12 @@ object ExportCommandBuilder {
         return "fade=t=$direction:st=${abs(startTime)}:d=${abs(safeDuration)}:alpha=1:color=white,fps=60,format=rgba"
     }
 
-    fun fadeInOut(endTime: Float, fadeInDur: Float, fadeOutDur: Float): String {
+    fun fadeInOut(endTime: Float, fadeInDur: Float, fadeOutDur: Float, fps: Int = 60): String {
         val safeFadeIn = if (fadeInDur <= 0f) 0.01f else fadeInDur
         val safeFadeOutDur = if (fadeOutDur - 0.05f <= 0f) 0.01f else fadeOutDur
         val safeEnd = if (endTime - 0.05f <= 0f) 0.01f else endTime
-        return "fade=t=in:st=0:d=${abs(safeFadeIn)}:alpha=1:color=white,fps=60,format=rgba," +
-               "fade=t=out:st=${abs(safeEnd)}:d=${abs(safeFadeOutDur)}:alpha=1:color=white,fps=60,format=rgba"
+        return "fade=t=in:st=0:d=${abs(safeFadeIn)}:alpha=1:color=white,fps=$fps,format=rgba," +
+               "fade=t=out:st=${abs(safeEnd)}:d=${abs(safeFadeOutDur)}:alpha=1:color=white,fps=$fps,format=rgba"
     }
 
     fun fadeFilter(label: String, index: Int, startTime: Float, duration: Float, isIn: Boolean): String {
@@ -671,11 +679,6 @@ object ExportCommandBuilder {
                     inputIndex = 0
                 }
 
-                IpadType.BLUE_TYPE -> {
-                    // Uses pre-rendered video with hue + progress bar as base
-                    inputIndex = 0
-                }
-
                 IpadType.BORDER -> {
                     // Simple border type — background image as base
                     val bgFile = File(template.uri_bg_ffmpeg ?: "")
@@ -936,6 +939,9 @@ object ExportCommandBuilder {
 
         renderManager.computeWeights()
 
+        // Store overlay filter chain for bug reporting (matches original Java's this.overlay field)
+        lastOverlayFilter = overlay.toString()
+
         return args.toTypedArray()
     }
 
@@ -1021,7 +1027,7 @@ object ExportCommandBuilder {
         val durationSec = (endSec - startSec).toInt()
 
         val typeOut = transition.type_out
-        val filter = fadeInOut(fadeOutStart - startSec, durationIn, durationOut)
+        val filter = fadeInOut(fadeOutStart - startSec, durationIn, durationOut, template.fps)
 
         val segmentPath = preRenderExecutor.executeGenerateVideoSegment(
             entity.file ?: "", "bismilah", filter, durationSec, inputIndex,
@@ -1208,7 +1214,7 @@ object ExportCommandBuilder {
         val fadeOutStart = abs(endSec - durationOut)
         val durationSec = (endSec - startSec).toInt()
 
-        val filter = fadeInOut(fadeOutStart - startSec, durationIn, durationOut)
+        val filter = fadeInOut(fadeOutStart - startSec, durationIn, durationOut, template.fps)
         val segmentPath = preRenderExecutor.executeGenerateVideoSegment(
             entity.file ?: "", "ayah", filter, durationSec, inputIndex,
             countDownLatch, semaphore

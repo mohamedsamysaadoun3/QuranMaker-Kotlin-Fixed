@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.view.LayoutInflater
@@ -29,6 +30,8 @@ import hazem.nurmontage.videoquran.model.EntityMedia
 import hazem.nurmontage.videoquran.model.SquareBitmapModel
 import hazem.nurmontage.videoquran.model.Template
 import hazem.nurmontage.videoquran.ui.editor.VideoViewActivity
+import hazem.nurmontage.videoquran.ui.engine.EngineActivity
+import hazem.nurmontage.videoquran.utils.Feadback
 import hazem.nurmontage.videoquran.utils.FileMediaScanner
 import hazem.nurmontage.videoquran.utils.LocalPersistence
 import hazem.nurmontage.videoquran.utils.LocaleHelper
@@ -38,7 +41,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.apache.commons.io.FileUtils
 import java.io.File
+import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Semaphore
 import kotlin.math.abs
@@ -169,12 +174,12 @@ class ProgressViewActivity : BaseActivity(), ExportCommandBuilder.PreRenderExecu
         releaseWakeLock()
         super.onDestroy()
 
-        // Clean up template folder
+        // Clean up template folder using Commons IO on API 26+
         try {
             val template = mTemplate
             if (template != null) {
                 Thread {
-                    deleteFolder(File(template.folder_template ?: ""))
+                    deleteFolderWithCommonsIO(File(template.folder_template ?: ""))
                 }.start()
             }
             workerThread?.interrupt()
@@ -762,26 +767,45 @@ class ProgressViewActivity : BaseActivity(), ExportCommandBuilder.PreRenderExecu
 
     /**
      * Show error UI when FFmpeg export fails.
-     * Displays an error layout with a "Support Team" button.
+     *
+     * Collects the full overlay filter chain + FFmpeg session output for bug reporting.
+     * Shows the error layout with a "Support Team" button that triggers
+     * [Feadback.reportBug] — matching the original Java's RunnableC200010 inner class.
      */
     private fun showError(session: FFmpegSession) {
         try {
-            val isArabic = LocaleHelper.getLanguage(this) == "ar"
+            // Build the bug report string: overlay filter chain + session output
+            val reportBuilder = StringBuilder()
+            val overlayFilter = ExportCommandBuilder.lastOverlayFilter
+            if (overlayFilter.isNotEmpty()) {
+                reportBuilder.append(overlayFilter).append("\n")
+            }
+            val sessionOutput = session.output
+            if (sessionOutput != null) {
+                reportBuilder.append(sessionOutput)
+            }
+            val reportText = reportBuilder.toString()
+
             val errorLayout = binding.root.findViewById<LinearLayout>(R.id.layout_error)
             if (errorLayout != null) {
                 errorLayout.visibility = View.VISIBLE
             }
 
-            // Try to show error in the error layout
             val errorText = binding.root.findViewById<android.widget.TextView>(R.id.tv_error)
             val supportBtn = binding.root.findViewById<android.widget.Button>(R.id.btn_support_team)
+            val isArabic = LocaleHelper.getLanguage(this) == "ar"
 
             if (isArabic) {
                 supportBtn?.text = "فريق الدعم"
-                errorText?.text = "يوجد مشكلة في هذا التصميم ، لن يتم حفظ هذا الفيديو أخبر فريق الدعم"
+                errorText?.text = "يوجد مشكلة في هذا التصميم ، لن يتم حفظ هذا الفيديو أخبر فريق الدعم "
             } else {
                 supportBtn?.text = "Support Team"
                 errorText?.text = "There is a problem with this design, this video won't be saved. Tell the support team."
+            }
+
+            // Wire the Support Team button to the bug report email
+            supportBtn?.setOnClickListener {
+                Feadback.reportBug(this@ProgressViewActivity, reportText, supportBtn.text.toString())
             }
         } catch (e: Exception) {
             toStudio()
@@ -819,10 +843,21 @@ class ProgressViewActivity : BaseActivity(), ExportCommandBuilder.PreRenderExecu
 
     /**
      * Navigate back to the engine/studio screen.
+     *
+     * Original Java navigates to EngineActivity with the template ID
+     * and FLAG_ACTIVITY_CLEAR_TOP to ensure a clean back stack.
      */
     private fun toStudio() {
         if (isDestroy) return
-        setResult(RESULT_CANCELED)
+        val intent = Intent(this, EngineActivity::class.java)
+        val template = mTemplate
+        if (template != null) {
+            intent.putExtra(Common.TEMPLATE, template.idTemplate)
+        }
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP) // 65536 = 0x10000
+        startActivity(intent)
+        @Suppress("DEPRECATION")
+        overridePendingTransition(0, 0)
         finish()
     }
 
@@ -883,19 +918,44 @@ class ProgressViewActivity : BaseActivity(), ExportCommandBuilder.PreRenderExecu
     // ════════════════════════════════════════════════════════════════════
 
     /**
-     * Recursively delete a directory and its contents.
+     * Delete a folder using Apache Commons IO on API 26+ for better reliability,
+     * falling back to manual recursive deletion on older APIs.
+     *
+     * Matches the original Java's deleteFolderWithCommonsIO() + deleteDirectoryManually().
      */
-    private fun deleteFolder(file: File?) {
+    private fun deleteFolderWithCommonsIO(file: File?) {
         if (file == null || !file.exists()) return
+        if (Build.VERSION.SDK_INT >= 26) {
+            try {
+                FileUtils.deleteDirectory(file)
+                return
+            } catch (e: IOException) {
+                e.printStackTrace()
+                return
+            }
+        }
+        deleteDirectoryManually(file)
+    }
+
+    /**
+     * Recursively delete a directory and its contents (fallback for API < 26).
+     */
+    private fun deleteDirectoryManually(file: File) {
         if (file.isDirectory) {
             val children = file.listFiles()
             if (children != null) {
                 for (child in children) {
-                    deleteFolder(child)
+                    if (child.isDirectory) {
+                        deleteDirectoryManually(child)
+                    } else {
+                        child.delete()
+                    }
                 }
             }
+            file.delete()
+        } else {
+            file.delete()
         }
-        file.delete()
     }
 
     /**
@@ -957,7 +1017,7 @@ class ProgressViewActivity : BaseActivity(), ExportCommandBuilder.PreRenderExecu
 
     @Suppress("unused")
     fun fadeInOut(endTime: Float, fadeInDur: Float, fadeOutDur: Float): String {
-        return ExportCommandBuilder.fadeInOut(endTime, fadeInDur, fadeOutDur)
+        return ExportCommandBuilder.fadeInOut(endTime, fadeInDur, fadeOutDur, mTemplate?.fps ?: 60)
     }
 
     @Suppress("unused")
@@ -968,6 +1028,65 @@ class ProgressViewActivity : BaseActivity(), ExportCommandBuilder.PreRenderExecu
     @Suppress("unused")
     fun mSlideX(start: Float, duration: Float, offset: Float, scale: Float, from: Float, to: Float): String {
         return ExportCommandBuilder.mSlideX(start, duration, offset, scale, from, to)
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    //  H.264 codec detection
+    // ════════════════════════════════════════════════════════════════════
+
+    /**
+     * Detect the best available H.264 encoder based on device API level.
+     *
+     * Checks for `h264_mediacodec` and `libx264` encoders in the FFmpeg build,
+     * then selects the optimal one:
+     * - API ≤ 30: prefer `libx264` (more reliable software encoder)
+     * - API ≥ 31: prefer `h264_mediacodec` (hardware-accelerated, stable on newer APIs)
+     *
+     * Matches the original Java's getBestH264Codec() (lines 2881–2924).
+     *
+     * @return The best codec name, or null if no H.264 encoder is available.
+     */
+    private fun getBestH264Codec(): String? {
+        return try {
+            val session = FFmpegKit.execute("-hide_banner -encoders")
+            if (!ReturnCode.isSuccess(session.returnCode)) return null
+            val output = session.output ?: return null
+            val lower = output.lowercase()
+            val hasMediaCodec = lower.contains(" h264_mediacodec ")
+            val hasLibX264 = lower.contains(" libx264 ")
+
+            when {
+                // If only mediacodec is available, use it
+                !hasLibX264 && hasMediaCodec -> "h264_mediacodec"
+                // API 29 and below: prefer libx264
+                Build.VERSION.SDK_INT <= 29 -> {
+                    when {
+                        hasLibX264 -> "libx264"
+                        hasMediaCodec -> "h264_mediacodec"
+                        else -> null
+                    }
+                }
+                // API 30: prefer libx264
+                Build.VERSION.SDK_INT == 30 -> {
+                    when {
+                        hasLibX264 -> "libx264"
+                        hasMediaCodec -> "h264_mediacodec"
+                        else -> null
+                    }
+                }
+                // API 31+: prefer h264_mediacodec (hardware-accelerated)
+                else -> {
+                    when {
+                        hasMediaCodec -> "h264_mediacodec"
+                        hasLibX264 -> "libx264"
+                        else -> null
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     companion object {
