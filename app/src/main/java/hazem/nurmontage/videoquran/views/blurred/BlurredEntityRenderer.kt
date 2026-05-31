@@ -711,12 +711,12 @@ fun BlurredImageView.getBitmapDraw(isFlag: Boolean, file: File?): Bitmap {
     if (mIpadType == IpadType.CASSET.ordinal) {
         drawCaset(canvas, false, file)
     } else if (mIpadType == IpadType.CASSET_IMG.ordinal) {
-        drawCasetNoBg(canvas, false, file, isFlag)
+        drawCasetNoBg(canvas, false, file)
     } else if (mIpadType == IpadType.CASSET_IMG_BLUR.ordinal) {
         bitmapSquare = bitmapBlured
-        drawCasetNoBg(canvas, false, file, isFlag)
+        drawCasetNoBg(canvas, false, file)
     } else {
-        drawIpad(canvas, false, isFlag)
+        drawIpad(canvas, false)
     }
 
     // Billing removed — no watermark for any user
