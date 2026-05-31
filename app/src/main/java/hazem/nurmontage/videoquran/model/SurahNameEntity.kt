@@ -11,7 +11,7 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import android.text.TextDirectionHeuristics
 import androidx.core.graphics.ColorUtils
-import hazem.nurmontage.videoquran.constant.AyaTextPreset
+import hazem.nurmontage.videoquran.core.common.Constants.AyaTextPreset
 import hazem.nurmontage.videoquran.constant.IpadType
 import hazem.nurmontage.videoquran.constant.SurahNameStyle
 import hazem.nurmontage.videoquran.entity_timeline.EntityQuranTimeline
@@ -61,7 +61,7 @@ class SurahNameEntity : EntityView, Serializable {
     var index_surah: Int = 0
         internal set
     var ipad_type: Int = 0
-        private set
+        internal set
     var isHaveBg: Boolean = false
         internal set
     var mPreset: Int = 0

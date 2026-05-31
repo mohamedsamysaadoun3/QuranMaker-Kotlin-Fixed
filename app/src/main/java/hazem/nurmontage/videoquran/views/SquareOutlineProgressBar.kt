@@ -46,7 +46,14 @@ class SquareOutlineProgressBar @JvmOverloads constructor(
     private val partialPath: Path = Path()
     private val path: Path = Path()
     private val pathMeasure: PathMeasure = PathMeasure()
-    private var progress: Int = 0
+    var progress: Int = 0
+        set(value) {
+            val clamped = Math.max(0, Math.min(value, maxProgress))
+            if (field != clamped) {
+                field = clamped
+                invalidate()
+            }
+        }
     private val progressPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
@@ -81,7 +88,12 @@ class SquareOutlineProgressBar @JvmOverloads constructor(
         }
     }
 
-    fun getMax(): Int = maxProgress
+    var max: Int
+        get() = maxProgress
+        set(value) {
+            maxProgress = Math.max(1, value)
+            invalidate()
+        }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val size = View.MeasureSpec.getSize(widthMeasureSpec)
@@ -118,15 +130,7 @@ class SquareOutlineProgressBar @JvmOverloads constructor(
         progressPaint.shader = shader
     }
 
-    fun setProgress(progress: Int) {
-        val clamped = Math.max(0, Math.min(progress, maxProgress))
-        if (this.progress != clamped) {
-            this.progress = clamped
-            invalidate()
-        }
-    }
 
-    fun getProgress(): Int = progress
 
     fun setMaxProgress(max: Int) {
         maxProgress = Math.max(1, max)

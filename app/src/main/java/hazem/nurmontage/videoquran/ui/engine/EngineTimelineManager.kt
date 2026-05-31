@@ -14,6 +14,7 @@ import hazem.nurmontage.videoquran.utils.video.SmoothVideoAnimator
 import hazem.nurmontage.videoquran.constant.IpadType
 import hazem.nurmontage.videoquran.constant.ResizeType
 import hazem.nurmontage.videoquran.entity_timeline.EntityAudio
+import hazem.nurmontage.videoquran.entity_timeline.EntityBismilahTimeline
 import hazem.nurmontage.videoquran.fragment.EditEntityFragment
 import hazem.nurmontage.videoquran.fragment.EditMediaFragment
 import hazem.nurmontage.videoquran.fragment.EditTrslEntityFragment
@@ -263,7 +264,7 @@ fun EngineActivity.initTimeLineView() {
     trackEntityView.setiTrimLineCallback(iTrimLineCallback)
     trackViewEntity.scaleFactor = mTemplate!!.scale_timeline
     trackViewEntity.post {
-        val screenWidth = ScreenUtils.getScreenWidth(this@EngineActivity)
+        val screenWidth = ScreenUtils.getScreenWidth(this)
         val f = screenWidth * 0.12f
         trackViewEntity.maxTime = 0
         trackViewEntity.init(screenWidth, trackViewEntity.height)
@@ -329,7 +330,7 @@ fun EngineActivity.start() {
 }
 
 fun EngineActivity.stop() {
-    if (blurredImageView.isInitialized) {
+    if (try { blurredImageView; true } catch (_: UninitializedPropertyAccessException) { false }) {
         blurredImageView.isDrawingSquareVideo = false
     }
     animator_frame_video?.stop()
@@ -475,7 +476,7 @@ fun EngineActivity.updateSquareBitmap(str: String) {
         try {
             try {
                 val height = blurredImageView.getH()
-                bitmap = Glide.with(this@EngineActivity as androidx.fragment.app.FragmentActivity)
+                bitmap = Glide.with(this as androidx.fragment.app.FragmentActivity)
                     .asBitmap()
                     .load(str)
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -584,7 +585,7 @@ fun EngineActivity.updateSquareBitmap(str: String) {
 
 fun EngineActivity.updateBtnToStart() {
     try {
-        if (btnToStart.isInitialized) {
+        if (try { btnToStart; true } catch (_: UninitializedPropertyAccessException) { false }) {
             btnToStart.isEnabled = trackViewEntity.current_cursur_position > 0
             if (btnToStart.isEnabled) {
                 btnToStart.setColorFilter(-1, android.graphics.PorterDuff.Mode.SRC_IN)
@@ -599,7 +600,7 @@ fun EngineActivity.updateBtnToStart() {
 
 fun EngineActivity.updateBtnToEnd() {
     try {
-        if (btnToEnd.isInitialized) {
+        if (try { btnToEnd; true } catch (_: UninitializedPropertyAccessException) { false }) {
             btnToEnd.isEnabled = trackViewEntity.current_cursur_position < trackViewEntity.maxTime
             if (btnToEnd.isEnabled) {
                 btnToEnd.setColorFilter(-1, android.graphics.PorterDuff.Mode.SRC_IN)

@@ -19,7 +19,7 @@ import androidx.core.view.ViewCompat
 import hazem.nurmontage.videoquran.constant.IpadType
 import hazem.nurmontage.videoquran.constant.SurahNameStyle
 import hazem.nurmontage.videoquran.core.common.Constants
-import hazem.nurmontage.videoquran.model.BismilahEntity
+import hazem.nurmontage.videoquran.model.data.BismilahEntity
 import hazem.nurmontage.videoquran.model.SurahNameEntity
 import hazem.nurmontage.videoquran.model.Template
 import hazem.nurmontage.videoquran.model.TimeModel
@@ -220,7 +220,7 @@ fun BlurredImageView.drawEntityBitmap(file: File, size: Int, index: Int) {
             quranEntity.setupCanvasDraw(canvas)
             quranEntity.singleDraw(canvas)
             quranEntity.entityQuran!!.setFile("quran_${entityCounter}.png")
-            saveBitmap(bmp, file, quranEntity.entityQuran!!.getFile())
+            saveBitmap(bmp, file, quranEntity.entityQuran!!.getFile()!!)
             if (transition != null) {
                 transition.fromW = bmp.width.toFloat()
             }
@@ -246,7 +246,7 @@ fun BlurredImageView.drawEntityBitmap(file: File, size: Int, index: Int) {
             translationQuranEntity.setupCanvasDraw(canvas2)
             translationQuranEntity.singleDraw(canvas2)
             translationQuranEntity.entityTrslTimeline!!.setFile("trs_${trslCounter}.png")
-            saveBitmap(bmp2, file, translationQuranEntity.entityTrslTimeline!!.getFile())
+            saveBitmap(bmp2, file, translationQuranEntity.entityTrslTimeline!!.getFile()!!)
             if (transition2 != null) {
                 transition2.fromW = bmp2.width.toFloat()
             }
@@ -271,7 +271,7 @@ fun BlurredImageView.drawEntityBitmap(file: File, size: Int, index: Int) {
         bismilahEntity!!.setupCanvasDraw(canvas3)
         bismilahEntity!!.singleDraw(canvas3)
         bismilahEntity!!.getBismilahTimeline()!!.setFile("bismilah.png")
-        saveBitmap(bmp3, file, bismilahEntity!!.getBismilahTimeline()!!.getFile())
+        saveBitmap(bmp3, file, bismilahEntity!!.getBismilahTimeline()!!.getFile()!!)
         if (transition3 != null) {
             transition3.fromW = bmp3.width.toFloat()
         }
@@ -295,7 +295,7 @@ fun BlurredImageView.drawEntityBitmap(file: File, size: Int, index: Int) {
     mIsti3adhaEntity!!.setupCanvasDraw(canvas4)
     mIsti3adhaEntity!!.singleDraw(canvas4)
     mIsti3adhaEntity!!.getBismilahTimeline()!!.setFile("mIstiada.png")
-    saveBitmap(bmp4, file, mIsti3adhaEntity!!.getBismilahTimeline()!!.getFile())
+    saveBitmap(bmp4, file, mIsti3adhaEntity!!.getBismilahTimeline()!!.getFile()!!)
     if (transition4 != null) {
         transition4.fromW = bmp4.width.toFloat()
     }
@@ -1281,7 +1281,7 @@ fun BlurredImageView.updatePosSurahName() {
         surahNameEntity!!.setAlignment(Layout.Alignment.ALIGN_OPPOSITE)
     }
 
-    surahNameEntity!!.setIpad_type(mIpadType)
+    surahNameEntity!!.ipad_type = mIpadType
     surahNameEntity!!.setFactor_scale(1.0f)
     surahNameEntity!!.update(rectFSurahName!!)
 }
@@ -1502,7 +1502,7 @@ fun BlurredImageView.setSurahNameEntity(
     val existing = surahNameEntity
     if (existing == null) {
         // Load fonts
-        val typeface = UtilsFileLast.loadFontFromAsset(context, "fonts/arabic/$name3")
+        val typeface = UtilsFileLast.loadFontFromAsset(context, "fonts/arabic/$name3")!!
         val styleTypeface = UtilsFileLast.loadFontFromAsset(context, "fonts/surah_name.otf")
 
         // Determine color

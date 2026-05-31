@@ -14,7 +14,7 @@ import android.view.ViewGroup
 import android.widget.PopupWindow
 import android.widget.RelativeLayout
 import android.widget.Toast
-import androidx.activity.EdgeToEdge
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
@@ -124,7 +124,7 @@ class WorkUserActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        EdgeToEdge.enable(this)
+        enableEdgeToEdge()
         setContentView(R.layout.activity_work_user)
         WindowCompat.setDecorFitsSystemWindows(window, true)
 

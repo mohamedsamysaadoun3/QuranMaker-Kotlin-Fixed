@@ -12,7 +12,7 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import androidx.fragment.app.Fragment
 import hazem.nurmontage.videoquran.R
-import hazem.nurmontage.videoquran.constant.AyaTextPreset
+import hazem.nurmontage.videoquran.core.common.Constants.AyaTextPreset
 import hazem.nurmontage.videoquran.databinding.FragmentEditEntityBinding
 import hazem.nurmontage.videoquran.entity_timeline.Entity
 import hazem.nurmontage.videoquran.model.data.QuranEntity

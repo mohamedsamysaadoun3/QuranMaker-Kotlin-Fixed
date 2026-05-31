@@ -495,7 +495,7 @@ object ExportCommandBuilder {
                          ipadType == IpadType.ROUND_RECT || ipadType == IpadType.BOTTOM_RECT ||
                          ipadType == IpadType.RECT
 
-        var inputIndex: Int
+        var inputIndex = 0
         val countDownLatch: CountDownLatch
 
         if (isIpadType) {
@@ -513,7 +513,7 @@ object ExportCommandBuilder {
 
                 // Generate timer overlay
                 val timerPath = preRenderExecutor.executeGenerateTimer(durationMs, countDownLatch, semaphore)
-                args.addAll(listOf("-i", timerPath))
+                args.addAll(listOf("-i", timerPath ?: ""))
 
                 // Overlay timer on background
                 val timeModel = template.mTimeModel ?: return null
@@ -909,8 +909,9 @@ object ExportCommandBuilder {
         // Audio mapping
         if (hasAudioMix) {
             args.addAll(listOf("-map", lastVideoLabel, "-map", "[a]"))
-            if (codecInfo.audioCodec != null) {
-                args.addAll(listOf("-c:a", codecInfo.audioCodec, "-b:a", "256k", "-ar", "44100", "-ac", "2"))
+            val audioCodec = codecInfo.audioCodec
+            if (audioCodec != null) {
+                args.addAll(listOf("-c:a", audioCodec, "-b:a", "256k", "-ar", "44100", "-ac", "2"))
             }
         } else {
             args.addAll(listOf("-map", lastVideoLabel))

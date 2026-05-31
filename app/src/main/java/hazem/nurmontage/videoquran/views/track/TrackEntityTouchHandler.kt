@@ -1029,8 +1029,8 @@ fun TrackEntityView.processQuranItemsSelectionExt(): Int {
         mIsi3adaTimeline!!.setSelectMultiple(!isSelect3)
         if (mIsi3adaTimeline!!.isSelect) i++
     }
-    if (i > 0) clr_btn_quran = CLR_SELECT
-    else clr_btn_quran = CLR_BTN_DEFAULT
+    if (i > 0) clr_btn_quran = TrackEntityView.CLR_SELECT
+    else clr_btn_quran = TrackEntityView.CLR_BTN_DEFAULT
     return i
 }
 
@@ -1044,8 +1044,8 @@ fun TrackEntityView.processTrslQuranItemsSelectionExt(): Int {
             if (etl.isSelect) i++
         }
     }
-    if (i > 0) clr_btn_trsl = CLR_SELECT
-    else clr_btn_trsl = CLR_BTN_DEFAULT
+    if (i > 0) clr_btn_trsl = TrackEntityView.CLR_SELECT
+    else clr_btn_trsl = TrackEntityView.CLR_BTN_DEFAULT
     return i
 }
 
@@ -1059,8 +1059,8 @@ fun TrackEntityView.processAudioItemsSelectionExt(): Int {
             if (ea.isSelect) i++
         }
     }
-    if (i > 0) clr_btn_audio = CLR_SELECT
-    else clr_btn_audio = CLR_BTN_DEFAULT
+    if (i > 0) clr_btn_audio = TrackEntityView.CLR_SELECT
+    else clr_btn_audio = TrackEntityView.CLR_BTN_DEFAULT
     return i
 }
 
@@ -1083,7 +1083,7 @@ fun TrackEntityView.deselectAllQuranItemsExt(): Boolean {
             z = true
         }
     }
-    if (z) clr_btn_quran = CLR_BTN_DEFAULT
+    if (z) clr_btn_quran = TrackEntityView.CLR_BTN_DEFAULT
     return z
 }
 
@@ -1096,7 +1096,7 @@ fun TrackEntityView.deselectAllTrslQuranItemsExt(): Boolean {
             z = true
         }
     }
-    if (z) clr_btn_trsl = CLR_BTN_DEFAULT
+    if (z) clr_btn_trsl = TrackEntityView.CLR_BTN_DEFAULT
     return z
 }
 
@@ -1109,6 +1109,6 @@ fun TrackEntityView.deselectAllAudioItemsExt(): Boolean {
             z = true
         }
     }
-    if (z) clr_btn_audio = CLR_BTN_DEFAULT
+    if (z) clr_btn_audio = TrackEntityView.CLR_BTN_DEFAULT
     return z
 }

@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Pair
-import androidx.activity.EdgeToEdge
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.OnBackPressedCallback
 import androidx.core.graphics.Insets
 import androidx.core.view.GravityCompat
@@ -56,7 +56,7 @@ class AboutActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        EdgeToEdge.enable(this)
+        enableEdgeToEdge()
         binding = ActivityAboutBinding.inflate(layoutInflater)
         setContentView(binding.root)
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
@@ -93,12 +93,12 @@ class AboutActivity : BaseActivity() {
         }
 
         // Help button — opens WhatsApp group (btn_help is in the included layout_help_whatsapp)
-        binding.btnHelp.setOnClickListener {
+        binding.layoutHelpWhatsapp.btnHelp.setOnClickListener {
             help()
         }
 
         // Set help label text
-        binding.tvHelp.text = getString(R.string.help)
+        binding.layoutHelpWhatsapp.tvHelp.text = getString(R.string.help)
 
         // Build about items list using the original HTML-styled content
         val items = buildAboutItems()

@@ -129,9 +129,9 @@ class TrackEntityView @JvmOverloads constructor(
         private const val MAX_SCALE = 8.0f
         private const val MIN_SCALE = 0.09f
         private const val FACTOR_VITESSE = 180.0f
-        private const val CLR_DEFAULT_BG = -13421771   // 0x333333
-        private const val CLR_SELECT = -794718          // 0x3D3D32
-        private const val CLR_BTN_DEFAULT = -13421771
+        internal const val CLR_DEFAULT_BG = -13421771   // 0x333333
+        internal const val CLR_SELECT = -794718          // 0x3D3D32
+        internal const val CLR_BTN_DEFAULT = -13421771
     }
 
     // ── Callback interface ──────────────────────────────────────────────
@@ -664,7 +664,7 @@ class TrackEntityView @JvmOverloads constructor(
 
     // ── Public API ──────────────────────────────────────────────────
 
-    private fun setupFade(entityAudio: EntityAudio) {
+    internal fun setupFade(entityAudio: EntityAudio) {
         // Empty — fade is handled by the audio entity
     }
 
@@ -982,11 +982,11 @@ class TrackEntityView @JvmOverloads constructor(
         return isPassExt(motionEvent)
     }
 
-    private fun updateMediaIndex() {
+    internal fun updateMediaIndex() {
         for (i in entityListAudio.indices) entityListAudio[i].index = i
     }
 
-    private fun updateIndex() {
+    internal fun updateIndex() {
         for (i in entityListQuran.indices) {
             val eqt = entityListQuran[i]
             eqt.index = i
@@ -994,7 +994,7 @@ class TrackEntityView @JvmOverloads constructor(
         }
     }
 
-    private fun updateTrslIndex() {
+    internal fun updateTrslIndex() {
         for (i in entityListTrslQuran.indices) {
             val etl = entityListTrslQuran[i]
             etl.index = i

@@ -278,10 +278,11 @@ class ProgressViewActivity : BaseActivity(), ExportCommandBuilder.PreRenderExecu
         for (media in list) {
             try {
                 if (media.end >= media.start && media.path_ffmpeg_effect == null && media.uri != null) {
-                    val localPath = if (media.uri!!.startsWith("http")) {
-                        AudioUtils.downloadFile(this, media.uri, mTemplate?.folder_template)
+                    val mediaUri = media.uri
+                    val localPath = if (mediaUri!!.startsWith("http")) {
+                        AudioUtils.downloadFile(this, mediaUri!!, mTemplate?.folder_template ?: "")
                     } else {
-                        AudioUtils.copyFromUri(this, Uri.parse(media.uri), mTemplate?.folder_template)
+                        AudioUtils.copyFromUri(this, Uri.parse(mediaUri), mTemplate?.folder_template ?: "")
                     }
                     if (localPath != null) {
                         media.path_ffmpeg = localPath
@@ -585,10 +586,10 @@ class ProgressViewActivity : BaseActivity(), ExportCommandBuilder.PreRenderExecu
             val currentStepDuration = renderManager.getCurrentStepDuration()
             if (currentStepDuration <= 0f) return
 
-            var localProgress = (time / 1000.0f) / currentStepDuration
-            if (localProgress > 1.0f) localProgress = 1.0f
+            var localProgress = (time.toFloat() / 1000f) / currentStepDuration.toFloat()
+            if (localProgress > 1f) localProgress = 1f
 
-            targetProgress = renderManager.updateLocalProgress(localProgress) * 100.0f
+            targetProgress = renderManager.updateLocalProgress(localProgress) * 100f
 
             if (!isAnimating) {
                 startSmoothAnimation()

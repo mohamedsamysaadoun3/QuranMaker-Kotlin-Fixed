@@ -7,7 +7,7 @@ import android.net.Uri
 import android.view.View
 import androidx.core.view.InputDeviceCompat
 import hazem.nurmontage.videoquran.R
-import hazem.nurmontage.videoquran.utils.AudioUtils
+import hazem.nurmontage.videoquran.utils.audio.AudioUtils
 import hazem.nurmontage.videoquran.utils.DrawableHelper
 import hazem.nurmontage.videoquran.utils.NetworkUtils
 import hazem.nurmontage.videoquran.utils.UtilsFileLast
@@ -30,6 +30,7 @@ import hazem.nurmontage.videoquran.fragment.EditEntityFragment
 import hazem.nurmontage.videoquran.fragment.EditMediaFragment
 import hazem.nurmontage.videoquran.fragment.EditS_NameFragment
 import hazem.nurmontage.videoquran.fragment.EditTrslEntityFragment
+import hazem.nurmontage.videoquran.views.blurred.setSurahNameEntity
 import java.lang.ref.WeakReference
 
 // ==========================================================================
@@ -762,8 +763,8 @@ fun EngineActivity.addEntityFromTemplate() {
             entityQuranTemplate.indexNumber,
             entityQuranTemplate.number,
             entityQuranTemplate.color,
-            entityQuranTemplate.name_font,
-            entityQuranTemplate.transition,
+            entityQuranTemplate.name_font ?: "hafes",
+            entityQuranTemplate.transition ?: Transition(),
             isEnabled,
             entityQuranTemplate.icon,
             entityQuranTemplate.startWord_index,
@@ -777,8 +778,8 @@ fun EngineActivity.addEntityFromTemplate() {
                 entityQuranTemplate.rectF!!.r,
                 entityQuranTemplate.rectF!!.b
             ),
-            loadFontFromAsset,
-            createFromAsset,
+            loadFontFromAsset!!,
+            createFromAsset!!,
             entityQuranTemplate.colorTrsl,
             entityQuranTemplate.preset
         )
@@ -791,8 +792,8 @@ fun EngineActivity.addEntityFromTemplate() {
             translationTemplate.right,
             translationTemplate.number,
             translationTemplate.color,
-            translationTemplate.name_font,
-            translationTemplate.transition,
+            translationTemplate.name_font ?: "ReadexPro_Medium.ttf",
+            translationTemplate.transition ?: Transition(),
             translationTemplate.scale,
             translationTemplate.factor_size,
             RectF(
@@ -813,7 +814,7 @@ fun EngineActivity.addEntityFromTemplate() {
             template.entityIsti3adaTemplate!!.left,
             template.entityIsti3adaTemplate!!.right,
             template.entityIsti3adaTemplate!!.color,
-            template.entityIsti3adaTemplate!!.transition,
+            template.entityIsti3adaTemplate!!.transition ?: Transition(),
             template.entityIsti3adaTemplate!!.scale,
             template.entityIsti3adaTemplate!!.factor_size,
             RectF(
@@ -832,7 +833,7 @@ fun EngineActivity.addEntityFromTemplate() {
             template.entityBismilahTemplate!!.left,
             template.entityBismilahTemplate!!.right,
             template.entityBismilahTemplate!!.color,
-            template.entityBismilahTemplate!!.transition,
+            template.entityBismilahTemplate!!.transition ?: Transition(),
             template.entityBismilahTemplate!!.scale,
             template.entityBismilahTemplate!!.factor_size,
             RectF(
@@ -904,7 +905,7 @@ fun EngineActivity.addEntityFromTemplate() {
             } else if (entityMedia.uri != null) {
                 if (entityMedia.paths_https != null) {
                     if (NetworkUtils.isNetworkAvailable(this)) {
-                        addAudioRecitersTemplate(entityMedia.paths_https!!, 0, null)
+                        addAudioRecitersTemplate(entityMedia.paths_https!!, 0, "")
                     } else {
                         runOnUiThread {
                             dialogNoInternetList(entityMedia.paths_https!!)
@@ -1027,69 +1028,11 @@ fun EngineActivity.selectSurahName() {
     beginTransaction.commit()
 }
 
-fun EngineActivity.addUpdateAnim(
-    entityBismilahTimeline: EntityBismilahTimeline?,
-    entityBismilahTimeline2: EntityBismilahTimeline
-) {
-    if (entityBismilahTimeline == null) {
-        return
-    }
-    if (entityBismilahTimeline.getTransition() == null) {
-        entityBismilahTimeline.setTransition(Transition())
-    }
-    entityBismilahTimeline.getTransition()!!.isOut = entityBismilahTimeline2.getTransition()!!.isOut
-    entityBismilahTimeline.getTransition()!!.type_out = entityBismilahTimeline2.getTransition()!!.type_out
-    entityBismilahTimeline.getTransition()!!.duration_out = entityBismilahTimeline2.getTransition()!!.duration_out
-    entityBismilahTimeline.getTransition()!!.isIn = entityBismilahTimeline2.getTransition()!!.isIn
-    entityBismilahTimeline.getTransition()!!.type_in = entityBismilahTimeline2.getTransition()!!.type_in
-    entityBismilahTimeline.getTransition()!!.duration_in = entityBismilahTimeline2.getTransition()!!.duration_in
-}
-
-fun EngineActivity.addUpdateAnim(
-    entityBismilahTimeline: EntityBismilahTimeline?,
-    entityQuranTimeline: EntityQuranTimeline
-) {
-    if (entityBismilahTimeline == null) {
-        return
-    }
-    if (entityBismilahTimeline.getTransition() == null) {
-        entityBismilahTimeline.setTransition(Transition())
-    }
-    entityBismilahTimeline.getTransition()!!.isOut = entityQuranTimeline!!.getTransition()!!.isOut
-    entityBismilahTimeline.getTransition()!!.type_out = entityQuranTimeline!!.getTransition()!!.type_out
-    entityBismilahTimeline.getTransition()!!.duration_out = entityQuranTimeline!!.getTransition()!!.duration_out
-    entityBismilahTimeline.getTransition()!!.isIn = entityQuranTimeline!!.getTransition()!!.isIn
-    entityBismilahTimeline.getTransition()!!.type_in = entityQuranTimeline!!.getTransition()!!.type_in
-    entityBismilahTimeline.getTransition()!!.duration_in = entityQuranTimeline!!.getTransition()!!.duration_in
-}
-
 fun EngineActivity.clearCallback() {
     // These are val properties and cannot be reassigned to null
     // In the original Java code these were nullable interface references
 }
 
-fun EngineActivity.checkSplitEntity() {
-    if (EditEntityFragment.instance == null || trackViewEntity.selectedEntity == null) {
-        return
-    }
-    EditEntityFragment.instance!!.checkSplitEntity(
-        trackViewEntity.selectedEntity!!, -trackViewEntity.getCurrentPosition()
-    )
-}
+// Removed duplicate addUpdateAnim functions - they are defined in EngineTimelineManager.kt
 
-fun EngineActivity.checkSplitTrslEntity() {
-    if (EditTrslEntityFragment.instance == null || trackViewEntity.selectedEntity == null) {
-        return
-    }
-    EditTrslEntityFragment.instance!!.checkSplitEntity(
-        trackViewEntity.selectedEntity!!, -trackViewEntity.getCurrentPosition()
-    )
-}
 
-fun EngineActivity.checkSplitAudio() {
-    if (EditMediaFragment.instance == null || trackViewEntity.selectedEntity !is EntityAudio) {
-        return
-    }
-    val f = -trackViewEntity.getCurrentPosition()
-    EditMediaFragment.instance!!.checkSplit(trackViewEntity.selectedEntity!! as EntityAudio, f)
-}

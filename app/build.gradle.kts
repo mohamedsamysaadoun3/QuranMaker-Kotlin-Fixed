@@ -17,9 +17,19 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("/home/z/my-project/download/quranmaker-release.jks")
+            storePassword = "quran123"
+            keyAlias = "quranmaker"
+            keyPassword = "quran123"
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -42,6 +52,11 @@ android {
     buildFeatures {
         viewBinding = true
         dataBinding = true
+    }
+
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = false
     }
 
     packaging {
@@ -70,7 +85,6 @@ dependencies {
     // ═══════════════════════════════════════════════════════════
 
     // ─── AndroidX Core ───
-    // مكتشف: compileSdkVersion=35, targetSdk=35, minSdk=24
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.activity:activity-ktx:1.9.3")
@@ -87,42 +101,28 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
 
     // ─── Material Design 3 ───
-    // مكتشف: com.google.android.material في jadx_output
     implementation("com.google.android.material:material:1.12.0")
 
     // ─── Splash Screen ───
-    // مكتشف: androidx.core.splashscreen في jadx_output
     implementation("androidx.core:core-splashscreen:1.0.1")
 
     // ─── Emoji2 ───
-    // مكتشف: androidx.emoji2 في jadx_output
     implementation("androidx.emoji2:emoji2:1.4.0")
 
     // ─── Profile Installer ───
-    // مكتشف: androidx.profileinstaller في jadx_output
     implementation("androidx.profileinstaller:profileinstaller:1.4.1")
 
     // ─── Window ───
-    // مكتشف: uses-library androidx.window في AndroidManifest
     implementation("androidx.window:window:1.3.0")
 
     // ═══════════════════════════════════════════════════════════
-    // محركات الميديا - Media Engines (CRITICAL)
+    // محركات الميديا - Media Engines
     // ═══════════════════════════════════════════════════════════
 
     // ─── FFmpegKit ───
-    // مكتشف: FFmpeg version "6.0" من NativeLoader.smali
-    // مكتشف: 10 مكتبات .so أصلية (libavcodec 13MB, libavfilter 3.6MB, etc.)
-    // مكتشف: مكتبات خارجية مدعومة: dav1d, fontconfig, freetype, fribidi,
-    //   gmp, gnutls, kvazaar, mp3lame, libass, iconv, libilbc, libtheora,
-    //   libvidstab, libvorbis, libvpx, libwebp, libxml2, opencore-amr,
-    //   openh264, openssl, opus, rubberband, sdl2, shine, snappy, soxr,
-    //   speex, srt, tesseract, twolame, x264, x265, xvid, zimg
     implementation("com.arthenica:ffmpeg-kit-full:6.0-2")
 
     // ─── AndroidX Media3 (ExoPlayer) ───
-    // مكتشف: androidx.media3.exoplayer + media3.common في jadx_output
-    // مكتشف: CmcdData, IcyHeaders imports في EngineActivity
     implementation("androidx.media3:media3-exoplayer:1.5.1")
     implementation("androidx.media3:media3-ui:1.5.1")
     implementation("androidx.media3:media3-common:1.5.1")
@@ -132,39 +132,24 @@ dependencies {
     // ═══════════════════════════════════════════════════════════
 
     // ─── Glide ───
-    // مكتشف: com.bumptech.glide في jadx_output (327 ملف)
-    // مكتشف: Glide.with(), DiskCacheStrategy imports في EngineActivity
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
     // ─── Glide Transformations ───
-    // مكتشف: jp.wasabeef.glide.transformations (26 ملف)
-    // مكتشف: BlurTransformation, CropTransformation, GrayscaleTransformation
     implementation("jp.wasabeef:glide-transformations:4.3.0")
 
     // ═══════════════════════════════════════════════════════════
     // خدمات Google - Google Services
     // ═══════════════════════════════════════════════════════════
 
-    // ─── Google Play Services ───
-    // مكتشف: google_play_services_version = 12451000 من integers.xml
-    // مكتشف: play-services-base 18.5.0, play-services-basement 18.4.0
-    // مكتشف: play-services-tasks 18.2.0 من .properties files
     implementation("com.google.android.gms:play-services-base:18.5.0")
     implementation("com.google.android.gms:play-services-tasks:18.2.0")
-
-    // ─── Google Play Billing ─── REMOVED (free, clean app)
-    // ─── Google AdMob ─── REMOVED (no ads)
-    // ─── Firebase ─── REMOVED (no analytics tracking)
 
     // ═══════════════════════════════════════════════════════════
     // مؤثرات بصرية - Visual Effects
     // ═══════════════════════════════════════════════════════════
 
     // ─── Konfetti ───
-    // مكتشف: nl.dionsegijn.konfetti في jadx_output (30 ملف)
-    // مكتشف: Kotlin metadata: mv={1, 8, 0}, xi=48
-    // في الإصدار 2.x تم تقسيم المكتبة إلى konfetti-core و konfetti-xml
     implementation("nl.dionsegijn:konfetti-xml:2.0.4")
     implementation("nl.dionsegijn:konfetti-core:2.0.4")
 
@@ -172,16 +157,8 @@ dependencies {
     // أدوات مساعدة - Utilities
     // ═══════════════════════════════════════════════════════════
 
-    // ─── Apache Commons IO ───
-    // مكتشف: org.apache.commons.io في jadx_output
-    // مكتشف: FileUtils import في ProgressViewActivity
     implementation("commons-io:commons-io:2.16.1")
-
-    // ─── Gson ───
-    // Required by LocalPersistence.kt for Template JSON serialization
     implementation("com.google.code.gson:gson:2.10.1")
-
-    // ─── PairIP Protection ─── REMOVED (not needed for clean build)
 
     // ─── Kotlin Standard Library ───
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.25")

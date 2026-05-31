@@ -15,7 +15,7 @@ import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.ui.editor.ChoiceBgFromVideoActivity
 import hazem.nurmontage.videoquran.ui.gallery.GalleryPickerVideo
 import hazem.nurmontage.videoquran.ui.gallery_photos.GalleryPickerOneImage
-import hazem.nurmontage.videoquran.utils.AudioUtils
+import hazem.nurmontage.videoquran.utils.audio.AudioUtils
 import hazem.nurmontage.videoquran.utils.LocalPersistence
 import hazem.nurmontage.videoquran.utils.NetworkUtils
 import hazem.nurmontage.videoquran.utils.PCMWaveformExtractor
@@ -26,6 +26,7 @@ import hazem.nurmontage.videoquran.model.EffectAudio
 import hazem.nurmontage.videoquran.model.EntityMedia
 import hazem.nurmontage.videoquran.model.RecitersModel
 import hazem.nurmontage.videoquran.entity_timeline.EntityAudio
+import hazem.nurmontage.videoquran.fragment.ProgressViewFragment
 import java.io.File
 import java.util.Locale
 
@@ -152,7 +153,7 @@ fun EngineActivity.addAudioRecitersBackground(list: List<RecitersModel>, handler
                 } else {
                     "https://everyayah.com/data/${recitersModel.identifer}/${recitersModel.surah_index}${recitersModel.number_aya}.mp3"
                 }
-                val downloadFile = AudioUtils.downloadFile(this, str, mTemplate!!.folder_template!!)
+                val downloadFile = AudioUtils.downloadFile(this@addAudioRecitersBackground, str, mTemplate!!.folder_template!!)
                 if (downloadFile != null) {
                     arrayList.add(downloadFile)
                     arrayList2.add(str)
@@ -371,7 +372,7 @@ fun EngineActivity.applyffectAll(effectAudio: EffectAudio, i: Int) {
                     if (fromFile.scheme != null && fromFile.scheme!!.startsWith("http")) {
                         mPlayer!!.setDataSource(fromFile.toString())
                     } else {
-                        mPlayer!!.setDataSource(this@EngineActivity, fromFile)
+                        mPlayer!!.setDataSource(this@applyffectAll, fromFile)
                     }
                     mPlayer!!.prepareAsync()
                     mPlayer!!.setOnPreparedListener { mediaPlayer ->
@@ -383,7 +384,7 @@ fun EngineActivity.applyffectAll(effectAudio: EffectAudio, i: Int) {
                             entityAudio.max = (entityAudio.rect.right / entityAudio.scaleFactor) - ((entityAudio.rect.left / entityAudio.scaleFactor) - entityAudio.getOffsetLeft())
                             trackViewEntity.updateWhenEffect(entityAudio)
                         }
-                        entityAudio.mediaPlayer = this@EngineActivity.mPlayer
+                        entityAudio.mediaPlayer = mPlayer
                         applyffectAll(effectAudio, intValue + 1)
                     }
                     entityAudio.pathFfmpegEffect = file.absolutePath
@@ -415,7 +416,7 @@ fun EngineActivity.applyffect(str: String, entityAudio: EntityAudio) {
                     if (uri.scheme != null && uri.scheme!!.startsWith("http")) {
                         mPlayer!!.setDataSource(uri.toString())
                     } else {
-                        mPlayer!!.setDataSource(this@EngineActivity, uri)
+                        mPlayer!!.setDataSource(this@applyffect, uri)
                     }
                     mPlayer!!.prepareAsync()
                     mPlayer!!.setOnPreparedListener { mediaPlayer ->
@@ -459,7 +460,7 @@ fun EngineActivity.applyffectPlayAuto(str: String, entityAudio: EntityAudio) {
                     if (uri.scheme != null && uri.scheme!!.startsWith("http")) {
                         mPlayer!!.setDataSource(uri.toString())
                     } else {
-                        mPlayer!!.setDataSource(this@EngineActivity, uri)
+                        mPlayer!!.setDataSource(this@applyffectPlayAuto, uri)
                     }
                     mPlayer!!.prepareAsync()
                     mPlayer!!.setOnPreparedListener { mediaPlayer ->
@@ -548,7 +549,7 @@ fun EngineActivity.changeEntityAudio(i: Int, uri: Uri) {
         trackViewEntity.addAudio(entityAudio)
         if (round2 > 0 && round > 0) {
             val uri2 = if (!uri.toString().contains("share_with_me")) {
-                AudioUtils.copyFromUri(this, uri, mTemplate!!.folder_template!!)!!
+                AudioUtils.copyFromUri(this@changeEntityAudio, uri, mTemplate!!.folder_template!!)!!
             } else {
                 uri.toString()
             }
@@ -628,7 +629,7 @@ fun EngineActivity.changeEntityAudio(i: Int, uri: Uri, list: List<String>, i2: I
 
 fun EngineActivity.changeEntityAudioLambda(uri: Uri, i: Int, i2: Int, str: String, entityAudio: EntityAudio, i3: Int) {
     try {
-        val copyFromUri = AudioUtils.copyFromUri(this, uri, mTemplate!!.folder_template!!)!!
+        val copyFromUri = AudioUtils.copyFromUri(this@changeEntityAudioLambda, uri, mTemplate!!.folder_template!!)!!
         val f = i.toFloat()
         entityAudio.setAmps(PCMWaveformExtractor.extractWaveform(str, i2 / ((0.1f * f).toInt() + (f * 0.07f).toInt())))
         entityAudio.pathFfmpeg = copyFromUri
@@ -654,7 +655,7 @@ fun EngineActivity.changeEntityAudioLambda(uri: Uri, i: Int, i2: Int, str: Strin
             val entityMedia = mTemplate!!.entityMediaList[i3]
             val entityMedia2 = mTemplate!!.entityMediaList[i4]
             if (entityMedia2.video_path != null) {
-                entityMedia.video_path = AudioUtils.copyFromUri(this, Uri.parse(mTemplate!!.uri_upload_extract_audio_video), mTemplate!!.folder_template!!)
+                entityMedia.video_path = AudioUtils.copyFromUri(this@changeEntityAudioLambda, Uri.parse(mTemplate!!.uri_upload_extract_audio_video), mTemplate!!.folder_template!!)
                 if (mTemplate!!.extension != null) {
                     addAudioFromVideoWithExtention(mTemplate!!.extension!!, entityMedia.video_path!!, i4)
                     return
@@ -712,7 +713,7 @@ fun EngineActivity.changeEntityAudioFromVideo(i: Int, uri: Uri, str: String) {
         entityAudio.effectAudio.duration = (entityAudio.end - entityAudio.start).toInt()
         trackViewEntity.addAudio(entityAudio)
         if (round2 > 0 && round > 0) {
-            val copyFromUri = AudioUtils.copyFromUri(this, uri, mTemplate!!.folder_template!!)!!
+            val copyFromUri = AudioUtils.copyFromUri(this@changeEntityAudioFromVideo, uri, mTemplate!!.folder_template!!)!!
             val file = File(mTemplate!!.folder_template, System.currentTimeMillis().toString() + "_output.pcm")
             val arrayList = ArrayList<String>()
             arrayList.add("-i")
@@ -774,7 +775,7 @@ fun EngineActivity.changeEntityAudioReciters(i: Int, uri: Uri, mediaPlayer: Medi
         entityAudio.mediaPlayer = mediaPlayer
         trackViewEntity.addAudio(entityAudio)
         if (round2 > 0 && round > 0) {
-            AudioUtils.copyToLocalAsync(this, uri.toString(), mTemplate!!.folder_template!!, object : AudioUtils.Callback {
+            AudioUtils.copyToLocalAsync(this@changeEntityAudioReciters, uri.toString(), mTemplate!!.folder_template!!, object : AudioUtils.Callback {
                 override fun onSuccess(str: String) {
                     try {
                         val file = File(mTemplate!!.folder_template, System.currentTimeMillis().toString() + "_audio_wave.png")
@@ -782,7 +783,7 @@ fun EngineActivity.changeEntityAudioReciters(i: Int, uri: Uri, mediaPlayer: Medi
                             override fun apply(fFmpegSession: com.arthenica.ffmpegkit.FFmpegSession) {
                                 if (fFmpegSession.returnCode.isValueSuccess()) {
                                     try {
-                                        com.bumptech.glide.Glide.with(this@EngineActivity as androidx.fragment.app.FragmentActivity).asBitmap().load(Uri.fromFile(file)).submit().get()
+                                        com.bumptech.glide.Glide.with(this@changeEntityAudioReciters as androidx.fragment.app.FragmentActivity).asBitmap().load(Uri.fromFile(file)).submit().get()
                                         entityAudio.pathFfmpeg = str
                                         runOnUiThread { trackViewEntity.invalidate() }
                                     } catch (e: Exception) {
@@ -824,7 +825,7 @@ fun EngineActivity.addAudioTemplateHttp(uri: Uri?, i: Int, str: String?) {
         val uri2 = if (str != null) {
             uri.path
         } else if (!uri.toString().contains("share_with_me")) {
-            AudioUtils.copyFromUri(this, uri, mTemplate!!.folder_template!!)!!
+            AudioUtils.copyFromUri(this@addAudioTemplateHttp, uri, mTemplate!!.folder_template!!)!!
         } else {
             uri.toString()
         }
@@ -871,7 +872,7 @@ fun EngineActivity.addAudioTemplateHttp(uri: Uri?, i: Int, str: String?) {
                         if (fromFile.scheme != null && fromFile.scheme!!.startsWith("http")) {
                             mPlayer!!.setDataSource(fromFile.toString())
                         } else {
-                            mPlayer!!.setDataSource(this@EngineActivity, fromFile)
+                            mPlayer!!.setDataSource(this@addAudioTemplateHttp, fromFile)
                         }
                         mPlayer!!.prepareAsync()
                         mPlayer!!.setOnPreparedListener { mediaPlayer ->
@@ -896,7 +897,7 @@ fun EngineActivity.addAudioTemplateHttp(uri: Uri?, i: Int, str: String?) {
         if (uri.scheme != null && uri.scheme!!.startsWith("http")) {
             mPlayer!!.setDataSource(uri.toString())
         } else {
-            mPlayer!!.setDataSource(this, uri)
+            mPlayer!!.setDataSource(this@addAudioTemplateHttp, uri)
         }
         mPlayer!!.prepareAsync()
         mPlayer!!.setOnPreparedListener { mediaPlayer2 ->
@@ -976,7 +977,7 @@ fun EngineActivity.addEntitMediaHttp(entityMedia: EntityMedia, i: Int, uri: Uri,
                         } else {
                             val entityMedia2 = mTemplate!!.entityMediaList[i4]
                             if (entityMedia2.video_path != null) {
-                                entityMedia.video_path = AudioUtils.copyFromUri(this@EngineActivity, Uri.parse(mTemplate!!.uri_upload_extract_audio_video), mTemplate!!.folder_template!!)
+                                entityMedia.video_path = AudioUtils.copyFromUri(this@addEntitMediaHttp, Uri.parse(mTemplate!!.uri_upload_extract_audio_video), mTemplate!!.folder_template!!)
                                 if (mTemplate!!.extension != null) {
                                     addAudioFromVideoWithExtention(mTemplate!!.extension!!, entityMedia.video_path!!, i4)
                                 } else {
@@ -1052,7 +1053,7 @@ fun EngineActivity.addEntitMediaHttp(entityMedia: EntityMedia, i: Int, uri: Uri,
                 } else {
                     val entityMedia2 = mTemplate!!.entityMediaList[i4]
                     if (entityMedia2.video_path != null) {
-                        entityMedia.video_path = AudioUtils.copyFromUri(this@EngineActivity, Uri.parse(mTemplate!!.uri_upload_extract_audio_video), mTemplate!!.folder_template!!)
+                        entityMedia.video_path = AudioUtils.copyFromUri(this, Uri.parse(mTemplate!!.uri_upload_extract_audio_video), mTemplate!!.folder_template!!)
                         if (mTemplate!!.extension != null) {
                             addAudioFromVideoWithExtention(mTemplate!!.extension!!, entityMedia.video_path!!, i4)
                         } else {
@@ -1178,7 +1179,7 @@ fun EngineActivity.extractAudioFromVideo(str: String, z: Boolean) {
                 hideProgressFragment()
                 hideFragment()
                 Toast.makeText(
-                    this@EngineActivity,
+                    this,
                     mResources!!.getString(R.string.video_not_have_sound),
                     Toast.LENGTH_SHORT
                 ).show()
@@ -1195,8 +1196,9 @@ fun EngineActivity.extractAudioFromVideo(str: String, z: Boolean) {
 
 fun EngineActivity.updateProgress(i: Int, i2: Int) {
     runOnUiThread {
-        if (ProgressViewFragment.getInstance() != null) {
-            ProgressViewFragment.getInstance().update(i, i2)
+        val frag = ProgressViewFragment.getInstance()
+        if (frag != null) {
+            frag.update(i, i2)
         }
     }
 }
@@ -1215,14 +1217,14 @@ fun EngineActivity.addAudioRecitersTemplateRunnable(
             val uri = parse.toString()
             var downloadFile: String?
             if (!uri.startsWith("http://") && !uri.startsWith("https://")) {
-                downloadFile = AudioUtils.copyFromUri(this@EngineActivity, parse, mTemplate!!.folder_template!!)
+                downloadFile = AudioUtils.copyFromUri(this, parse, mTemplate!!.folder_template!!)
                 if (downloadFile == null) {
                     sb.append("file '").append(downloadFile!!.replace("'", "\\'")).append("'\n")
                     i++
                     updateProgress(i, pathes.size)
                 }
             }
-            downloadFile = AudioUtils.downloadFile(this@EngineActivity, uri, mTemplate!!.folder_template!!)!!
+            downloadFile = AudioUtils.downloadFile(this, uri, mTemplate!!.folder_template!!)!!
             if (downloadFile == null) {
                 sb.append("file '").append(downloadFile!!.replace("'", "\\'")).append("'\n")
                 i++

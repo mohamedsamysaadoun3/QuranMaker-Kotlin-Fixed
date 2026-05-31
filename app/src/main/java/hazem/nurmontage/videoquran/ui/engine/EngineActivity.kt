@@ -29,7 +29,7 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.EdgeToEdge
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
@@ -80,7 +80,7 @@ import hazem.nurmontage.videoquran.utils.UtilsFileLast
 import hazem.nurmontage.videoquran.adapter.DimensionAdabters
 import hazem.nurmontage.videoquran.core.common.Common
 import hazem.nurmontage.videoquran.core.common.Constants
-import hazem.nurmontage.videoquran.constant.AyaTextPreset
+import hazem.nurmontage.videoquran.core.common.Constants.AyaTextPreset
 import hazem.nurmontage.videoquran.core.common.Constants.AyaTextPreset as ConstantsAyaTextPreset
 import hazem.nurmontage.videoquran.constant.EffectAudioType
 import hazem.nurmontage.videoquran.constant.EntityAction
@@ -144,6 +144,14 @@ import hazem.nurmontage.videoquran.adapter.TransitionEntityAdabters
 import hazem.nurmontage.videoquran.model.Transition
 import hazem.nurmontage.videoquran.model.data.TranslationQuranEntity
 import hazem.nurmontage.videoquran.views.BlurredImageView
+import hazem.nurmontage.videoquran.views.blurred.updateIpad
+import hazem.nurmontage.videoquran.views.blurred.setupBitmapDraw
+import hazem.nurmontage.videoquran.views.blurred.setSurahNameEntity
+import hazem.nurmontage.videoquran.views.blurred.updateSizeAya
+import hazem.nurmontage.videoquran.views.blurred.updateSizeAyaTrsl
+import hazem.nurmontage.videoquran.views.blurred.updatePosSurahName
+import hazem.nurmontage.videoquran.views.blurred.createRectWithoutSurahName
+import hazem.nurmontage.videoquran.views.blurred.resizeEntity
 import hazem.nurmontage.videoquran.views.ButtonCustumFont
 import hazem.nurmontage.videoquran.views.CustomDiscreteSeekBar
 import hazem.nurmontage.videoquran.views.text.TextCustumFont
@@ -179,7 +187,7 @@ class EngineActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        EdgeToEdge.enable(this)
+        enableEdgeToEdge()
         setContentView(R.layout.activity_time_line)
 
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
@@ -254,7 +262,7 @@ class EngineActivity : BaseActivity() {
     //  Template loading
     // ──────────────────────────────────────────────
 
-    private fun loadTemplate() {
+    internal fun loadTemplate() {
         var template = LocalPersistence.readObjectFromFile(this, Constants.TEMPLATE_TMP) as? Template
         mTemplate = template
         if (template == null && intent != null) {
@@ -305,7 +313,7 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private fun checkUriShared() {
+    internal fun checkUriShared() {
         val stringExtra = intent.getStringExtra("muri")
         if (stringExtra != null) {
             addUriAudioToQuranFragment(Uri.parse(stringExtra), null)
@@ -316,7 +324,7 @@ class EngineActivity : BaseActivity() {
     //  Player helpers
     // ──────────────────────────────────────────────
 
-    private fun pausePlayer() {
+    internal fun pausePlayer() {
         try {
             hideLayoutResolution()
             if (mIsPlaying) {
@@ -344,14 +352,14 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private fun releaseWakeLock() {
+    internal fun releaseWakeLock() {
         try {
             window.clearFlags(0x00000400) // FLAG_KEEP_SCREEN_ON
         } catch (_: Exception) {
         }
     }
 
-    private fun clearFFmpeg() {
+    internal fun clearFFmpeg() {
         for (id in id_ffmpeg) {
             FFmpegKit.cancel(id)
         }
@@ -361,7 +369,7 @@ class EngineActivity : BaseActivity() {
     //  URI audio helper
     // ──────────────────────────────────────────────
 
-    private fun addUriAudioToQuranFragment(uri: Uri, textValue: String?) {
+    internal fun addUriAudioToQuranFragment(uri: Uri, textValue: String?) {
         try {
             val beginTransaction = supportFragmentManager.beginTransaction()
             mCurrentFragment = AddQuranFragment.getInstance(iAddQuran, mResources!!, uri, textValue ?: "", "-")
@@ -375,21 +383,21 @@ class EngineActivity : BaseActivity() {
     }
 
     // Helper functions to break recursive type inference at getInstance call sites
-    private fun createAddQuranFragment(cb: AddQuranFragment.IAddQuran, res: Resources): AddQuranFragment =
+    internal fun createAddQuranFragment(cb: AddQuranFragment.IAddQuran, res: Resources): AddQuranFragment =
         AddQuranFragment.getInstance(cb, res)
 
     // Getter functions to provide explicitly typed callbacks, breaking recursive type inference
-    private fun getEditSNameCb(): EditS_NameFragment.IEditS_Name = iEditSName
-    private fun getBismilahEntityCb(): EditBismilahEntityFragment.IBismilahEntityCallback = iBismilahEntityCallback
-    private fun getEditTrstEntityCb(): EditTrslEntityFragment.IEditEntityCallback = iEditTrstEntityCallback
+    internal fun getEditSNameCb(): EditS_NameFragment.IEditS_Name = iEditSName
+    internal fun getBismilahEntityCb(): EditBismilahEntityFragment.IBismilahEntityCallback = iBismilahEntityCallback
+    internal fun getEditTrstEntityCb(): EditTrslEntityFragment.IEditEntityCallback = iEditTrstEntityCallback
 
-    private fun createColorSNameFragment(cb: EditS_NameFragment.IEditS_Name, entity: SurahNameEntity, res: Resources): ColorS_NameFragment =
+    internal fun createColorSNameFragment(cb: EditS_NameFragment.IEditS_Name, entity: SurahNameEntity, res: Resources): ColorS_NameFragment =
         ColorS_NameFragment.getInstance(cb, entity, res)
 
-    private fun createColorBismilahFragment(cb: EditBismilahEntityFragment.IBismilahEntityCallback, entity: BismilahEntity, res: Resources): ColorBismilahFragment =
+    internal fun createColorBismilahFragment(cb: EditBismilahEntityFragment.IBismilahEntityCallback, entity: BismilahEntity, res: Resources): ColorBismilahFragment =
         ColorBismilahFragment.getInstance(cb, entity, res)
 
-    private fun createColorTrslAyaFragment(cb: EditTrslEntityFragment.IEditEntityCallback, entity: TranslationQuranEntity, res: Resources): ColorTrslAyaFragment =
+    internal fun createColorTrslAyaFragment(cb: EditTrslEntityFragment.IEditEntityCallback, entity: TranslationQuranEntity, res: Resources): ColorTrslAyaFragment =
         ColorTrslAyaFragment.getInstance(cb, entity, res)
 
     companion object {
@@ -401,56 +409,56 @@ class EngineActivity : BaseActivity() {
         private const val VIDEO_PERMISSION_REQUEST_CODE = 11
     }
 
-    private var activityLauncher: ActivityResultLauncher<Intent>? = null
-    private var animator_frame_video: SmoothVideoAnimator? = null
-    private lateinit var blurredImageView: BlurredImageView
-    private lateinit var btnChangeResize: LinearLayout
-    private lateinit var btnIpod: LinearLayout
-    private lateinit var btnPlayPause: ImageButton
-    private lateinit var btnRedo: ImageButton
-    private lateinit var btnToEnd: ImageButton
-    private lateinit var btnToStart: ImageButton
-    private lateinit var btnUndo: ImageButton
-    private lateinit var btn_cancel: ImageButton
-    private lateinit var btn_export: ButtonCustumFont
-    private lateinit var btn_setup_fps: LinearLayout
-    private var dialog: Dialog? = null
-    private var dialogInternet: Dialog? = null
-    private var endFrame: Int = 0
-    private var endTimeAudioVisible: Int = 0
-    private var entityAudio_player: EntityAudio? = null
-    private var entityAudio_visible: EntityAudio? = null
-    private var isOnScroll: Boolean = false
-    private var isToCrop: Boolean = false
-    private lateinit var ivIpod: ImageView
-    private lateinit var ivResize: ImageView
-    private var lastIndexVisible: Int = 0
-    private lateinit var layout_resolution: LinearLayout
-    private var mCurrentFragment: androidx.fragment.app.Fragment? = null
-    private var mIsPlaying: Boolean = false
-    private var mPlayer: MediaPlayer? = null
-    private var mResources: Resources? = null
-    private var mTemplate: Template? = null
-    private var oneExport: Boolean = false
-    private lateinit var seekBar_fps: CustomDiscreteSeekBar
-    private lateinit var seekBar_res: CustomDiscreteSeekBar
-    private lateinit var textChangeResize: TextCustumFont
-    private var timeFormatter: TimeFormatter? = null
-    private lateinit var trackViewEntity: TrackEntityView
-    private lateinit var tv_currentTime: TextView
-    private lateinit var tv_endTime: TextView
-    private lateinit var tv_resolution: TextCustumFont
-    private lateinit var tv_tittle_fragment: TextCustumFont
-    private var uri_bg: String? = null
-    private var valueAnimator: SmoothTimelineAnimator? = null
-    private var vibrationHelper: MyVibrationHelper? = null
-    private var isSaveTmpTemplate: Boolean = true
-    private val executor: java.util.concurrent.Executor = java.util.concurrent.Executors.newSingleThreadExecutor()
-    private val id_ffmpeg = mutableListOf<Long>()
-    private var current_position_time: Int = 0
-    private var startCursur: Int = 0
+    internal var activityLauncher: ActivityResultLauncher<Intent>? = null
+    internal var animator_frame_video: SmoothVideoAnimator? = null
+    internal lateinit var blurredImageView: BlurredImageView
+    internal lateinit var btnChangeResize: LinearLayout
+    internal lateinit var btnIpod: LinearLayout
+    internal lateinit var btnPlayPause: ImageButton
+    internal lateinit var btnRedo: ImageButton
+    internal lateinit var btnToEnd: ImageButton
+    internal lateinit var btnToStart: ImageButton
+    internal lateinit var btnUndo: ImageButton
+    internal lateinit var btn_cancel: ImageButton
+    internal lateinit var btn_export: ButtonCustumFont
+    internal lateinit var btn_setup_fps: LinearLayout
+    internal var dialog: Dialog? = null
+    internal var dialogInternet: Dialog? = null
+    internal var endFrame: Int = 0
+    internal var endTimeAudioVisible: Int = 0
+    internal var entityAudio_player: EntityAudio? = null
+    internal var entityAudio_visible: EntityAudio? = null
+    internal var isOnScroll: Boolean = false
+    internal var isToCrop: Boolean = false
+    internal lateinit var ivIpod: ImageView
+    internal lateinit var ivResize: ImageView
+    internal var lastIndexVisible: Int = 0
+    internal lateinit var layout_resolution: LinearLayout
+    internal var mCurrentFragment: androidx.fragment.app.Fragment? = null
+    internal var mIsPlaying: Boolean = false
+    internal var mPlayer: MediaPlayer? = null
+    internal var mResources: Resources? = null
+    internal var mTemplate: Template? = null
+    internal var oneExport: Boolean = false
+    internal lateinit var seekBar_fps: CustomDiscreteSeekBar
+    internal lateinit var seekBar_res: CustomDiscreteSeekBar
+    internal lateinit var textChangeResize: TextCustumFont
+    internal var timeFormatter: TimeFormatter? = null
+    internal lateinit var trackViewEntity: TrackEntityView
+    internal lateinit var tv_currentTime: TextView
+    internal lateinit var tv_endTime: TextView
+    internal lateinit var tv_resolution: TextCustumFont
+    internal lateinit var tv_tittle_fragment: TextCustumFont
+    internal var uri_bg: String? = null
+    internal var valueAnimator: SmoothTimelineAnimator? = null
+    internal var vibrationHelper: MyVibrationHelper? = null
+    internal var isSaveTmpTemplate: Boolean = true
+    internal val executor: java.util.concurrent.Executor = java.util.concurrent.Executors.newSingleThreadExecutor()
+    internal val id_ffmpeg = mutableListOf<Long>()
+    internal var current_position_time: Int = 0
+    internal var startCursur: Int = 0
 
-    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+    internal val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             if (mCurrentFragment != null) {
                 hideFragment()
@@ -460,7 +468,7 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private val iTrimLineCallback = object : TrackEntityView.ITrimLineCallback {
+    internal val iTrimLineCallback = object : TrackEntityView.ITrimLineCallback {
         override fun fadeInAudio(f: Float) {}
 
         override fun fadeOutAudio(f: Float) {}
@@ -632,7 +640,7 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private val iAddQuran: AddQuranFragment.IAddQuran = object : AddQuranFragment.IAddQuran {
+    internal val iAddQuran: AddQuranFragment.IAddQuran = object : AddQuranFragment.IAddQuran {
         override fun onBismilah() {
             val addEntityIste3adha = addEntityIste3adha()
             val addEntityBissmilah = addEntityBissmilah()
@@ -684,7 +692,7 @@ class EngineActivity : BaseActivity() {
             blurredImageView.updateSizeAya()
             blurredImageView.updateSizeAyaTrsl()
             blurredImageView.setSurahNameEntity(
-                str!!, str2!!, "", 1.0f, "\u062E\u0637 \u0627\u0644\u0625\u0628\u0644.otf",
+                str!!, str2!!, null, 1.0f, "\u062E\u0637 \u0627\u0644\u0625\u0628\u0644.otf",
                 blurredImageView.clr_aya, 0,
                 if (blurredImageView.surahNameEntity != null) blurredImageView.surahNameEntity!!.style else SurahNameStyle.NONE.ordinal,
                 i,
@@ -705,7 +713,7 @@ class EngineActivity : BaseActivity() {
             blurredImageView.updateSizeAya()
             blurredImageView.updateSizeAyaTrsl()
             blurredImageView.setSurahNameEntity(
-                str!!, str2!!, "", 1.0f, "\u062E\u0637 \u0627\u0644\u0625\u0628\u0644.otf",
+                str!!, str2!!, null, 1.0f, "\u062E\u0637 \u0627\u0644\u0625\u0628\u0644.otf",
                 blurredImageView.clr_aya, 0,
                 if (blurredImageView.surahNameEntity != null) blurredImageView.surahNameEntity!!.style else SurahNameStyle.NONE.ordinal,
                 i,
@@ -746,7 +754,7 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private val searchAyaResult: ActivityResultLauncher<Intent> = registerForActivityResult(
+    internal val searchAyaResult: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { activityResult: ActivityResult ->
         isToCrop = false
@@ -766,7 +774,7 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private val nameReaderResult: ActivityResultLauncher<Intent> = registerForActivityResult(
+    internal val nameReaderResult: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { activityResult: ActivityResult ->
         isToCrop = false
@@ -794,7 +802,7 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private val editSurahNameResult: ActivityResultLauncher<Intent> = registerForActivityResult(
+    internal val editSurahNameResult: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { activityResult: ActivityResult ->
         isToCrop = false
@@ -814,7 +822,7 @@ class EngineActivity : BaseActivity() {
         blurredImageView.invalidate()
     }
 
-    private val editTrslResult: ActivityResultLauncher<Intent> = registerForActivityResult(
+    internal val editTrslResult: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { activityResult: ActivityResult ->
         isToCrop = false
@@ -829,7 +837,7 @@ class EngineActivity : BaseActivity() {
         blurredImageView.invalidate()
     }
 
-    private val iChangeBgCallback = object : ChangeBgFragment.IChangeBgCallback {
+    internal val iChangeBgCallback = object : ChangeBgFragment.IChangeBgCallback {
         override fun onCancel() {
             hideFragment()
         }
@@ -883,7 +891,7 @@ class EngineActivity : BaseActivity() {
                                 BitmapCropper.cropTo16x9(blurredImageView.bitmapOriginal, blurredImageView.getW(), blurredImageView.getH())
                             }
                             blurredImageView.updatePosCanvas(cropTo16x9)
-                            blurredImageView.updateIpad(cropTo16x9, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
+                            blurredImageView.updateIpad(cropTo16x9!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
                             if (mTemplate!!.ipad_type == IpadType.IPAD_NEOMORPHIC.ordinal) {
                                 val width = (blurredImageView.ipad_rect!!.width() * 0.6f).toInt()
                                 var round = Math.round(blurredImageView.bitmapOriginal!!.width * mTemplate!!.x_square)
@@ -1035,7 +1043,7 @@ class EngineActivity : BaseActivity() {
 
     }
 
-    private val iDimensionCallback = object : DimensionAdabters.IDimensionCallback {
+    internal val iDimensionCallback = object : DimensionAdabters.IDimensionCallback {
         override fun isCustomSize(z: Boolean, resizeType: ResizeType) {}
 
         override fun done() {
@@ -1077,7 +1085,7 @@ class EngineActivity : BaseActivity() {
                             }
                             blurredImageView.updatePosCanvas(cropTo16x9)
                             blurredImageView.bitmapBlured = cropTo16x9
-                            blurredImageView.updateIpad(cropTo16x9, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
+                            blurredImageView.updateIpad(cropTo16x9!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
                             i5 = 0
                         } finally {
                         }
@@ -1150,7 +1158,7 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private val iAudioCallback = object : AddAudioFragment.IAudioCallback {
+    internal val iAudioCallback = object : AddAudioFragment.IAudioCallback {
         override fun upload() {
             if (checkPermissionAudio()) {
                 pickAudio()
@@ -1175,7 +1183,7 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private val iIpadEditCallback = object : EditIpadFragment.IIpadEditCallback {
+    internal val iIpadEditCallback = object : EditIpadFragment.IIpadEditCallback {
         override fun onClick(i: Int, i2: Int) {
             mTemplate!!.color_ipad = i
             mTemplate!!.index_color = i2
@@ -1373,40 +1381,40 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private val launchChoiceBgActivity: ActivityResultLauncher<Intent> = registerForActivityResult(
+    internal val launchChoiceBgActivity: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { activityResult: ActivityResult ->
         onChoiceBgResult(activityResult)
     }
 
-    private val launchCropActivity: ActivityResultLauncher<Intent> = registerForActivityResult(
+    internal val launchCropActivity: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { activityResult: ActivityResult ->
         onCropResult(activityResult)
     }
 
-    private val launchImg: ActivityResultLauncher<Intent> = registerForActivityResult(
+    internal val launchImg: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { activityResult: ActivityResult ->
         onImgResult(activityResult)
     }
 
-    private val launchVideo: ActivityResultLauncher<Intent> = registerForActivityResult(
+    internal val launchVideo: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { activityResult: ActivityResult ->
         onVideoResult(activityResult)
     }
 
-    private val launchVideoExtract: ActivityResultLauncher<Intent> = registerForActivityResult(
+    internal val launchVideoExtract: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { activityResult: ActivityResult ->
         onVideoExtractResult(activityResult)
     }
 
-    private val extentions = arrayOf(".mp3", ".ogg", ".acc", ".m4a", ".wav", ".mpeg")
-    private var start_extenstion: Int = 0
+    internal val extentions = arrayOf(".mp3", ".ogg", ".acc", ".m4a", ".wav", ".mpeg")
+    internal var start_extenstion: Int = 0
 
-    private val iQuranIconCallback = object : EditIconQuranFragment.IQuranIconCallback {
+    internal val iQuranIconCallback = object : EditIconQuranFragment.IQuranIconCallback {
         override fun add(str: String) {
             try {
                 val quranEntity = trackViewEntity.selectedEntity!!.getEntityView() as QuranEntity
@@ -1444,7 +1452,7 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    @Suppress("TYPE_CHECKING_HAS_RUN_INTO_RECURSIVE_PROBLEM") private val iEditSName = object : EditS_NameFragment.IEditS_Name {
+    @Suppress("TYPE_CHECKING_HAS_RUN_INTO_RECURSIVE_PROBLEM") internal val iEditSName = object : EditS_NameFragment.IEditS_Name {
         override fun onFont(surahNameEntity: SurahNameEntity) {
             val beginTransaction = supportFragmentManager.beginTransaction()
             mCurrentFragment = FontFragment.getInstance(iFontCallback, surahNameEntity.nameFont!!, surahNameEntity.getPaintAya().typeface)
@@ -1491,7 +1499,7 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private val iFontCallback = object : FontFragment.IFontCallback {
+    internal val iFontCallback = object : FontFragment.IFontCallback {
         override fun onAdd(str: String?, typeface: Typeface?) {
             try {
                 if (blurredImageView.entity_select is SurahNameEntity) {
@@ -1535,7 +1543,7 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    @Suppress("TYPE_CHECKING_HAS_RUN_INTO_RECURSIVE_PROBLEM") private val iBismilahEntityCallback = object : EditBismilahEntityFragment.IBismilahEntityCallback {
+    @Suppress("TYPE_CHECKING_HAS_RUN_INTO_RECURSIVE_PROBLEM") internal val iBismilahEntityCallback = object : EditBismilahEntityFragment.IBismilahEntityCallback {
         override fun updatePreset(ayaTextPreset: AyaTextPreset) {
             blurredImageView.setPreset(hazem.nurmontage.videoquran.core.common.Constants.AyaTextPreset.values()[ayaTextPreset.ordinal])
         }
@@ -1622,7 +1630,7 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private val iEditEntityCallback: EditEntityFragment.IEditEntityCallback = object : EditEntityFragment.IEditEntityCallback {
+    internal val iEditEntityCallback: EditEntityFragment.IEditEntityCallback = object : EditEntityFragment.IEditEntityCallback {
         override fun updatePreset(ayaTextPreset: AyaTextPreset) {
             blurredImageView.setPreset(hazem.nurmontage.videoquran.core.common.Constants.AyaTextPreset.values()[ayaTextPreset.ordinal])
         }
@@ -1774,7 +1782,7 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    @Suppress("TYPE_CHECKING_HAS_RUN_INTO_RECURSIVE_PROBLEM") private val iEditTrstEntityCallback = object : EditTrslEntityFragment.IEditEntityCallback {
+    @Suppress("TYPE_CHECKING_HAS_RUN_INTO_RECURSIVE_PROBLEM") internal val iEditTrstEntityCallback = object : EditTrslEntityFragment.IEditEntityCallback {
         override fun updatePreset(ayaTextPreset: AyaTextPreset) {
             blurredImageView.setTrslPreset(hazem.nurmontage.videoquran.core.common.Constants.AyaTextPreset.values()[ayaTextPreset.ordinal])
         }
@@ -1929,14 +1937,14 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private val iEditMultipleCallback = object : EditMultipleEntityFragment.IEditMultipleCallback {
+    internal val iEditMultipleCallback = object : EditMultipleEntityFragment.IEditMultipleCallback {
         override fun onDelete() {
             stop()
             dialogDeleteSelected()
         }
     }
 
-    private val iEditMediaCallback: EditMediaFragment.IEditMediaCallback = object : EditMediaFragment.IEditMediaCallback {
+    internal val iEditMediaCallback: EditMediaFragment.IEditMediaCallback = object : EditMediaFragment.IEditMediaCallback {
         override fun onReplace() {}
 
 
@@ -2199,7 +2207,7 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private val iEdiTextCallback = object : EditTextFragment.IEdiTextCallback {
+    internal val iEdiTextCallback = object : EditTextFragment.IEdiTextCallback {
         override fun onDone(entityQuranTimeline: EntityQuranTimeline?) {
             setupHideFragment()
             if (entityQuranTimeline != null) {
@@ -2213,7 +2221,7 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private val iTransitionCallback = object : TransitionEntityAdabters.ITransition {
+    internal val iTransitionCallback = object : TransitionEntityAdabters.ITransition {
 
         override fun destroy(entityQuranTimeline: EntityQuranTimeline) {
             if (entityQuranTimeline == null) {
@@ -2319,7 +2327,7 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private val iTransitionBismilahCallback = object : TransitionBismilahAdabters.ITransition {
+    internal val iTransitionBismilahCallback = object : TransitionBismilahAdabters.ITransition {
         override fun destroy(entityBismilahTimeline: EntityBismilahTimeline) {
             entityBismilahTimeline.quranEntity.isAnimTest = false
             entityBismilahTimeline.quranEntity.endAnimator()
@@ -2421,11 +2429,11 @@ class EngineActivity : BaseActivity() {
         }
     }
 
-    private val frameLock = Any()
-    private var pendingFramePath: String? = null
-    private var isProcessingFrame: Boolean = false
+    internal val frameLock = Any()
+    internal var pendingFramePath: String? = null
+    internal var isProcessingFrame: Boolean = false
 
-    private val frameProcessorRunnable = Runnable {
+    internal val frameProcessorRunnable = Runnable {
         var str: String?
         while (true) {
             synchronized(frameLock) {
@@ -2486,7 +2494,7 @@ private fun iniTypeImg() {
             blurredImageView.isGlass = mTemplate!!.isGlass
             blurredImageView.isVideo = false
             blurredImageView.updatePosCanvas(cropTo16x9)
-            blurredImageView.updateIpad(cropTo16x9, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
+            blurredImageView.updateIpad(cropTo16x9!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
 
             if (mTemplate!!.ipad_type == IpadType.IPAD_NEOMORPHIC.ordinal) {
                 val width = (blurredImageView.ipad_rect!!.width() * 0.6f).toInt()
@@ -2908,7 +2916,7 @@ private fun initViews() {
 // save() - private method
 // =====================================================================
 
-private fun save() {
+internal fun save() {
     if (oneExport) return
     oneExport = true
     trackViewEntity.finishScroll()
@@ -2935,7 +2943,7 @@ private fun save() {
                         else -> BitmapCropper.cropTo16x9(blurredImageView.bitmapOriginal)
                     }
                     blurredImageView.updatePosCanvas(mTemplate!!.width, mTemplate!!.height, cropTo16x92)
-                    blurredImageView.updateIpad(cropTo16x92, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
+                    blurredImageView.updateIpad(cropTo16x92!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
                     val width = (blurredImageView.ipad_rect!!.width() * 1.0f).toInt()
                     val height = (cropTo16x92!!.height * 0.5355f).toInt()
                     mTemplate!!.setDrawingTranslation(blurredImageView.btmX, blurredImageView.btmY)
@@ -2981,7 +2989,7 @@ private fun save() {
                     }
                     val bitmap = cropTo16x9
                     blurredImageView.updatePosCanvas(mTemplate!!.width, mTemplate!!.height, bitmap)
-                    blurredImageView.updateIpad(bitmap, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
+                    blurredImageView.updateIpad(bitmap!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
 
                     var rect: Rect
                     var cropToSquareWithRoundCorners: Bitmap? = null
@@ -4985,7 +4993,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
     }
 
 
-    private fun enableUndoBtn() {
+    internal fun enableUndoBtn() {
         try {
             val imageButton = btnUndo
             if (imageButton == null || imageButton.isEnabled) {
@@ -5001,7 +5009,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun enableRedoBtn() {
+    internal fun enableRedoBtn() {
         try {
             val imageButton = btnRedo
             if (imageButton == null || imageButton.isEnabled) {
@@ -5017,7 +5025,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun disableRedoBtn() {
+    internal fun disableRedoBtn() {
         try {
             val imageButton = btnRedo
             if (imageButton == null || !imageButton.isEnabled) {
@@ -5033,7 +5041,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun disableUndoBtn() {
+    internal fun disableUndoBtn() {
         try {
             val imageButton = btnUndo
             if (imageButton == null || !imageButton.isEnabled) {
@@ -5049,7 +5057,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun updateBtnCutState() {
+    internal fun updateBtnCutState() {
         try {
             checkSplitEntity()
             checkSplitTrslEntity()
@@ -5059,7 +5067,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun addEntity(
+    internal fun addEntity(
         str: String, str2: String, str3: String, str4: String,
         i: Int, i2: Int, str5: String, i3: Int, i4: Int
     ) {
@@ -5097,7 +5105,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         blurredImageView.addEntity(quranEntity)
     }
 
-    private fun addTranslationEntity(str: String, i: Int, z: Boolean) {
+    internal fun addTranslationEntity(str: String, i: Int, z: Boolean) {
         val translationQuranEntity = TranslationQuranEntity(
             str, blurredImageView.getRectFAya()!!,
             Typeface.createFromAsset(resources.assets, "fonts/ReadexPro_Medium.ttf")!!,
@@ -5114,7 +5122,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         blurredImageView.addEntity(translationQuranEntity)
     }
 
-    private fun addEntityBissmilah(
+    internal fun addEntityBissmilah(
         str: String, f: Float, f2: Float, i: Int,
         transition: Transition, f3: Float, f4: Float,
         rectF: RectF?, i2: Int
@@ -5148,7 +5156,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         blurredImageView.addBismilahEntity(bismilahEntity)
     }
 
-    private fun addEntityIsti3ada(
+    internal fun addEntityIsti3ada(
         str: String, f: Float, f2: Float, i: Int,
         transition: Transition, f3: Float, f4: Float,
         rectF: RectF?, i2: Int
@@ -5182,7 +5190,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         blurredImageView.addIsti3adhaEntity(bismilahEntity)
     }
 
-    private fun addEntityBissmilah(): Boolean {
+    internal fun addEntityBissmilah(): Boolean {
         if (blurredImageView.getBismilahEntity() != null) {
             if (blurredImageView.getBismilahEntity()!!.bismilahTimeline!!.visible()) {
                 return false
@@ -5209,7 +5217,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         return true
     }
 
-    private fun addEntityIste3adha(): Boolean {
+    internal fun addEntityIste3adha(): Boolean {
         if (blurredImageView.getmIsti3adhaEntity() != null) {
             if (blurredImageView.getmIsti3adhaEntity()!!.bismilahTimeline!!.visible()) {
                 return false
@@ -5236,7 +5244,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         return true
     }
 
-    private fun duplicateEntity(quranEntity: QuranEntity) {
+    internal fun duplicateEntity(quranEntity: QuranEntity) {
         var typefaceNumber = quranEntity.getTypefaceNumber()
         if (typefaceNumber == null) {
             typefaceNumber = UtilsFileLast.loadFontFromAsset(this, "fonts/arabic/خط فارس الكوفي.otf")!!
@@ -5295,7 +5303,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         trackViewEntity.updateCursurToSelectEntity()
     }
 
-    private fun duplicateEntity(translationQuranEntity: TranslationQuranEntity) {
+    internal fun duplicateEntity(translationQuranEntity: TranslationQuranEntity) {
         var typeface = translationQuranEntity.getPaintAya().typeface
         if (typeface == null) {
             typeface = UtilsFileLast.loadFontFromAsset(this, "fonts/${translationQuranEntity.nameFont}")
@@ -5349,7 +5357,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         trackViewEntity.updateCursurToSelectEntity()
     }
 
-    private fun splitEntity(translationQuranEntity: TranslationQuranEntity) {
+    internal fun splitEntity(translationQuranEntity: TranslationQuranEntity) {
         val abs = Math.abs(trackViewEntity.getXCursur())
         if (abs <= translationQuranEntity.entityTrslTimeline!!.rect.left ||
             abs >= translationQuranEntity.entityTrslTimeline!!.rect.right
@@ -5423,7 +5431,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun splitEntity(quranEntity: QuranEntity) {
+    internal fun splitEntity(quranEntity: QuranEntity) {
         val abs = Math.abs(trackViewEntity.getXCursur())
         if (abs <= quranEntity.entityQuran!!.rect.left ||
             abs >= quranEntity.entityQuran!!.rect.right
@@ -5510,7 +5518,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun addEntity(
+    internal fun addEntity(
         str: String, str2: String, str3: String, str4: String,
         f: Float, f2: Float, i: Int, i2: Int, i3: Int,
         str5: String, transition: Transition, z: Boolean,
@@ -5557,7 +5565,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         blurredImageView.addEntity(quranEntity)
     }
 
-    private fun addEntityTrsl(
+    internal fun addEntityTrsl(
         str: String, f: Float, f2: Float, i: Int, i2: Int,
         str2: String, transition: Transition, f3: Float, f4: Float,
         rectF: RectF?, i3: Int, i4: Int, z: Boolean
@@ -5606,7 +5614,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun addAudioRecitersBackground(list: List<RecitersModel>, handler: Handler) {
+    internal fun addAudioRecitersBackground(list: List<RecitersModel>, handler: Handler) {
         val arrayList = ArrayList<String>()
         val arrayList2 = ArrayList<String>()
         val sb = StringBuilder()
@@ -5691,7 +5699,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun addAudioRecitersFfmpeg(
+    internal fun addAudioRecitersFfmpeg(
         strArr: Array<String>, file: File, list: List<String>, file2: File
     ) {
         id_ffmpeg.add(
@@ -5711,7 +5719,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         )
     }
 
-    private fun addAudioRecitersTemplateRunnable(
+    internal fun addAudioRecitersTemplateRunnable(
         pathes: List<String>, valIndex: Int, valPathVideo: String
     ): Runnable = Runnable {
         try {
@@ -5916,7 +5924,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         tv_endTime!!.text = "/$str2"
     }
 
-    private fun hideLayoutResolution() {
+    internal fun hideLayoutResolution() {
         val linearLayout = layout_resolution
         if (linearLayout == null || linearLayout.visibility != 0) {
             return
@@ -5926,7 +5934,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun hideFragment() {
+    internal fun hideFragment() {
         try {
             if (!isFinishing && !supportFragmentManager.isDestroyed) {
                 val supportFragmentManager = supportFragmentManager
@@ -5943,7 +5951,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         mCurrentFragment = null
     }
 
-    private fun showProgress() {
+    internal fun showProgress() {
         try {
             setStatusBarColor(ViewCompat.MEASURED_STATE_MASK)
             setNavigationBarColor(ViewCompat.MEASURED_STATE_MASK)
@@ -5958,7 +5966,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun showProgressSimple() {
+    internal fun showProgressSimple() {
         try {
             findViewById<View>(R.id.container_progress).visibility = 0
             if (isFinishing || supportFragmentManager.isDestroyed) {
@@ -5971,7 +5979,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun hideProgressFragment() {
+    internal fun hideProgressFragment() {
         try {
             setStatusBarColor(-15658735)
             setNavigationBarColor(-14803426)
@@ -5989,7 +5997,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun toCrop() {
+    internal fun toCrop() {
         isSaveTmpTemplate = false
         isToCrop = true
         Common.bitmap = blurredImageView.bitmapOriginal
@@ -6222,16 +6230,16 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         imageChooser()
     }
 
-    private fun videoChooserForAudio() {
+    internal fun videoChooserForAudio() {
         isToCrop = true
         launchVideoExtract!!.launch(Intent(this, GalleryPickerVideo::class.java))
     }
 
-    private fun videoChooser() {
+    internal fun videoChooser() {
         launchVideo!!.launch(Intent(this, GalleryPickerVideo::class.java))
     }
 
-    private fun imageChooser() {
+    internal fun imageChooser() {
         launchImg!!.launch(Intent(this, GalleryPickerOneImage::class.java))
     }
 
@@ -6327,7 +6335,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun addAudioFromVideoWithExtention(str: String, str2: String, i: Int) {
+    internal fun addAudioFromVideoWithExtention(str: String, str2: String, i: Int) {
         try {
             val file = File(File(mTemplate!!.folder_template!!), "${System.currentTimeMillis()}_audio$str")
             FFmpegKit.executeWithArgumentsAsync(
@@ -6342,7 +6350,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun extractAudioFromVideoRecursive(str: String, i: Int, z: Boolean, i2: Int) {
+    internal fun extractAudioFromVideoRecursive(str: String, i: Int, z: Boolean, i2: Int) {
         if (isDestroyed) {
             return
         }
@@ -6379,7 +6387,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         extractAudioFromVideo(str, z)
     }
 
-    private fun extractAudioFromVideo(str: String, z: Boolean) {
+    internal fun extractAudioFromVideo(str: String, z: Boolean) {
         try {
             val file = File(File(mTemplate!!.folder_template!!), "${System.currentTimeMillis()}_audio.mp3")
             FFmpegKit.executeWithArgumentsAsync(
@@ -6421,19 +6429,19 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun toChoiceBgFromVideo(uri: Uri) {
+    internal fun toChoiceBgFromVideo(uri: Uri) {
         val intent = Intent(this, ChoiceBgFromVideoActivity::class.java)
         intent.data = uri
         launchChoiceBgActivity!!.launch(intent)
     }
 
-    private fun handleVideo(uri: Uri) {
+    internal fun handleVideo(uri: Uri) {
         showProgress()
         id_ffmpeg.clear()
         executor.execute(handleVideoRunnable(uri))
     }
 
-    private fun handleVideoRunnable(uri: Uri): Runnable = Runnable {
+    internal fun handleVideoRunnable(uri: Uri): Runnable = Runnable {
         try {
             val copyFromUri = AudioUtils.copyFromUri(this@EngineActivity, uri, mTemplate!!.folder_template!!)!!
             val mediaPlayer = MediaPlayer()
@@ -6497,7 +6505,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun changeBitmap(str: String) {
+    internal fun changeBitmap(str: String) {
         executor.execute(Runnable {
             var cropTo16x9: Bitmap?
             var cropToSquareWithRoundCorners: Bitmap? = null
@@ -6533,7 +6541,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
                     )
                 }
                 blurredImageView.updatePosCanvas(cropTo16x9)
-                blurredImageView.updateIpad(cropTo16x9, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
+                blurredImageView.updateIpad(cropTo16x9!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
                 if (mTemplate!!.ipad_type != IpadType.BLACK_LAYER.ordinal &&
                     mTemplate!!.ipad_type != IpadType.GRADIENT.ordinal &&
                     mTemplate!!.ipad_type != IpadType.MASK_BRUSH.ordinal &&
@@ -6699,7 +6707,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         })
     }
 
-    private fun updateSquareBitmap(str: String) {
+    internal fun updateSquareBitmap(str: String) {
         if (isOnScroll) {
             if (mIsPlaying) {
                 return
@@ -6821,7 +6829,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
     }
 
     @Throws(IOException::class)
-    private fun setupOriginalBitmap(uri: Uri): Bitmap {
+    internal fun setupOriginalBitmap(uri: Uri): Bitmap {
         val height = blurredImageView.getH()
         val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
         val min = height / Math.min(bitmap.width, bitmap.height).toFloat()
@@ -6830,14 +6838,14 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         )
     }
 
-    private fun setupOriginalBitmap(bitmap: Bitmap, i: Int): Bitmap {
+    internal fun setupOriginalBitmap(bitmap: Bitmap, i: Int): Bitmap {
         val min = i / Math.min(bitmap.width, bitmap.height).toFloat()
         return Bitmap.createScaledBitmap(
             bitmap, Math.round(bitmap.width * min), Math.round(bitmap.height * min), true
         )
     }
 
-    private fun handleImg(uri: Uri) {
+    internal fun handleImg(uri: Uri) {
         showProgress()
         executor.execute {
             var cropTo16x9: Bitmap?
@@ -6870,7 +6878,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
                             )
                         }
                         blurredImageView.updatePosCanvas(cropTo16x9)
-                        blurredImageView.updateIpad(cropTo16x9, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
+                        blurredImageView.updateIpad(cropTo16x9!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
                         val min = Math.min(
                             blurredImageView.bitmapOriginal!!.width,
                             blurredImageView.bitmapOriginal!!.height
@@ -7050,7 +7058,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun updateTime() {
+    internal fun updateTime() {
         trackViewEntity.calculMaxTime()
         updateViewTime(trackViewEntity.maxTime, trackViewEntity.current_cursur_position)
         if (trackViewEntity.current_cursur_position <= trackViewEntity.maxTime) {
@@ -7061,7 +7069,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun updateTimeToEndAya() {
+    internal fun updateTimeToEndAya() {
         trackViewEntity.calculMaxTime()
         trackViewEntity.translateToEnd()
         updateViewTime(trackViewEntity.maxTime, trackViewEntity.current_cursur_position)
@@ -7073,7 +7081,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun selectSurahName() {
+    internal fun selectSurahName() {
         findViewById<View>(R.id.layout_menu).visibility = 4
         val surahNameEntity = blurredImageView.surahNameEntity
         val beginTransaction = supportFragmentManager.beginTransaction()
@@ -7211,12 +7219,12 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         EditMediaFragment.instance!!.checkSplit(trackViewEntity.selectedEntity!! as EntityAudio, f)
     }
 
-    private fun clearCallback() {
+    internal fun clearCallback() {
         // These are val properties and cannot be reassigned to null
         // In the original Java code these were nullable interface references
     }
 
-    private fun addUpdateAnim(
+    internal fun addUpdateAnim(
         entityBismilahTimeline: EntityBismilahTimeline?,
         entityBismilahTimeline2: EntityBismilahTimeline
     ) {
@@ -7234,7 +7242,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         entityBismilahTimeline.getTransition()!!.duration_in = entityBismilahTimeline2.getTransition()!!.duration_in
     }
 
-    private fun addUpdateAnim(
+    internal fun addUpdateAnim(
         entityBismilahTimeline: EntityBismilahTimeline?,
         entityQuranTimeline: EntityQuranTimeline
     ) {
@@ -7288,7 +7296,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         animator_frame_video?.stop()
     }
 
-    private fun updateFrame() {
+    internal fun updateFrame() {
         val template = mTemplate
         if (template == null || !template.isVideoSquare ||
             mTemplate!!.ipad_type == IpadType.RECT.ordinal ||
@@ -7319,7 +7327,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         )
     }
 
-    private fun processFrame(str: String) {
+    internal fun processFrame(str: String) {
         var cropTo16x9: Bitmap?
         try {
             if (!(isOnScroll && mIsPlaying) && mIsPlaying) {
@@ -7416,11 +7424,11 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
 
     // ── Missing method stubs ──────────────────────────────────────────────
 
-    private fun pauseTimelineAnimation() {
+    internal fun pauseTimelineAnimation() {
         valueAnimator?.stop()
     }
 
-    private fun updateBtnToStart() {
+    internal fun updateBtnToStart() {
         try {
             if (::btnToStart.isInitialized) {
                 btnToStart.isEnabled = trackViewEntity.current_cursur_position > 0
@@ -7435,7 +7443,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun updateBtnToEnd() {
+    internal fun updateBtnToEnd() {
         try {
             if (::btnToEnd.isInitialized) {
                 btnToEnd.isEnabled = trackViewEntity.current_cursur_position < trackViewEntity.maxTime
@@ -7450,7 +7458,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun cancelDialog() {
+    internal fun cancelDialog() {
         try {
             val d = dialog
             if (d != null && d.isShowing) {
@@ -7462,7 +7470,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun cancelDialogInternet() {
+    internal fun cancelDialogInternet() {
         try {
             val d = dialogInternet
             if (d != null && d.isShowing) {
@@ -7474,12 +7482,12 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun toProVersion() {
+    internal fun toProVersion() {
         // Billing removed - pro version is always unlocked
         // Originally navigated to ProVersionActivity; now a no-op
     }
 
-    private fun showExitDialog() {
+    internal fun showExitDialog() {
         try {
             isSaveTmpTemplate = false
             pausePlayer()
@@ -7573,7 +7581,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
             btnYes.setOnClickListener {
                 if (NetworkUtils.isNetworkAvailable(this@EngineActivity)) {
                     cancelDialogInternet()
-                    addAudioRecitersTemplate(list, 0, null)
+                    addAudioRecitersTemplate(list, 0, "")
                 }
             }
             dialogInternet!!.show()
@@ -7582,33 +7590,33 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun onChoiceBgResult(activityResult: ActivityResult) {
+    internal fun onChoiceBgResult(activityResult: ActivityResult) {
         // TODO: implement
     }
 
-    private fun onCropResult(activityResult: ActivityResult) {
+    internal fun onCropResult(activityResult: ActivityResult) {
         // TODO: implement
     }
 
-    private fun onImgResult(activityResult: ActivityResult) {
+    internal fun onImgResult(activityResult: ActivityResult) {
         // TODO: implement
     }
 
-    private fun onVideoResult(activityResult: ActivityResult) {
+    internal fun onVideoResult(activityResult: ActivityResult) {
         // TODO: implement
     }
 
-    private fun onVideoExtractResult(activityResult: ActivityResult) {
+    internal fun onVideoExtractResult(activityResult: ActivityResult) {
         // TODO: implement
     }
 
 
     // 3-param overload kept for compatibility; the main logic is in the 2-param version above
-    private fun addUriAudioToQuranFragment(uri: Uri, str: String, i: Int) {
+    internal fun addUriAudioToQuranFragment(uri: Uri, str: String, i: Int) {
         addUriAudioToQuranFragment(uri, str)
     }
 
-    private fun addEntityFromTemplate() {
+    internal fun addEntityFromTemplate() {
         val template = mTemplate ?: return
         val isEnabled = template.ipad_type == IpadType.GRADIENT.ordinal ||
                 template.ipad_type == IpadType.MASK_BRUSH.ordinal ||
@@ -7627,8 +7635,8 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
                 entityQuranTemplate.indexNumber,
                 entityQuranTemplate.number,
                 entityQuranTemplate.color,
-                entityQuranTemplate.name_font,
-                entityQuranTemplate.transition,
+                entityQuranTemplate.name_font ?: "hafes",
+                entityQuranTemplate.transition ?: Transition(),
                 isEnabled,
                 entityQuranTemplate.icon,
                 entityQuranTemplate.startWord_index,
@@ -7642,8 +7650,8 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
                     entityQuranTemplate.rectF!!.r,
                     entityQuranTemplate.rectF!!.b
                 ),
-                loadFontFromAsset,
-                createFromAsset,
+                loadFontFromAsset!!,
+                createFromAsset!!,
                 entityQuranTemplate.colorTrsl,
                 entityQuranTemplate.preset
             )
@@ -7656,8 +7664,8 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
                 translationTemplate.right,
                 translationTemplate.number,
                 translationTemplate.color,
-                translationTemplate.name_font,
-                translationTemplate.transition,
+                translationTemplate.name_font ?: "ReadexPro_Medium.ttf",
+                translationTemplate.transition ?: Transition(),
                 translationTemplate.scale,
                 translationTemplate.factor_size,
                 RectF(
@@ -7678,7 +7686,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
                 template.entityIsti3adaTemplate!!.left,
                 template.entityIsti3adaTemplate!!.right,
                 template.entityIsti3adaTemplate!!.color,
-                template.entityIsti3adaTemplate!!.transition,
+                template.entityIsti3adaTemplate!!.transition ?: Transition(),
                 template.entityIsti3adaTemplate!!.scale,
                 template.entityIsti3adaTemplate!!.factor_size,
                 RectF(
@@ -7697,7 +7705,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
                 template.entityBismilahTemplate!!.left,
                 template.entityBismilahTemplate!!.right,
                 template.entityBismilahTemplate!!.color,
-                template.entityBismilahTemplate!!.transition,
+                template.entityBismilahTemplate!!.transition ?: Transition(),
                 template.entityBismilahTemplate!!.scale,
                 template.entityBismilahTemplate!!.factor_size,
                 RectF(
@@ -7769,7 +7777,7 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
                 } else if (entityMedia.uri != null) {
                     if (entityMedia.paths_https != null) {
                         if (NetworkUtils.isNetworkAvailable(this)) {
-                            addAudioRecitersTemplate(entityMedia.paths_https!!, 0, null)
+                            addAudioRecitersTemplate(entityMedia.paths_https!!, 0, "")
                         } else {
                             runOnUiThread {
                                 dialogNoInternetList(entityMedia.paths_https!!)
@@ -7808,12 +7816,12 @@ fun applyffect(str: String, entityAudio: EntityAudio) {
         }
     }
 
-    private fun initTypeVideo() {
+    internal fun initTypeVideo() {
         // TODO: implement
     }
 
     private val isSubscribed: Boolean
-        get() = MyPreferences.isProVersion()
+        get() = true // Billing removed
 
     private lateinit var seekbar_fps: CustomDiscreteSeekBar
     private lateinit var seekbar_resolution: CustomDiscreteSeekBar

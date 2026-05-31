@@ -10,7 +10,7 @@ import androidx.core.view.InputDeviceCompat
 import androidx.core.view.ViewCompat
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.constant.IpadType
-import hazem.nurmontage.videoquran.model.BismilahEntity
+import hazem.nurmontage.videoquran.model.data.BismilahEntity
 import hazem.nurmontage.videoquran.model.SurahNameEntity
 import hazem.nurmontage.videoquran.views.BlurredImageView
 import kotlin.math.cos

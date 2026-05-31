@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.adapter.ColorAdapter
-import hazem.nurmontage.videoquran.constant.AyaTextPreset
+import hazem.nurmontage.videoquran.core.common.Constants.AyaTextPreset
 import hazem.nurmontage.videoquran.core.common.Constants
 import hazem.nurmontage.videoquran.databinding.FragmentColorAyaBinding
 import hazem.nurmontage.videoquran.fragment.EditTrslEntityFragment

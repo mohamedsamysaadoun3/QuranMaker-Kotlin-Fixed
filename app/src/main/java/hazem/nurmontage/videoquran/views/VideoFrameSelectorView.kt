@@ -37,6 +37,13 @@ class VideoFrameSelectorView @JvmOverloads constructor(
         fun onFrameSelected(value: Int, bitmap: Bitmap)
     }
 
+    interface OnFrameSeekListener {
+        fun onSeekTo(timeUs: Long)
+    }
+
+    private var onFrameSeekListener: OnFrameSeekListener? = null
+    private var videoDurationUs: Long = 0L
+
     private fun init() {
         framePaint.color = -7829368
         cursorPaint.color = SupportMenu.CATEGORY_MASK
@@ -112,7 +119,7 @@ class VideoFrameSelectorView @JvmOverloads constructor(
             frameRect.set(f3, 0.0f, widthRatio + f3, frameHeight)
             val f4 = cornerRadius
             canvas.drawRoundRect(frameRect, f4, f4, framePaint)
-            val bitmap = frameBitmaps[index].bitmap
+            val bitmap = frameBitmaps[index].getBitmap()
             if (bitmap != null) {
                 canvas.drawBitmap(
                     bitmap,
@@ -151,6 +158,22 @@ class VideoFrameSelectorView @JvmOverloads constructor(
 
     fun setOnFrameSelectedListener(onFrameSelectedListener: OnFrameSelectedListener?) {
         this.onFrameSelectedListener = onFrameSelectedListener
+    }
+
+    fun setOnFrameSeekListener(listener: OnFrameSeekListener?) {
+        this.onFrameSeekListener = listener
+    }
+
+    fun setDuration(durationUs: Long) {
+        this.videoDurationUs = durationUs
+    }
+
+    fun setVideoPath(path: String) {
+        if (path.startsWith("content://") || path.startsWith("file://")) {
+            setVideoUri(Uri.parse(path))
+        } else {
+            setVideoUri(Uri.fromFile(java.io.File(path)))
+        }
     }
 
     init {

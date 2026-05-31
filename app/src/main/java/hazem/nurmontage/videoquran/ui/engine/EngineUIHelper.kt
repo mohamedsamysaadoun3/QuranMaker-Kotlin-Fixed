@@ -36,9 +36,11 @@ import hazem.nurmontage.videoquran.fragment.*
 import hazem.nurmontage.videoquran.model.data.BismilahEntity
 import hazem.nurmontage.videoquran.model.data.QuranEntity
 import hazem.nurmontage.videoquran.model.data.TranslationQuranEntity
+import hazem.nurmontage.videoquran.model.SurahNameEntity
 import hazem.nurmontage.videoquran.core.common.Common
 import hazem.nurmontage.videoquran.core.common.Constants
 import hazem.nurmontage.videoquran.utils.AspectRatioCalculator
+import hazem.nurmontage.videoquran.utils.audio.AudioUtils
 import hazem.nurmontage.videoquran.utils.BitmapCropper
 import hazem.nurmontage.videoquran.utils.LocaleHelper
 import hazem.nurmontage.videoquran.utils.LocalPersistence
@@ -48,10 +50,10 @@ import hazem.nurmontage.videoquran.utils.ScreenUtils
 import hazem.nurmontage.videoquran.utils.UtilsBitmap
 import hazem.nurmontage.videoquran.fragment.AddQuranFragment
 import hazem.nurmontage.videoquran.views.BlurredImageView
+import hazem.nurmontage.videoquran.views.blurred.updateIpad
 import hazem.nurmontage.videoquran.views.ButtonCustumFont
 import hazem.nurmontage.videoquran.views.CustomDiscreteSeekBar
 import hazem.nurmontage.videoquran.views.TextCustumFont
-import hazem.nurmontage.videoquran.views.text.TextCustumFont
 import hazem.nurmontage.videoquran.views.TrackEntityView
 import java.io.File
 import java.io.FileOutputStream
@@ -76,7 +78,7 @@ fun EngineActivity.iniTypeImg() {
             blurredImageView.initCanvasDimension(blurredImageView.getW(), blurredImageView.getH(), mTemplate!!.geTypeResize())
             val height = blurredImageView.getH()
             try {
-                bitmap = Glide.with(this@EngineActivity as androidx.fragment.app.FragmentActivity).asBitmap()
+                bitmap = Glide.with(this as androidx.fragment.app.FragmentActivity).asBitmap()
                     .load(mTemplate!!.uri_bg)
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .skipMemoryCache(true)
@@ -84,7 +86,7 @@ fun EngineActivity.iniTypeImg() {
                     .submit().get() as Bitmap
             } catch (unused: Exception) {
                 mTemplate!!.color_ipad = -1
-                bitmap = Glide.with(this@EngineActivity as androidx.fragment.app.FragmentActivity).asBitmap()
+                bitmap = Glide.with(this as androidx.fragment.app.FragmentActivity).asBitmap()
                     .load(R.drawable.bg_19)
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .skipMemoryCache(true)
@@ -100,7 +102,7 @@ fun EngineActivity.iniTypeImg() {
             blurredImageView.isGlass = mTemplate!!.isGlass
             blurredImageView.isVideo = false
             blurredImageView.updatePosCanvas(cropTo16x9)
-            blurredImageView.updateIpad(cropTo16x9, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
+            blurredImageView.updateIpad(cropTo16x9!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
 
             if (mTemplate!!.ipad_type == IpadType.IPAD_NEOMORPHIC.ordinal) {
                 val width = (blurredImageView.ipad_rect!!.width() * 0.6f).toInt()
@@ -203,9 +205,9 @@ fun EngineActivity.iniTypeImg() {
                 rect = rect4
             }
             if (mTemplate!!.gradient != null) {
-                blurredImageView.setBitmap(UtilsBitmap.blur(this@EngineActivity, cropTo16x9!!, 20, 1), bitmap2, mTemplate!!.gradient!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), rect)
+                blurredImageView.setBitmap(UtilsBitmap.blur(this, cropTo16x9!!, 20, 1), bitmap2, mTemplate!!.gradient!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), rect)
             } else {
-                blurredImageView.setBitmap(UtilsBitmap.blur(this@EngineActivity, cropTo16x9!!, 20, 1), bitmap2, mTemplate!!.color_ipad, mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), rect)
+                blurredImageView.setBitmap(UtilsBitmap.blur(this, cropTo16x9!!, 20, 1), bitmap2, mTemplate!!.color_ipad, mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), rect)
             }
             clrTrsl = if (mTemplate!!.ipad_type == IpadType.BLUE_TYPE.ordinal) {
                 blurredImageView.paintLecture.color
@@ -431,10 +433,10 @@ fun EngineActivity.initViews() {
         stop()
         if (Build.VERSION.SDK_INT >= 33) {
             save()
-        } else if (ContextCompat.checkSelfPermission(this@EngineActivity, "android.permission.WRITE_EXTERNAL_STORAGE") == 0) {
+        } else if (ContextCompat.checkSelfPermission(this, "android.permission.WRITE_EXTERNAL_STORAGE") == 0) {
             save()
         } else {
-            ActivityCompat.requestPermissions(this@EngineActivity, arrayOf("android.permission.WRITE_EXTERNAL_STORAGE"), 1)
+            ActivityCompat.requestPermissions(this, arrayOf("android.permission.WRITE_EXTERNAL_STORAGE"), 1)
         }
     }
     val imageButton4 = findViewById<android.widget.ImageButton>(R.id.btn_cancel)
@@ -490,7 +492,7 @@ fun EngineActivity.initViews() {
         btnChangeResize?.setBackgroundColor(0)
         btnChangeResize?.setOnClickListener {
             stop()
-            dialogPremium(R.drawable.iv_layout_ipad)
+            dialogPremium(R.drawable.iv_layout_ipod)
         }
         textCustumFont.setTextColor(-8355712)
         ivIpod?.setColorFilter(-8355712, android.graphics.PorterDuff.Mode.SRC_IN)
@@ -647,14 +649,6 @@ fun EngineActivity.hideLayoutResolution() {
     }
 }
 
-fun EngineActivity.selectSurahName() {
-    findViewById<View>(R.id.layout_menu).visibility = 4
-    val surahNameEntity = blurredImageView.surahNameEntity
-    val beginTransaction = supportFragmentManager.beginTransaction()
-    mCurrentFragment = EditS_NameFragment.getInstance(iEditSName, mResources, surahNameEntity)
-    beginTransaction.replace(R.id.m_container, mCurrentFragment!!)
-    beginTransaction.commit()
-}
 
 fun EngineActivity.dialogCopyRight() {
     try {
@@ -815,7 +809,7 @@ fun EngineActivity.dialogNoInternet(uri: Uri) {
         val btnYes = inflate.findViewById<ButtonCustumFont>(R.id.dialog_yes)
         btnYes.text = mResources!!.getString(R.string.retry)
         btnYes.setOnClickListener {
-            if (NetworkUtils.isNetworkAvailable(this@EngineActivity)) {
+            if (NetworkUtils.isNetworkAvailable(this)) {
                 cancelDialogInternet()
                 addAudioTemplateHttp(uri, 0, null)
             }
@@ -854,9 +848,9 @@ fun EngineActivity.dialogNoInternetList(list: List<String>) {
         val btnYes = inflate.findViewById<ButtonCustumFont>(R.id.dialog_yes)
         btnYes.text = mResources!!.getString(R.string.retry)
         btnYes.setOnClickListener {
-            if (NetworkUtils.isNetworkAvailable(this@EngineActivity)) {
+            if (NetworkUtils.isNetworkAvailable(this)) {
                 cancelDialogInternet()
-                addAudioRecitersTemplate(list, 0, null)
+                addAudioRecitersTemplate(list, 0, "")
             }
         }
         dialogInternet!!.show()
@@ -893,14 +887,14 @@ fun EngineActivity.dialogDeleteSelected() {
                     iTrimLineCallback!!.onEmptySelect()
                 }
             }.start()
-            if (this@EngineActivity.dialog != null) {
-                this@EngineActivity.dialog!!.dismiss()
+            if (this.dialog != null) {
+                this.dialog!!.dismiss()
             }
         }
         val buttonCustumFont2 = inflate.findViewById<ButtonCustumFont>(R.id.dialog_yes)
         buttonCustumFont2.text = mResources!!.getString(R.string.no)
         buttonCustumFont2.setOnClickListener {
-            this@EngineActivity.dialog!!.dismiss()
+            this.dialog!!.dismiss()
         }
         this.dialog!!.show()
     } catch (e: Exception) {
@@ -925,7 +919,7 @@ fun EngineActivity.showExitDialog() {
         val btnNo = inflate.findViewById<ButtonCustumFont>(R.id.dialog_no)
         btnNo.text = mResources!!.getString(R.string.leave)
         btnNo.setOnClickListener {
-            LocalPersistence.deleteTemplate(this@EngineActivity, Constants.TEMPLATE_TMP)
+            LocalPersistence.deleteTemplate(this, Constants.TEMPLATE_TMP)
             cancelDialog()
             finish()
         }
@@ -992,33 +986,6 @@ fun EngineActivity.toCrop() {
     launchCropActivity!!.launch(Intent(this, hazem.nurmontage.videoquran.ui.editor.CropBitmapActivity::class.java))
 }
 
-fun EngineActivity.pickVideoForAudio() {
-    if (Build.VERSION.SDK_INT >= 34) {
-        if (ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_VISUAL_USER_SELECTED") != 0 &&
-            ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_VIDEO") != 0
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf("android.permission.READ_MEDIA_VIDEO", "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"),
-                12
-            )
-            return
-        }
-    } else if (Build.VERSION.SDK_INT >= 33) {
-        if (ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_VIDEO") != 0) {
-            ActivityCompat.requestPermissions(
-                this, arrayOf("android.permission.READ_MEDIA_VIDEO"), 12
-            )
-            return
-        }
-    } else if (ContextCompat.checkSelfPermission(this, "android.permission.READ_EXTERNAL_STORAGE") != 0) {
-        ActivityCompat.requestPermissions(
-            this, arrayOf("android.permission.READ_EXTERNAL_STORAGE"), 12
-        )
-        return
-    }
-    videoChooserForAudio()
-}
 
 fun EngineActivity.pickVideoFromGallery() {
     if (Build.VERSION.SDK_INT >= 34) {
@@ -1092,18 +1059,6 @@ fun EngineActivity.pickImageFromGallery() {
     imageChooser()
 }
 
-fun EngineActivity.videoChooserForAudio() {
-    isToCrop = true
-    launchVideoExtract!!.launch(Intent(this, hazem.nurmontage.videoquran.ui.gallery.GalleryPickerVideo::class.java))
-}
-
-fun EngineActivity.videoChooser() {
-    launchVideo!!.launch(Intent(this, hazem.nurmontage.videoquran.ui.gallery.GalleryPickerVideo::class.java))
-}
-
-fun EngineActivity.imageChooser() {
-    launchImg!!.launch(Intent(this, hazem.nurmontage.videoquran.ui.gallery_photos.GalleryPickerOneImage::class.java))
-}
 
 fun EngineActivity.handleVideo(uri: Uri) {
     showProgress()
@@ -1113,9 +1068,9 @@ fun EngineActivity.handleVideo(uri: Uri) {
 
 fun EngineActivity.handleVideoRunnable(uri: Uri): Runnable = Runnable {
     try {
-        val copyFromUri = AudioUtils.copyFromUri(this@EngineActivity, uri, mTemplate!!.folder_template!!)!!
+        val copyFromUri = AudioUtils.copyFromUri(this, uri, mTemplate!!.folder_template!!)!!
         val mediaPlayer = MediaPlayer()
-        mediaPlayer.setDataSource(this@EngineActivity, uri)
+        mediaPlayer.setDataSource(this, uri)
         mediaPlayer.setOnPreparedListener { mp ->
             if (mp == null) {
                 return@setOnPreparedListener
@@ -1183,7 +1138,7 @@ fun EngineActivity.changeBitmap(str: String) {
         var rect: Rect?
         try {
             val height = blurredImageView.getH()
-            val bitmap2 = Glide.with(this@EngineActivity as androidx.fragment.app.FragmentActivity)
+            val bitmap2 = Glide.with(this as androidx.fragment.app.FragmentActivity)
                 .asBitmap()
                 .load(str)
                 .override(height, height)
@@ -1211,7 +1166,7 @@ fun EngineActivity.changeBitmap(str: String) {
                 )
             }
             blurredImageView.updatePosCanvas(cropTo16x9)
-            blurredImageView.updateIpad(cropTo16x9, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
+            blurredImageView.updateIpad(cropTo16x9!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
             // Simplified for split - full bitmap square logic preserved
             if (mTemplate!!.ipad_type != IpadType.BLACK_LAYER.ordinal &&
                 mTemplate!!.ipad_type != IpadType.GRADIENT.ordinal &&
@@ -1220,10 +1175,10 @@ fun EngineActivity.changeBitmap(str: String) {
                 mTemplate!!.ipad_type != IpadType.CASSET_IMG.ordinal
             ) {
                 if (mTemplate!!.ipad_type == IpadType.CASSET_IMG_BLUR.ordinal) {
-                    blurredImageView.bitmapBlured = UtilsBitmap.blur(this@EngineActivity, cropTo16x9!!, 20, 1)
+                    blurredImageView.bitmapBlured = UtilsBitmap.blur(this, cropTo16x9!!, 20, 1)
                     blurredImageView.bitmapSquare = blurredImageView.bitmapBlured
                 } else {
-                    blurredImageView.bitmapBlured = UtilsBitmap.blur(this@EngineActivity, cropTo16x9!!, 20, 1)
+                    blurredImageView.bitmapBlured = UtilsBitmap.blur(this, cropTo16x9!!, 20, 1)
                     mTemplate!!.color_ipad = blurredImageView.colorIpad()
                     runOnUiThread {
                         blurredImageView.invalidate()
@@ -1231,7 +1186,7 @@ fun EngineActivity.changeBitmap(str: String) {
                 }
             }
             blurredImageView.bitmapSquare = cropTo16x9
-            blurredImageView.bitmapBlured = UtilsBitmap.blur(this@EngineActivity, cropTo16x9!!, 20, 1)
+            blurredImageView.bitmapBlured = UtilsBitmap.blur(this, cropTo16x9!!, 20, 1)
             mTemplate!!.color_ipad = blurredImageView.colorIpad()
             runOnUiThread {
                 blurredImageView.invalidate()
@@ -1292,29 +1247,48 @@ fun EngineActivity.handleImg(uri: Uri) {
                         )
                     }
                     blurredImageView.updatePosCanvas(cropTo16x9)
-                    blurredImageView.updateIpad(cropTo16x9, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
+                    blurredImageView.updateIpad(cropTo16x9!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
                     val min = Math.min(
                         blurredImageView.bitmapOriginal!!.width,
                         blurredImageView.bitmapOriginal!!.height
                     )
                     // IPad type specific bitmap handling - simplified for split
                     when (mTemplate!!.ipad_type) {
-                        IpadType.GRADIENT.ordinal -> blurredImageView.setBitmap(
-                            UtilsBitmap.blur(this@EngineActivity, cropTo16x9!!, 20, 1),
-                            null, ViewCompat.MEASURED_STATE_MASK,
-                            mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), null
-                        )
+                        IpadType.GRADIENT.ordinal -> {
+                            val gradient = blurredImageView.color_gradient
+                            if (gradient != null) {
+                                blurredImageView.setBitmap(
+                                    UtilsBitmap.blur(this, cropTo16x9!!, 20, 1),
+                                    null as Bitmap?, gradient,
+                                    mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), null
+                                )
+                            } else {
+                                blurredImageView.setBitmap(
+                                    UtilsBitmap.blur(this, cropTo16x9!!, 20, 1),
+                                    null as Bitmap?, ViewCompat.MEASURED_STATE_MASK,
+                                    mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), null
+                                )
+                            }
+                        }
                         IpadType.BLUE_TYPE.ordinal -> {
-                            val color = blurredImageView.color_gradient ?: blurredImageView.color_ipad
-                            blurredImageView.setBitmap(
-                                UtilsBitmap.blur(this@EngineActivity, cropTo16x9!!, 20, 1),
-                                null, color,
-                                mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), null
-                            )
+                            val gradient = blurredImageView.color_gradient
+                            if (gradient != null) {
+                                blurredImageView.setBitmap(
+                                    UtilsBitmap.blur(this, cropTo16x9!!, 20, 1),
+                                    null as Bitmap?, gradient,
+                                    mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), null
+                                )
+                            } else {
+                                blurredImageView.setBitmap(
+                                    UtilsBitmap.blur(this, cropTo16x9!!, 20, 1),
+                                    null as Bitmap?, blurredImageView.color_ipad,
+                                    mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), null
+                                )
+                            }
                         }
                         else -> blurredImageView.setBitmap(
-                            UtilsBitmap.blur(this@EngineActivity, cropTo16x9!!, 20, 1),
-                            null, -1, mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), null
+                            UtilsBitmap.blur(this, cropTo16x9!!, 20, 1),
+                            null as Bitmap?, -1, mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), null
                         )
                     }
                     blurredImageView.invalidate()
@@ -1334,35 +1308,6 @@ fun EngineActivity.handleImg(uri: Uri) {
     }
 }
 
-fun EngineActivity.toChoiceBgFromVideo(uri: Uri) {
-    val intent = Intent(this, hazem.nurmontage.videoquran.ui.editor.ChoiceBgFromVideoActivity::class.java)
-    intent.data = uri
-    launchChoiceBgActivity!!.launch(intent)
-}
-
-// ==========================================================================
-// initTimeLineView()
-// ==========================================================================
-
-fun EngineActivity.initTimeLineView() {
-    tv_currentTime = findViewById(R.id.tv_current_time)
-    tv_endTime = findViewById(R.id.tv_end_time)
-    val trackEntityView = findViewById<TrackEntityView>(R.id.time_line_view)
-    trackViewEntity = trackEntityView
-    trackEntityView.setiTrimLineCallback(iTrimLineCallback)
-    trackViewEntity.scaleFactor = mTemplate!!.scale_timeline
-    trackViewEntity.post {
-        val screenWidth = ScreenUtils.getScreenWidth(this@EngineActivity)
-        val f = screenWidth * 0.12f
-        // // trackViewEntity.secondInScreen = f // TODO // TODO: fix
-        // // trackViewEntity.secondInScreen = f // TODO // TODO: fix // TODO: fix second_in_screenNoScale call
-        trackViewEntity.maxTime = 0
-        trackViewEntity.init(screenWidth, trackViewEntity.height)
-        trackViewEntity.setPosCursur(mTemplate!!.currentCursur)
-        startCursur = trackViewEntity.current_cursur_position
-        updateViewTime(trackViewEntity.maxTime, trackViewEntity.current_cursur_position)
-    }
-}
 
 // ==========================================================================
 // addUriAudioToQuranFragment overloads
@@ -1384,51 +1329,6 @@ fun EngineActivity.addUriAudioToQuranFragment(uri: Uri, textValue: String?) {
 // 3-param overload kept for compatibility; the main logic is in the 2-param version above
 fun EngineActivity.addUriAudioToQuranFragment(uri: Uri, str: String, i: Int) {
     addUriAudioToQuranFragment(uri, str)
-}
-
-// ==========================================================================
-// Time display helpers
-// ==========================================================================
-
-fun EngineActivity.updateEndViewTime(i: Int) {
-    val j = i.toLong()
-    val seconds = TimeUnit.MILLISECONDS.toSeconds(j) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(j))
-    val str = if (seconds < 10) {
-        "${TimeUnit.MILLISECONDS.toMinutes(j)}:0$seconds"
-    } else {
-        "${TimeUnit.MILLISECONDS.toMinutes(j)}:$seconds"
-    }
-    tv_endTime!!.text = "/$str"
-}
-
-fun EngineActivity.updateStartViewTime(i: Int) {
-    val j = i.toLong()
-    val seconds = TimeUnit.MILLISECONDS.toSeconds(j) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(j))
-    val str = if (seconds < 10) {
-        "${TimeUnit.MILLISECONDS.toMinutes(j)}:0$seconds"
-    } else {
-        "${TimeUnit.MILLISECONDS.toMinutes(j)}:$seconds"
-    }
-    tv_currentTime!!.text = str
-}
-
-fun EngineActivity.updateViewTime(i: Int, i2: Int) {
-    val j = i2.toLong()
-    val seconds = TimeUnit.MILLISECONDS.toSeconds(j) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(j))
-    val str = if (seconds < 10) {
-        "${TimeUnit.MILLISECONDS.toMinutes(j)}:0$seconds"
-    } else {
-        "${TimeUnit.MILLISECONDS.toMinutes(j)}:$seconds"
-    }
-    val j2 = i.toLong()
-    val seconds2 = TimeUnit.MILLISECONDS.toSeconds(j2) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(j2))
-    val str2 = if (seconds2 < 10) {
-        "${TimeUnit.MILLISECONDS.toMinutes(j2)}:0$seconds2"
-    } else {
-        "${TimeUnit.MILLISECONDS.toMinutes(j2)}:$seconds2"
-    }
-    tv_currentTime!!.text = str
-    tv_endTime!!.text = "/$str2"
 }
 
 // ==========================================================================

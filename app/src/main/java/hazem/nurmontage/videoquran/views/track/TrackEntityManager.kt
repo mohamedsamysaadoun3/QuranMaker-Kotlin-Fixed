@@ -128,9 +128,9 @@ fun TrackEntityView.deleteEntityAllSelectExt() {
         }
     } catch (_: Exception) {
     }
-    clr_btn_audio = CLR_BTN_DEFAULT
-    clr_btn_quran = CLR_BTN_DEFAULT
-    clr_btn_trsl = CLR_BTN_DEFAULT
+    clr_btn_audio = TrackEntityView.CLR_BTN_DEFAULT
+    clr_btn_quran = TrackEntityView.CLR_BTN_DEFAULT
+    clr_btn_trsl = TrackEntityView.CLR_BTN_DEFAULT
 }
 
 fun TrackEntityView.deleteMediaEntityExt() {

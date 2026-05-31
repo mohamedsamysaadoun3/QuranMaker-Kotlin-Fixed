@@ -138,7 +138,7 @@ fun TrackEntityView.drawItemBtnExt(canvas: Canvas) {
             paintItem.color = Common.COLOR_BLOCK_AUDIO
             canvas.drawRoundRect(rectSquareAudio!!, 2.0f, 2.0f, paintItem)
             val i = (rectItemAudio!!.right - rectSquareAudio!!.right).toInt()
-            if (clr_btn_audio != CLR_BTN_DEFAULT) {
+            if (clr_btn_audio != TrackEntityView.CLR_BTN_DEFAULT) {
                 val drawable = ContextCompat.getDrawable(context, R.drawable.checked_timeline)
                 drawable?.setBounds(i, rectSquareAudio!!.top.toInt(), (i + rectSquareAudio!!.width()).toInt(), rectSquareAudio!!.bottom.toInt())
                 drawable?.draw(canvas)
@@ -168,7 +168,7 @@ fun TrackEntityView.drawItemBtnExt(canvas: Canvas) {
                 canvas.drawPath(pathItemQuran!!, paintItem)
                 paintItem.color = Common.COLOR_BLOCK_QURAN
                 canvas.drawRoundRect(rectSquareQuran!!, 2.0f, 2.0f, paintItem)
-                if (clr_btn_quran != CLR_BTN_DEFAULT) {
+                if (clr_btn_quran != TrackEntityView.CLR_BTN_DEFAULT) {
                     val drawable2 = ContextCompat.getDrawable(context, R.drawable.checked_timeline)
                     val i2 = (rectFItemQuran!!.right - rectSquareQuran!!.right).toInt()
                     drawable2?.setBounds(i2, rectSquareQuran!!.top.toInt(), (i2 + rectSquareQuran!!.width()).toInt(), rectSquareQuran!!.bottom.toInt())
@@ -196,7 +196,7 @@ fun TrackEntityView.drawItemBtnExt(canvas: Canvas) {
                 canvas.drawPath(pathItemTrslQuran!!, paintItem)
                 paintItem.color = Common.COLOR_BLOCK_TRANSLATION
                 canvas.drawRoundRect(rectSquareTrslQuran!!, 2.0f, 2.0f, paintItem)
-                if (clr_btn_trsl != CLR_BTN_DEFAULT) {
+                if (clr_btn_trsl != TrackEntityView.CLR_BTN_DEFAULT) {
                     val drawable3 = ContextCompat.getDrawable(context, R.drawable.checked_timeline)
                     val i3 = (rectFItemTrslQuran!!.right - rectSquareTrslQuran!!.right).toInt()
                     drawable3?.setBounds(i3, rectSquareTrslQuran!!.top.toInt(), (i3 + rectSquareTrslQuran!!.width()).toInt(), rectSquareTrslQuran!!.bottom.toInt())
@@ -225,7 +225,7 @@ fun TrackEntityView.drawItemBtnExt(canvas: Canvas) {
                 canvas.drawPath(pathItemQuran!!, paintItem)
                 paintItem.color = Common.COLOR_BLOCK_QURAN
                 canvas.drawRoundRect(rectSquareQuran!!, 2.0f, 2.0f, paintItem)
-                if (clr_btn_quran != CLR_BTN_DEFAULT) {
+                if (clr_btn_quran != TrackEntityView.CLR_BTN_DEFAULT) {
                     val drawable4 = ContextCompat.getDrawable(context, R.drawable.checked_timeline)
                     val i4 = (rectFItemQuran!!.right - rectSquareQuran!!.right).toInt()
                     drawable4?.setBounds(i4, rectSquareQuran!!.top.toInt(), (i4 + rectSquareQuran!!.width()).toInt(), rectSquareQuran!!.bottom.toInt())
@@ -253,7 +253,7 @@ fun TrackEntityView.drawItemBtnExt(canvas: Canvas) {
                 canvas.drawPath(pathItemTrslQuran!!, paintItem)
                 paintItem.color = Common.COLOR_BLOCK_TRANSLATION
                 canvas.drawRoundRect(rectSquareTrslQuran!!, 2.0f, 2.0f, paintItem)
-                if (clr_btn_trsl != CLR_BTN_DEFAULT) {
+                if (clr_btn_trsl != TrackEntityView.CLR_BTN_DEFAULT) {
                     val drawable3 = ContextCompat.getDrawable(context, R.drawable.checked_timeline)
                     val i3 = (rectFItemTrslQuran!!.right - rectSquareTrslQuran!!.right).toInt()
                     drawable3?.setBounds(i3, rectSquareTrslQuran!!.top.toInt(), (i3 + rectSquareTrslQuran!!.width()).toInt(), rectSquareTrslQuran!!.bottom.toInt())
@@ -297,10 +297,10 @@ fun TrackEntityView.drawBasmalaExt(canvas: Canvas, rectF: RectF): Float {
                     bismilahTimeline!!.quranEntity.endAnimator()
                     iTrimLineCallback!!.onUpdate()
                 } else {
-                    setupAnimationQuran(bismilahTimeline!!.quranEntity)
+                    setupAnimationBismilah(bismilahTimeline!!.quranEntity)
                 }
             } else if (round(bismilahTimeline!!.rect.left + getCurrentPosition()) <= 0.0f && round(bismilahTimeline!!.rect.right + getCurrentPosition()) > 0.0f) {
-                setupAnimationQuran(bismilahTimeline!!.quranEntity)
+                setupAnimationBismilah(bismilahTimeline!!.quranEntity)
                 bismilahTimeline!!.getEntityView()!!.isVisible = true
                 iTrimLineCallback!!.onUpdate()
             }
@@ -322,10 +322,10 @@ fun TrackEntityView.drawBasmalaExt(canvas: Canvas, rectF: RectF): Float {
                 mIsi3adaTimeline!!.quranEntity.endAnimator()
                 iTrimLineCallback!!.onUpdate()
             } else {
-                setupAnimationQuran(mIsi3adaTimeline!!.quranEntity)
+                setupAnimationBismilah(mIsi3adaTimeline!!.quranEntity)
             }
         } else if (round(mIsi3adaTimeline!!.rect.left + getCurrentPosition()) <= 0.0f && round(mIsi3adaTimeline!!.rect.right + getCurrentPosition()) > 0.0f) {
-            setupAnimationQuran(mIsi3adaTimeline!!.quranEntity)
+            setupAnimationBismilah(mIsi3adaTimeline!!.quranEntity)
             mIsi3adaTimeline!!.getEntityView()!!.isVisible = true
             iTrimLineCallback!!.onUpdate()
         }

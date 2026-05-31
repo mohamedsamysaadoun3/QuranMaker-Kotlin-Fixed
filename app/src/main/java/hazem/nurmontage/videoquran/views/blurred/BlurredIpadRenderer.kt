@@ -79,12 +79,12 @@ fun BlurredImageView.drawRectWithShadow(
         val gradient = this.color_gradient
         val baseColor: Int
         if (gradient != null) {
-            baseColor = gradient.getColor()
+            baseColor = gradient.color
             val argb = Color.argb(70, Color.red(baseColor), Color.green(baseColor), Color.blue(baseColor))
             this.paintIpad.shader = CreateGradient.createLinearGradientWithAngle(
                 this.ipad_rect!!,
-                this.color_gradient!!.getAngle(),
-                intArrayOf(this.color_gradient!!.getColor(), this.color_gradient!!.getSecond(), this.color_gradient!!.getThree()),
+                this.color_gradient!!.angle.toFloat(),
+                intArrayOf(this.color_gradient!!.color, this.color_gradient!!.second, this.color_gradient!!.three),
                 floatArrayOf(0.0f, 0.7f, 1.0f)
             )
             this.paintIpad.color = argb
@@ -169,12 +169,12 @@ fun BlurredImageView.drawRectBottom(canvas: Canvas, rect: RectF) {
         val gradient = this.color_gradient
         val baseColor: Int
         if (gradient != null) {
-            baseColor = gradient.getColor()
+            baseColor = gradient.color
             val argb = Color.argb(70, Color.red(baseColor), Color.green(baseColor), Color.blue(baseColor))
             this.paintIpad.shader = CreateGradient.createLinearGradientWithAngle(
                 this.ipad_rect!!,
-                this.color_gradient!!.getAngle(),
-                intArrayOf(this.color_gradient!!.getColor(), this.color_gradient!!.getSecond(), this.color_gradient!!.getThree()),
+                this.color_gradient!!.angle.toFloat(),
+                intArrayOf(this.color_gradient!!.color, this.color_gradient!!.second, this.color_gradient!!.three),
                 floatArrayOf(0.0f, 0.7f, 1.0f)
             )
             this.paintIpad.color = argb
@@ -302,8 +302,8 @@ fun BlurredImageView.drawNeumorphicRect(canvas: Canvas, blurRadius: Float, isFla
         this.paint.shader = null
 
         val hsv = FloatArray(3)
-        Color.colorToHSV(getColor_gradient()!!.getSecond(), hsv)
-        hsv[0] = (hsv[0] + getColor_gradient()!!.getAngle()) % 360.0f
+        Color.colorToHSV(getColor_gradient()!!.second, hsv)
+        hsv[0] = (hsv[0] + getColor_gradient()!!.angle) % 360.0f
         hsv[1] = min(1.0f, hsv[1] * 1.2f)
         hsv[2] = min(1.0f, hsv[2] * 1.1f)
         baseColor = Color.HSVToColor(hsv)
@@ -514,7 +514,9 @@ fun BlurredImageView.drawCaset(canvas: Canvas, isFlag: Boolean, file: File?) {
         this.rectFProgress!!.left = leftReelCenterX - (gearRect.width() * 0.5f)
         this.rectFProgress!!.top = gearRect.top.toFloat()
         this.rectFProgress!!.right = rightReelCenterX - (gearRect.width() * 0.5f)
-        saveProgressCassetBitmap(file, gearRect.width(), gearRect.height(), drawable)
+        if (file != null) {
+            saveProgressCasetBitmap(file, gearRect.width(), gearRect.height(), drawable)
+        }
     }
 
     // Corner dots
@@ -661,7 +663,9 @@ fun BlurredImageView.drawCasetNoBg(canvas: Canvas, isFlag: Boolean, file: File?,
         this.rectFProgress!!.left = leftReelCenterX - (gearRect.width() * 0.5f)
         this.rectFProgress!!.top = gearRect.top.toFloat()
         this.rectFProgress!!.right = rightReelCenterX - (gearRect.width() * 0.5f)
-        saveProgressCassetBitmap(file, gearRect.width(), gearRect.height(), drawable)
+        if (file != null) {
+            saveProgressCasetBitmap(file, gearRect.width(), gearRect.height(), drawable)
+        }
     }
 
     // Corner dots
@@ -892,7 +896,7 @@ fun BlurredImageView.drawGradientLayer(canvas: Canvas, isFlag: Boolean) {
     if (getColor_gradient() != null) {
         this.paintIpad.shader = LinearGradient(
             0.0f, this.ipad_rect!!.top, 0.0f, this.ipad_rect!!.bottom,
-            intArrayOf(0, getColor_gradient()!!.getColor(), getColor_gradient()!!.getSecond(), getColor_gradient()!!.getThree()),
+            intArrayOf(0, getColor_gradient()!!.color, getColor_gradient()!!.second, getColor_gradient()!!.three),
             floatArrayOf(0.0f, 0.87f, 0.93f, 1.0f),
             Shader.TileMode.CLAMP
         )
@@ -1124,42 +1128,42 @@ fun BlurredImageView.drawIpad(canvas: Canvas, isFlag: Boolean) {
         this.mIpadType == IpadType.IPAD_CLASSIC.ordinal -> {
             canvas.drawRect(this.ipad_rect!!, this.paintIpad)
             drawBitmapWithShadow(canvas)
-            drawLecture(canvas)
+            drawLectureExt(canvas)
             if (isFlag) {
-                drawProgress(canvas)
+                drawProgressExt(canvas)
             }
         }
         this.mIpadType == IpadType.IPAD.ordinal || this.mIpadType == IpadType.IPAD_UNBLUR.ordinal -> {
             val shadowRad = (min(this.ipad_rect!!.width(), this.ipad_rect!!.height()) * 0.03f).toInt()
             drawRectWithShadow(canvas, this.ipad_rect!!, ViewCompat.MEASURED_STATE_MASK, if (shadowRad <= 0) 1 else shadowRad, 0, 0, true)
             drawBitmapWithShadow(canvas)
-            drawLecture(canvas)
+            drawLectureExt(canvas)
             if (isFlag) {
-                drawProgress(canvas)
+                drawProgressExt(canvas)
             }
         }
         this.mIpadType == IpadType.BOTTOM_RECT.ordinal -> {
             drawRectBottom(canvas, this.ipad_rect!!)
             drawBitmapWithShadowTypeBottom(canvas)
-            drawLecture(canvas)
+            drawLectureExt(canvas)
             if (isFlag) {
-                drawProgress(canvas)
+                drawProgressExt(canvas)
             }
         }
         this.mIpadType == IpadType.ROUND_RECT.ordinal -> {
             val shadowRad2 = (this.ipad_rect!!.width() * 0.03f).toInt()
             drawRectWithShadow(canvas, this.ipad_rect!!, ViewCompat.MEASURED_STATE_MASK, if (shadowRad2 <= 0) 1 else shadowRad2, 0, 0, true)
-            drawLecture(canvas)
+            drawLectureExt(canvas)
             if (isFlag) {
-                drawProgress(canvas)
+                drawProgressExt(canvas)
             }
         }
         this.mIpadType == IpadType.RECT.ordinal || this.mIpadType == IpadType.BORDER.ordinal -> {
             val shadowRad3 = (this.ipad_rect!!.width() * 0.03f).toInt()
             drawRectWithShadow(canvas, this.ipad_rect!!, ViewCompat.MEASURED_STATE_MASK, if (shadowRad3 <= 0) 1 else shadowRad3, 0, 0, false)
-            drawLecture(canvas)
+            drawLectureExt(canvas)
             if (isFlag) {
-                drawProgress(canvas)
+                drawProgressExt(canvas)
             }
         }
         this.mIpadType == IpadType.BLACK_LAYER.ordinal -> {
@@ -1200,9 +1204,9 @@ fun BlurredImageView.drawIpad(canvas: Canvas, isFlag: Boolean, isPremium: Boolea
             } else {
                 drawBitmapWithShadow(canvas)
             }
-            drawLecture(canvas)
+            drawLectureExt(canvas)
             if (isFlag) {
-                drawProgress(canvas)
+                drawProgressExt(canvas)
             }
         }
         this.mIpadType == IpadType.IPAD_NEOMORPHIC.ordinal -> {
@@ -1227,9 +1231,9 @@ fun BlurredImageView.drawIpad(canvas: Canvas, isFlag: Boolean, isPremium: Boolea
             } else {
                 drawBitmapWithShadow(canvas)
             }
-            drawLecture(canvas)
+            drawLectureExt(canvas)
             if (isFlag) {
-                drawProgress(canvas)
+                drawProgressExt(canvas)
             }
         }
         this.mIpadType == IpadType.BOTTOM_RECT.ordinal -> {
@@ -1239,25 +1243,25 @@ fun BlurredImageView.drawIpad(canvas: Canvas, isFlag: Boolean, isPremium: Boolea
             } else {
                 drawBitmapWithShadowTypeBottom(canvas)
             }
-            drawLecture(canvas)
+            drawLectureExt(canvas)
             if (isFlag) {
-                drawProgress(canvas)
+                drawProgressExt(canvas)
             }
         }
         this.mIpadType == IpadType.ROUND_RECT.ordinal -> {
             val shadowRad2 = (this.ipad_rect!!.width() * 0.03f).toInt()
             drawRectWithShadow(canvas, this.ipad_rect!!, ViewCompat.MEASURED_STATE_MASK, if (shadowRad2 <= 0) 1 else shadowRad2, 0, 0, true)
-            drawLecture(canvas)
+            drawLectureExt(canvas)
             if (isFlag) {
-                drawProgress(canvas)
+                drawProgressExt(canvas)
             }
         }
         this.mIpadType == IpadType.RECT.ordinal || this.mIpadType == IpadType.BORDER.ordinal -> {
             val shadowRad3 = (this.ipad_rect!!.width() * 0.03f).toInt()
             drawRectWithShadow(canvas, this.ipad_rect!!, ViewCompat.MEASURED_STATE_MASK, if (shadowRad3 <= 0) 1 else shadowRad3, 0, 0, false)
-            drawLecture(canvas)
+            drawLectureExt(canvas)
             if (isFlag) {
-                drawProgress(canvas)
+                drawProgressExt(canvas)
             }
         }
         this.mIpadType == IpadType.BLACK_LAYER.ordinal -> {

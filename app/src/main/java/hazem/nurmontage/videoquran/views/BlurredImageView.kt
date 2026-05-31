@@ -27,7 +27,7 @@ import androidx.core.view.ViewCompat
 import hazem.nurmontage.videoquran.constant.IpadType
 import hazem.nurmontage.videoquran.constant.ResizeType
 import hazem.nurmontage.videoquran.constant.SurahNameStyle
-import hazem.nurmontage.videoquran.model.BismilahEntity
+import hazem.nurmontage.videoquran.model.data.BismilahEntity
 import hazem.nurmontage.videoquran.model.EntitySelectTool
 import hazem.nurmontage.videoquran.model.EntityView
 import hazem.nurmontage.videoquran.model.Gradient
@@ -91,7 +91,7 @@ class BlurredImageView @JvmOverloads constructor(
     // ═══════════════════════════════════════════════════════════════════
 
     internal var backgroundPaint: Paint = Paint()
-        private set
+        internal set
     internal var bismilahEntity: BismilahEntity? = null
     internal var bitmapBlured: Bitmap? = null
     internal var bitmapNotBlur: Bitmap? = null
@@ -107,7 +107,7 @@ class BlurredImageView @JvmOverloads constructor(
     internal var color_line_bg: Int = 0
     internal var currentTime: String = "0:00"
     internal var darkShadowPaint: Paint = Paint()
-        private set
+        internal set
     internal var entity_select: EntityView? = null
     internal var frameInterval: Long = 0L
     internal var gestureDetector: GestureDetectorCompat? = null
@@ -127,7 +127,7 @@ class BlurredImageView @JvmOverloads constructor(
     internal var isWattermark: Boolean = false
     internal var left_square: Float = 0f
     internal var lightShadowPaint: Paint = Paint()
-        private set
+        internal set
     internal var linePaint: Paint = Paint()
     internal var linearGradient_classic: LinearGradient? = null
     internal var mCanvas_height: Int = 0
@@ -183,10 +183,10 @@ class BlurredImageView @JvmOverloads constructor(
                 }
                 if (entity_select != null && entity_select!!.isVisible && !isWattermark) {
                     if (selectTool!!.isApply(entity_select!!, e.x, e.y)) {
-                        if (selectTool!!.isApply_Move()) {
+                        if (selectTool!!.isApply_Move) {
                             iViewCallback!!.onEndMove()
                         }
-                        if (selectTool!!.isApply_Scale()) {
+                        if (selectTool!!.isApply_Scale) {
                             iViewCallback!!.onEndScale()
                         }
                         selectTool!!.setClick_apply(true)
@@ -194,7 +194,7 @@ class BlurredImageView @JvmOverloads constructor(
                     } else {
                         selectTool!!.isScale(entity_select!!, e.x, e.y)
                     }
-                    if (selectTool!!.isApply_Scale()) {
+                    if (selectTool!!.isApply_Scale) {
                         selectTool!!.setOnProgress(true)
                         prevDistance = distanceToCenter(e.x, e.y)
                     }
@@ -203,7 +203,7 @@ class BlurredImageView @JvmOverloads constructor(
             }
 
             override fun onSingleTapUp(e: MotionEvent): Boolean {
-                if (entity_select != null && selectTool!!.isClick_apply()) {
+                if (entity_select != null && selectTool!!.isClick_apply) {
                     selectTool!!.setClick_apply(false)
                     invalidate()
                     return true
@@ -221,9 +221,9 @@ class BlurredImageView @JvmOverloads constructor(
                         } else {
                             iViewCallback!!.onEmtyClick()
                         }
-                    } else if (selectTool != null && selectTool!!.isApply_Move() &&
+                    } else if (selectTool != null && selectTool!!.isApply_Move &&
                         ((entity_select is QuranEntity) || (entity_select is TranslationQuranEntity)) &&
-                        !selectTool!!.isApply_all()
+                        !selectTool!!.isApply_all
                     ) {
                         selectTool!!.setApply_all(true)
                         invalidate()
@@ -1027,7 +1027,7 @@ class BlurredImageView @JvmOverloads constructor(
 
         // Single-finger scale gesture (when selectTool is in onProgress mode)
         val entitySelectTool = this.selectTool
-        if (entitySelectTool != null && entitySelectTool.isOnProgress && this.selectTool!!.isApply_Scale() && this.entity_select != null) {
+        if (entitySelectTool != null && entitySelectTool.isOnProgress && this.selectTool!!.isApply_Scale && this.entity_select != null) {
             if (motionEvent.action == MotionEvent.ACTION_MOVE && this.prevDistance > 0.0f) {
                 var distanceToCenter = distanceToCenter(motionEvent.x, motionEvent.y)
                 if (distanceToCenter < 1.0f) {
@@ -1052,9 +1052,9 @@ class BlurredImageView @JvmOverloads constructor(
             if (motionEvent.action == MotionEvent.ACTION_UP) {
                 this.prevDistance = -1.0f
                 this.selectTool!!.setOnProgress(false)
-                if (this.selectTool!!.isApply_Scale() && this.iViewCallback != null) {
+                if (this.selectTool!!.isApply_Scale && this.iViewCallback != null) {
                     val entityView = this.entity_select
-                    if (((entityView is QuranEntity) || (entityView is TranslationQuranEntity)) && !this.selectTool!!.isApply_all()) {
+                    if (((entityView is QuranEntity) || (entityView is TranslationQuranEntity)) && !this.selectTool!!.isApply_all) {
                         this.selectTool!!.setApply_all(true)
                         invalidate()
                     }

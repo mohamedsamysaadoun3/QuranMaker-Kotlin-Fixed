@@ -6,7 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.activity.EdgeToEdge
+import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import hazem.nurmontage.videoquran.core.base.BaseActivity
@@ -43,7 +43,7 @@ class FullscreenActivity : BaseActivity() {
         splashScreen.setKeepOnScreenCondition { keepSplash }
 
         super.onCreate(savedInstanceState)
-        EdgeToEdge.enable(this)
+        enableEdgeToEdge()
 
         binding = ActivityFullscreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
