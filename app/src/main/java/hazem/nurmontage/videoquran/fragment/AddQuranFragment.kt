@@ -386,13 +386,18 @@ class AddQuranFragment : Fragment {
                     val selectedItemPosition2 = toPos + 1
                     val selectedItemPosition3 = surahPos + 1
                     Thread {
-                        iAddQuran?.progress()
-                        if (includeBismilah != null && includeBismilah?.isChecked == true) {
-                            iAddQuran?.onBismilah()
+                        try {
+                            iAddQuran?.progress()
+                            if (includeBismilah != null && includeBismilah?.isChecked == true) {
+                                iAddQuran?.onBismilah()
+                            }
+                            addAyaEntityRecursive(
+                                selectedItemPosition, selectedItemPosition2, selectedItemPosition3
+                            )
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            iAddQuran?.onCancel()
                         }
-                        addAyaEntityRecursive(
-                            selectedItemPosition, selectedItemPosition2, selectedItemPosition3
-                        )
                     }.start()
                 }
             }
@@ -665,7 +670,10 @@ class AddQuranFragment : Fragment {
      */
     fun addAyaEntityRecursive(from: Int, to: Int, surahNumber: Int) {
         try {
-            val ayahText = quranReader?.getAyahText(surahNumber, from) ?: return
+            val ayahText = quranReader?.getAyahText(surahNumber, from) ?: run {
+                iAddQuran?.onCancel()
+                return
+            }
             val translationPos = spinnerTranslation?.selectedItemPosition ?: 0
             val translationAyahText = if (translationPos > 0) {
                 quranReader?.getTranslationAyahText(
@@ -678,7 +686,10 @@ class AddQuranFragment : Fragment {
             }
             if (iAddQuran != null) {
                 if (spinnerReciters?.isEnabled == true) {
-                    val identifier = arrayIdentifier?.get(spinnerReciters?.selectedItemPosition ?: 0) ?: return
+                    val identifier = arrayIdentifier?.get(spinnerReciters?.selectedItemPosition ?: 0) ?: run {
+                        iAddQuran?.onCancel()
+                        return
+                    }
                     recitersModels.add(RecitersModel(identifier, surahNumber, from))
                 }
                 if (from >= to) {

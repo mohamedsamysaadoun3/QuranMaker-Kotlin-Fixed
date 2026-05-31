@@ -150,98 +150,95 @@ fun BlurredImageView.onDrawExt(canvas: Canvas) {
         val bitmap3 = this.bitmapBlured
         if (bitmap3 != null && !bitmap3.isRecycled) {
 
-            // ── For types that are NOT GRADIENT/MASK_BRUSH/BLACK_LAYER/CASSET_IMG,
-            //    draw type-specific background and overlays ──
-            if (this.mIpadType != IpadType.GRADIENT.ordinal &&
-                this.mIpadType != IpadType.MASK_BRUSH.ordinal &&
-                this.mIpadType != IpadType.BLACK_LAYER.ordinal &&
-                this.mIpadType != IpadType.CASSET_IMG.ordinal
+            // ═════════════════════════════════════════════════════════════════
+            //  Phase 1: Type-specific background drawing
+            //
+            //  CONFIRMED by smali (BlurredImageView.smali lines 21307–21581):
+            //  The original app draws type-specific backgrounds, then ALL types
+            //  proceed to the SAME bitmapSquare check + drawIpad/drawProgress.
+            //  The JADX decompiler split this into two exclusive branches,
+            //  which was WRONG. The actual flow is unified.
+            // ═════════════════════════════════════════════════════════════════
+            if (this.mIpadType == IpadType.GRADIENT.ordinal ||
+                this.mIpadType == IpadType.MASK_BRUSH.ordinal ||
+                this.mIpadType == IpadType.BLACK_LAYER.ordinal ||
+                this.mIpadType == IpadType.CASSET_IMG.ordinal
             ) {
-                // ── Type-specific background ──
-                if (this.mIpadType == IpadType.BLUE_TYPE.ordinal) {
-                    if (!this.isVideo) {
-                        val bitmap2 = this.bitmapNotBlur
-                        if (bitmap2 != null && !bitmap2.isRecycled) {
-                            canvas.drawBitmap(this.bitmapNotBlur!!, this.btmX, this.btmY, this.grayscalePaint)
-                        }
-                    }
-                } else if (this.mIpadType == IpadType.CASSET_IMG_BLUR.ordinal) {
-                    if (!this.isVideo) {
-                        canvas.drawBitmap(this.bitmapBlured!!, this.btmX, this.btmY, this.paint)
-                    }
-                } else if (this.mIpadType == IpadType.IPAD_CLASSIC.ordinal) {
-                    if (getColor_gradient() != null) {
-                        this.paint.shader = this.linearGradient_classic
-                        canvas.drawPaint(this.paint)
-                        this.paint.shader = null
-                    } else {
-                        canvas.drawColor(this.color_bg_type_classic)
-                    }
-                } else if (this.mIpadType != IpadType.IPAD_NEOMORPHIC.ordinal &&
-                    this.mIpadType != IpadType.CASSET.ordinal
-                ) {
-                    if (this.mIpadType == IpadType.IPAD_UNBLUR.ordinal) {
-                        val nb = this.bitmapNotBlur
-                        if (nb != null && !nb.isRecycled) {
-                            canvas.drawBitmap(nb, this.btmX, this.btmY, this.paint)
-                        }
-                    } else {
-                        canvas.drawBitmap(this.bitmapBlured!!, this.btmX, this.btmY, this.paint)
-                    }
-                }
-
-                // ── Overlays for non-GRADIENT/MASK_BRUSH/BLACK_LAYER/CASSET_IMG types ──
-                // BEFORE: bitmapSquare == null → drawIpad (INVERTED — caused thin-line bug)
-                // WHY_CHANGED: Reference draws iPad when bitmapSquare IS set, not when null
-                // FIXED_BY: Inverted the condition to match reference (BlurredImageView.smali line 4121)
-                // REF: BlurredImageView.java onDraw — if (bitmapSquare != null) drawIpad else drawProgress
-                // VISUAL_IMPACT: iPad frame now renders correctly instead of appearing as thin line
-                if (this.bitmapSquare != null) {
-                    this.drawIpad(canvas, true)
-                } else {
-                    this.drawProgressExt(canvas)
-                }
-                this.drawLineHelper(canvas)
-                this.drawBismilahExt(canvas)
-                this.drawEntityExt(canvas)
-                this.drawNameSurahExt(canvas)
-
-                val entityView = this.entity_select
-                if (entityView != null && this.selectTool != null && entityView.isVisible) {
-                    val entityView2 = this.entity_select
-                    if (entityView2 !is SurahNameEntity ||
-                        entityView2 is BismilahEntity ||
-                        (entityView2.entityQuran != null && this.entity_select!!.entityQuran!!.visible()) ||
-                        (this.entity_select!!.entityTrslTimeline != null && this.entity_select!!.entityTrslTimeline!!.visible())
-                    ) {
-                        this.selectTool!!.draw(canvas, this.entity_select!!)
-                    }
-                }
-            } else {
-                // ── GRADIENT / MASK_BRUSH / BLACK_LAYER / CASSET_IMG types:
-                //    draw bitmapNotBlur as background instead of blurred ──
+                // GRADIENT/MASK_BRUSH/BLACK_LAYER/CASSET_IMG: draw bitmapNotBlur
                 if (!this.isVideo) {
                     val bitmap = this.bitmapNotBlur
                     if (bitmap != null && !bitmap.isRecycled) {
                         canvas.drawBitmap(bitmap, this.btmX, this.btmY, this.paint)
                     }
                 }
-
-                // ── Overlays for GRADIENT/MASK_BRUSH/BLACK_LAYER/CASSET_IMG types ──
-                if (this.bitmapSquare == null) {
-                    // drawIpad not called for these types per original structure
-                }
-                this.drawLineHelper(canvas)
-                this.drawBismilahExt(canvas)
-                this.drawEntityExt(canvas)
-                this.drawNameSurahExt(canvas)
-
-                val entityView = this.entity_select
-                if (entityView != null && this.selectTool != null) {
-                    val entityView2 = this.entity_select
-                    if (entityView2 !is SurahNameEntity) {
-                        // condition satisfied — fall through to draw
+            } else if (this.mIpadType == IpadType.BLUE_TYPE.ordinal) {
+                if (!this.isVideo) {
+                    val bitmap2 = this.bitmapNotBlur
+                    if (bitmap2 != null && !bitmap2.isRecycled) {
+                        canvas.drawBitmap(this.bitmapNotBlur!!, this.btmX, this.btmY, this.grayscalePaint)
                     }
+                }
+            } else if (this.mIpadType == IpadType.CASSET_IMG_BLUR.ordinal) {
+                if (!this.isVideo) {
+                    canvas.drawBitmap(this.bitmapBlured!!, this.btmX, this.btmY, this.paint)
+                }
+            } else if (this.mIpadType == IpadType.IPAD_CLASSIC.ordinal) {
+                if (getColor_gradient() != null) {
+                    this.paint.shader = this.linearGradient_classic
+                    canvas.drawPaint(this.paint)
+                    this.paint.shader = null
+                } else {
+                    canvas.drawColor(this.color_bg_type_classic)
+                }
+            } else if (this.mIpadType != IpadType.IPAD_NEOMORPHIC.ordinal &&
+                this.mIpadType != IpadType.HEART.ordinal &&
+                this.mIpadType != IpadType.BATTERY.ordinal &&
+                this.mIpadType != IpadType.CASSET.ordinal
+            ) {
+                // All remaining types: draw blurred/unblurred background
+                // IPAD_NEOMORPHIC, HEART, BATTERY, CASSET skip background drawing
+                if (this.mIpadType == IpadType.IPAD_UNBLUR.ordinal) {
+                    val nb = this.bitmapNotBlur
+                    if (nb != null && !nb.isRecycled) {
+                        canvas.drawBitmap(nb, this.btmX, this.btmY, this.paint)
+                    }
+                } else {
+                    canvas.drawBitmap(this.bitmapBlured!!, this.btmX, this.btmY, this.paint)
+                }
+            }
+
+            // ═════════════════════════════════════════════════════════════════
+            //  Phase 2: bitmapSquare check → drawIpad or drawProgress
+            //
+            //  CONFIRMED by smali (BlurredImageView.smali lines 21586–21599):
+            //  if-eqz v0 (bitmapSquare), :cond_a → if NOT null → drawIpad
+            //  if null → drawProgress. This applies to ALL types, not just
+            //  non-gradient types. The JADX decompiler incorrectly split this
+            //  into two branches, causing GRADIENT/MASK_BRUSH/BLACK_LAYER/
+            //  CASSET_IMG types to skip drawIpad entirely (BUG-3 root cause).
+            // ═════════════════════════════════════════════════════════════════
+            if (this.bitmapSquare != null) {
+                this.drawIpad(canvas, true)
+            } else {
+                this.drawProgressExt(canvas)
+            }
+
+            // ═════════════════════════════════════════════════════════════════
+            //  Phase 3: Overlays (same for all types)
+            // ═════════════════════════════════════════════════════════════════
+            this.drawLineHelper(canvas)
+            this.drawBismilahExt(canvas)
+            this.drawEntityExt(canvas)
+            this.drawNameSurahExt(canvas)
+
+            val entityView = this.entity_select
+            if (entityView != null && this.selectTool != null && entityView.isVisible) {
+                val entityView2 = this.entity_select
+                if (entityView2 !is SurahNameEntity ||
+                    entityView2 is BismilahEntity ||
+                    (entityView2.entityQuran != null && this.entity_select!!.entityQuran!!.visible()) ||
+                    (this.entity_select!!.entityTrslTimeline != null && this.entity_select!!.entityTrslTimeline!!.visible())
+                ) {
                     this.selectTool!!.draw(canvas, this.entity_select!!)
                 }
             }

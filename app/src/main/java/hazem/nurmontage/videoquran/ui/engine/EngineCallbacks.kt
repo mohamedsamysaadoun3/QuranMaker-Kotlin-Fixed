@@ -75,6 +75,8 @@ import hazem.nurmontage.videoquran.views.blurred.setupBitmapDraw
 import hazem.nurmontage.videoquran.views.blurred.setSurahNameEntity
 import hazem.nurmontage.videoquran.views.blurred.updateSizeAya
 import hazem.nurmontage.videoquran.views.blurred.updateSizeAyaTrsl
+import hazem.nurmontage.videoquran.views.blurred.resizeEntity
+import hazem.nurmontage.videoquran.views.blurred.updatePosSurahName
 import hazem.nurmontage.videoquran.utils.AspectRatioCalculator
 import hazem.nurmontage.videoquran.utils.LocaleHelper
 import hazem.nurmontage.videoquran.core.base.BaseActivity
@@ -329,9 +331,9 @@ fun EngineActivity.createIAddQuran(): AddQuranFragment.IAddQuran {
                 if (blurredImageView.surahNameEntity != null) blurredImageView.surahNameEntity!!.clrBg else ViewCompat.MEASURED_STATE_MASK
             )
             if (str3 == null) {
-                addAudio(uri!!)
+                if (uri != null) addAudio(uri) else iAddQuran?.onCancel()
             } else {
-                addAudioFromVideo(uri!!, str3!!)
+                if (uri != null) addAudioFromVideo(uri, str3) else iAddQuran?.onCancel()
             }
         }
 
@@ -363,6 +365,7 @@ fun EngineActivity.createIAddQuran(): AddQuranFragment.IAddQuran {
 
         override fun onCancel() {
             hideFragment()
+            hideProgressFragment()
         }
 
         override fun onErrorLimitation() {
@@ -388,6 +391,7 @@ fun EngineActivity.createIChangeBgCallback(): ChangeBgFragment.IChangeBgCallback
     return object : ChangeBgFragment.IChangeBgCallback {
         override fun onCancel() {
             hideFragment()
+            hideProgressFragment()
         }
 
         override fun onDone() {
@@ -611,7 +615,8 @@ fun EngineActivity.createIDimensionCallback(): DimensionAdabters.IDimensionCallb
                 var runnable: Runnable
                 try {
                     try {
-                        blurredImageView.invalidate()
+                        // FIX: Use reset() instead of invalidate() to recycle old bitmap (matches Java ref)
+                        blurredImageView.reset()
                         mTemplate!!.resizeType = i3
                         mTemplate!!.imgResize = str
                         val size = AspectRatioCalculator.getSize(i3, mTemplate!!.resolution)
@@ -627,6 +632,8 @@ fun EngineActivity.createIDimensionCallback(): DimensionAdabters.IDimensionCallb
                         }
 
                         blurredImageView.updatePosCanvas(cropTo16x9)
+                        // FIX: Store unblurred reference (matches Java ref line 7761)
+                        blurredImageView.setBitmapBlured(cropTo16x9)
                         blurredImageView.updateIpad(cropTo16x9!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize())
 
                         // Recalculate the iPad square bitmap based on type
@@ -696,20 +703,42 @@ fun EngineActivity.createIDimensionCallback(): DimensionAdabters.IDimensionCallb
                             rect = rect4
                         }
 
-                        // Update the blurred bitmap and re-render
+                        // FIX: Use setBitmap (NOT updateBitmap) to trigger createRect() (matches Java ref)
                         val blurred = UtilsBitmap.blur(this@createIDimensionCallback, cropTo16x9!!, 20, 1)
                         if (bitmap2 != null && rect != null) {
                             if (mTemplate!!.gradient != null) {
-                                blurredImageView.updateBitmap(blurred, bitmap2, mTemplate!!.gradient!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), rect)
+                                blurredImageView.setBitmap(blurred, bitmap2, mTemplate!!.gradient!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), rect)
                             } else {
-                                blurredImageView.updateBitmap(blurred, bitmap2, mTemplate!!.color_ipad, mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), rect)
+                                blurredImageView.setBitmap(blurred, bitmap2, mTemplate!!.color_ipad, mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), rect)
                             }
                         } else {
                             blurredImageView.bitmapBlured = blurred
                         }
 
+                        // FIX: Resize entities and surah name to match new canvas (matches Java ref)
+                        blurredImageView.resizeEntity()
+                        blurredImageView.updatePosSurahName()
+
+                        // FIX: Store non-blur reference and do second setBitmap pass (matches Java ref)
+                        blurredImageView.setBitmapNotBlur(cropTo16x9)
+                        val cropCopy = cropTo16x9?.let { Bitmap.createBitmap(it) }
+                        if (cropCopy != null) {
+                            val blurred2 = UtilsBitmap.blur(this@createIDimensionCallback, cropCopy, 20, 1)
+                            if (bitmap2 != null && rect != null) {
+                                if (mTemplate!!.gradient != null) {
+                                    blurredImageView.setBitmap(blurred2, bitmap2, mTemplate!!.gradient!!, mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), rect)
+                                } else {
+                                    blurredImageView.setBitmap(blurred2, bitmap2, mTemplate!!.color_ipad, mTemplate!!.ipad_type, mTemplate!!.geTypeResize(), rect)
+                                }
+                            }
+                            blurredImageView.resizeEntity()
+                            blurredImageView.updatePosSurahName()
+                        }
+
                         runnable = Runnable {
                             blurredImageView.invalidate()
+                            trackViewEntity?.invalidate()
+                            updateTime()
                             hideProgressFragment()
                         }
                     } catch (e: Exception) {
