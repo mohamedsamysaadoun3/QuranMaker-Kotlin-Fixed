@@ -14,34 +14,13 @@ import hazem.nurmontage.videoquran.model.EffectAudio
 import hazem.nurmontage.videoquran.utils.waveform.WaveformBitmapRenderer
 import hazem.nurmontage.videoquran.views.TrackEntityView
 
-/**
- * Audio entity on the timeline editor.
- *
- * Represents a single audio clip in the multi-track timeline, with:
- * - Waveform rendering via [WaveformBitmapRenderer]
- * - Trim handles (left/right) for clipping the audio range
- * - [EffectAudio] chain for volume, reverb, echo, fade, speed, noise removal
- * - [MediaPlayer] lifecycle for preview playback
- * - Fade-in/fade-out animation via [ObjectAnimator]
- * - Split support for dividing the clip at the cursor position
- *
- * Coordinate system:
- * - [rect] defines the pixel bounds on the timeline canvas
- * - [start]/[end] define the audio time range in milliseconds
- * - [offset]/[offsetLeft]/[offsetRight] handle scroll offsets
- * - [scaleFactor] converts between pixel and time coordinates
- *
- * Converted from EntityAudio.java — all drawing and trim logic preserved exactly.
- */
 class EntityAudio : Entity {
 
-    // ── Audio metadata ───────────────────────────────────────────────
     internal var amps: FloatArray? = null
     internal var downX: Float = 0f
     internal var duration: Int = 0
     var effectAudio: EffectAudio = EffectAudio()
         set(value) {
-            // Deep copy matching original Java setEffectAudio behavior
             field.reverbPreset = value.reverbPreset
             field.speed = value.speed
             field.volume = value.volume
@@ -81,8 +60,6 @@ class EntityAudio : Entity {
     internal var videoPath: String? = null
     var waveformValues: ByteArray? = null
 
-    // ── Property overrides ───────────────────────────────────────────
-
     override var secondInScreen: Float
         get() = super.secondInScreen * scaleFactor
         set(value) { super.secondInScreen = value }
@@ -93,8 +70,6 @@ class EntityAudio : Entity {
             super.right = value
             rect.right = value
         }
-
-    // ── Constructors ─────────────────────────────────────────────────
 
     constructor(
         bitmap: Bitmap?,
@@ -156,9 +131,6 @@ class EntityAudio : Entity {
         initPaints(h)
     }
 
-    /**
-     * Initialize Paint objects for the audio block border and waveform fill.
-     */
     private fun initPaints(height: Float) {
         val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = -2434342
@@ -180,34 +152,11 @@ class EntityAudio : Entity {
         this.padding = height * 0.07f
     }
 
-    // ── EffectAudio delegation ───────────────────────────────────────
-
     fun updateEffect() {
         effectAudio.start = start
         effectAudio.end = end
         effectAudio.duration = (end - start).toInt()
     }
-
-    fun copyEffectAudio(newEffect: EffectAudio?) {
-        if (newEffect == null) return
-        effectAudio.reverbPreset = newEffect.reverbPreset
-        effectAudio.speed = newEffect.speed
-        effectAudio.volume = newEffect.volume
-        effectAudio.fade_in = newEffect.fade_in
-        effectAudio.fade_out = newEffect.fade_out
-        effectAudio.decays = newEffect.decays
-        effectAudio.isRemoveNoice = newEffect.isRemoveNoice
-        effectAudio.delays_cmd = newEffect.delays_cmd
-        effectAudio.delays = newEffect.delays
-        effectAudio.decays_cmd = newEffect.decays_cmd
-        effectAudio.outGain = newEffect.outGain
-        effectAudio.volume_echo = newEffect.volume_echo
-        effectAudio.isEnhance = newEffect.isEnhance
-        effectAudio.reverbPreset_index_list = newEffect.reverbPreset_index_list
-    }
-
-
-    // ── FFmpeg paths ─────────────────────────────────────────────────
 
     fun setPathFfmpeg(path: String?) {
         this.pathFfmpeg = path
@@ -219,8 +168,6 @@ class EntityAudio : Entity {
     fun getPathFfmpegEffect(): String? = pathFfmpegEffect
     fun setPathFfmpegEffect(path: String?) { this.pathFfmpegEffect = path }
 
-    // ── HTTP paths ───────────────────────────────────────────────────
-
     fun addPathHttp(paths: List<String>?) {
         if (paths == null) return
         if (pathsHttp == null) pathsHttp = mutableListOf()
@@ -230,41 +177,25 @@ class EntityAudio : Entity {
     fun setPathHttp(paths: List<String>?) { this.pathsHttp = paths?.toMutableList() }
     fun getPathsHttp(): List<String>? = pathsHttp
 
-    // ── Preview effect flag ──────────────────────────────────────────
-
     fun setApplyEffectInPreview(apply: Boolean) { isApplyEffectInPreview = apply }
     fun isApplyEffectInPreview(): Boolean = isApplyEffectInPreview
-
-    // ── Scale effect ─────────────────────────────────────────────────
 
     fun setScaleEffect(scale: Float) { scaleEffect = scale }
     fun getScaleEffect(): Float = scaleEffect
 
-    // ── Duration ─────────────────────────────────────────────────────
-
     fun getDuration(): Int = duration
     fun setDuration(dur: Int) { this.duration = dur }
-
-    // ── Min duration ─────────────────────────────────────────────────
 
     fun getMinDuration(): Int = minDuration
     fun setMinDuration(min: Int) { this.minDuration = min }
 
-    // ── Video path ───────────────────────────────────────────────────
-
     fun setVideoPath(path: String?) { this.videoPath = path }
     fun getVideoPath(): String? = videoPath
 
-    // ── URI ──────────────────────────────────────────────────────────
-
     fun getUri(): Uri? = uri
-
-    // ── Play state ───────────────────────────────────────────────────
 
     fun isPlay(): Boolean = isPlay
     fun setPlay(play: Boolean) { this.isPlay = play }
-
-    // ── Amplitudes & Waveform ────────────────────────────────────────
 
     fun getAmps(): FloatArray? = amps
     fun getRenderer(): WaveformBitmapRenderer? = renderer
@@ -278,8 +209,6 @@ class EntityAudio : Entity {
         this.renderer = WaveformBitmapRenderer(a, width, height, Common.COLOR_WAVE_INT)
     }
 
-    // ── Fade animation state ─────────────────────────────────────────
-
     fun isStartFadeIn(): Boolean = isStartFadeIn
     fun isStartFadeOut(): Boolean = isStartFadeOut
     fun setStartFadeIn(start: Boolean) { isStartFadeIn = start }
@@ -288,8 +217,6 @@ class EntityAudio : Entity {
     fun setITrimLineCallback(callback: TrackEntityView.ITrimLineCallback?) {
         this.iTrimLineCallback = callback
     }
-
-    // ── Fade-in animation ────────────────────────────────────────────
 
     fun setFadeInDelta(delta: Float) {
         iTrimLineCallback?.fadeInAudio(delta)
@@ -304,8 +231,6 @@ class EntityAudio : Entity {
         }
     }
 
-    // ── Fade-out animation ───────────────────────────────────────────
-
     fun setFadeOutDelta(delta: Float) {
         iTrimLineCallback?.fadeOutAudio(delta)
     }
@@ -318,10 +243,6 @@ class EntityAudio : Entity {
             start()
         }
     }
-
-    // ══════════════════════════════════════════════════════════════════
-    //  Entity overrides — position, trim, hit-test
-    // ══════════════════════════════════════════════════════════════════
 
     override fun getH(): Float = h
 
@@ -341,8 +262,6 @@ class EntityAudio : Entity {
 
     override fun setDownX(downX: Float) { this.downX = downX }
     override fun getDownX(): Float = downX
-
-    // ── Trim logic ───────────────────────────────────────────────────
 
     override fun onUpRight() {
         val round = (Math.round(rect.right / secondInScreen) * 1000).toFloat() - getOnTapTime()
@@ -368,8 +287,6 @@ class EntityAudio : Entity {
         left = lastLeft
     }
 
-    // ── Hit test ─────────────────────────────────────────────────────
-
     override fun onTouch(point: PointF): Boolean {
         selectTrim = null
         downX = point.x
@@ -392,8 +309,6 @@ class EntityAudio : Entity {
         return isSelect
     }
 
-    // ── Split ────────────────────────────────────────────────────────
-
     fun split(cursorX: Float): EntityAudio {
         return EntityAudio(
             null, uri, cursorX, rect.top, h, rect.right,
@@ -405,10 +320,6 @@ class EntityAudio : Entity {
             split.rect.bottom = rect.bottom
         }
     }
-
-    // ══════════════════════════════════════════════════════════════════
-    //  Drawing — waveform rendering
-    // ══════════════════════════════════════════════════════════════════
 
     private fun drawWave(canvas: Canvas, rect: RectF) {
         if (amps == null || renderer == null) return
@@ -423,25 +334,6 @@ class EntityAudio : Entity {
     override fun draw(canvas: Canvas) {
         try { drawWave(canvas, rect) } catch (_: Exception) {}
     }
-
-    // ── Visibility helper ────────────────────────────────────────────
-
-    /** Alias for Java-compatible isVisible() — the property getter is inherited from [Entity] */
-    fun isEntityVisible(): Boolean = isVisible
-
-    // ── Start/End overrides ──────────────────────────────────────────
-
-    // Start/End are inherited from Entity as public var properties,
-    // which auto-generate getStart()/setStart() and getEnd()/setEnd().
-    // The following renamed accessors are kept as convenience methods:
-    fun getAudioStart(): Float = start
-    fun setAudioStart(s: Float) { start = s }
-    fun getAudioEnd(): Float = end
-    fun setAudioEnd(e: Float) { end = e }
-
-    // ══════════════════════════════════════════════════════════════════
-    //  Cleanup
-    // ══════════════════════════════════════════════════════════════════
 
     override fun release() {
         super.release()

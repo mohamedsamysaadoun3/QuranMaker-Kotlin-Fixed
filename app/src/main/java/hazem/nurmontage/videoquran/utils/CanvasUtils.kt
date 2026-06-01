@@ -7,17 +7,6 @@ import kotlin.math.min
 
 object CanvasUtils {
 
-    /**
-     * Draw a custom rounded rectangle with different top-right and bottom-right corner radii.
-     * @param canvas Canvas to draw on
-     * @param left Left edge
-     * @param top Top edge
-     * @param right Right edge
-     * @param bottom Bottom edge
-     * @param topRightRadius Corner radius for top-right
-     * @param bottomRightRadius Corner radius for bottom-right
-     * @return The path that was drawn
-     */
     @JvmStatic
     fun drawCustomRoundedRect(
         canvas: Canvas,

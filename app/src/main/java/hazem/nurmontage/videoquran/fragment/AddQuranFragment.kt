@@ -28,31 +28,9 @@ import hazem.nurmontage.videoquran.utils.QuranReader
 import hazem.nurmontage.videoquran.views.CheckboxCustumFont
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
-/**
- * Fragment for adding Quran ayahs to the video project.
- *
- * Provides a complete UI for selecting surah, ayah range, reciter, and
- * translation. When the user confirms, the fragment reads the Quran text
- * from assets and splits long ayahs into manageable chunks for the
- * timeline, invoking the [IAddQuran] callback for each entity.
- *
- * Key features:
- * - Surah spinner with ayah count auto-population
- * - From/To ayah spinners that sync in certain selection modes
- * - Reciter selection with network availability check
- * - Translation language selection (8 supported languages)
- * - Quran icon picker (Hafs, Shamerli, Nour Hode, Amiri)
- * - Bismillah inclusion checkbox
- * - Upload recitation support (custom audio + reader name)
- * - Recursive ayah processing with automatic chunk splitting
- * - State persistence via QuranPreference and MyPreferences
- *
- * Originally: AddQuranFragment.java (616 lines)
- */
 class AddQuranFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: AddQuranFragment? = null
 
         fun getInstance(
@@ -79,50 +57,18 @@ class AddQuranFragment : Fragment {
         }
     }
 
-    /**
-     * Callback interface for Quran ayah addition events.
-     *
-     * The host Activity/Fragment implements this to receive ayah data,
-     * translation text, reciter information, and lifecycle events.
-     */
     interface IAddQuran {
-        /** Called for each ayah chunk with full text and index data. */
-        fun onAdd(
-            str: String, str2: String, str3: String?, str4: String?,
-            i: Int, i2: Int, str5: String, i3: Int, i4: Int
-        )
-
-        /** Called when a custom recitation reader name is selected. */
+        fun onAdd(str: String, str2: String, str3: String?, str4: String?, i: Int, i2: Int, str5: String, i3: Int, i4: Int)
         fun onAddReaderName(str: String?, str2: String?, uri: Uri?)
-
-        /** Called with the translation text for an ayah. */
         fun onAddTranslation(str: String, i: Int, z: Boolean)
-
-        /** Called when bismillah should be included. */
         fun onBismilah()
-
-        /** Called when the user cancels. */
         fun onCancel()
-
-        /** Called when all ayahs are done (with custom recitation upload). */
         fun onDone(str: String, i: Int, str2: String?, uri: Uri?, str3: String?)
-
-        /** Called when all ayahs are done (with online reciter). */
         fun onDone(str: String, i: Int, str2: String?, list: List<RecitersModel>?)
-
-        /** Called when the ayah limit is exceeded. */
         fun onErrorLimitation()
-
-        /** Called when the search button is pressed. */
         fun onSearch()
-
-        /** Called for video copyright check. */
         fun onVuCopyRight()
-
-        /** Called to show progress indicator. */
         fun progress()
-
-        /** Called when the upload recitation button is pressed. */
         fun uploadRecitation()
     }
 
@@ -314,7 +260,6 @@ class AddQuranFragment : Fragment {
                 includeBismilah?.isChecked = !(includeBismilah?.isChecked ?: false)
             }
 
-            // Surah spinner
             spinnerSurah = root.findViewById(R.id.sura_name)
             val surahAdapter = ArrayAdapter(
                 requireContext(), R.layout.row_spinner_aya, arraySurah!!
@@ -326,7 +271,6 @@ class AddQuranFragment : Fragment {
                 it.dropDownVerticalOffset = it.height * (-10)
             }
 
-            // From ayah spinner
             spinnerFrom = root.findViewById(R.id.aya_from)
             val fromAdapter = ArrayAdapter<String>(
                 requireContext(), R.layout.row_spinner_aya
@@ -336,7 +280,6 @@ class AddQuranFragment : Fragment {
             spinnerFrom?.onItemSelectedListener = onFromAyaSelectedListener
             spinnerFrom?.adapter = adapterFromAyah as SpinnerAdapter
 
-            // To ayah spinner
             spinnerTo = root.findViewById(R.id.aya_to)
             val toAdapter = ArrayAdapter<String>(
                 requireContext(), R.layout.row_spinner_aya
@@ -345,7 +288,6 @@ class AddQuranFragment : Fragment {
             toAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinnerTo?.adapter = adapterToAyah as SpinnerAdapter
 
-            // Reciters spinner
             spinnerReciters = root.findViewById(R.id.spinner_reciters)
             val recitersAdapter = ArrayAdapter(
                 requireContext(), R.layout.row_spinner_aya, arrayReciters!!
@@ -365,7 +307,6 @@ class AddQuranFragment : Fragment {
             }
             spinnerReciters?.adapter = recitersAdapter as SpinnerAdapter
 
-            // Translation spinner
             spinnerTranslation = root.findViewById(R.id.spinner_translation)
             val translationAdapter = ArrayAdapter(
                 requireContext(), R.layout.row_spinner_aya, arrayTranslation!!
@@ -373,10 +314,8 @@ class AddQuranFragment : Fragment {
             translationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinnerTranslation?.adapter = translationAdapter as SpinnerAdapter
 
-            // No internet layout
             layoutConnection = root.findViewById(R.id.hint_no_internet)
 
-            // Done button — starts ayah processing on background thread
             root.findViewById<View>(R.id.btn_done).setOnClickListener {
                 if (iAddQuran != null) {
                     val fromPos = spinnerFrom?.selectedItemPosition ?: 0
@@ -402,14 +341,12 @@ class AddQuranFragment : Fragment {
                 }
             }
 
-            // Cancel button
             root.findViewById<View>(R.id.btn_cancel).setOnClickListener {
                 if (iAddQuran != null) {
                     iAddQuran?.onCancel()
                 }
             }
 
-            // Search button
             root.findViewById<View>(R.id.btn_search).setOnClickListener {
                 savePreference()
                 if (iAddQuran != null) {
@@ -417,7 +354,6 @@ class AddQuranFragment : Fragment {
                 }
             }
 
-            // Upload recitation button
             root.findViewById<View>(R.id.btn_upload).setOnClickListener {
                 if (iAddQuran != null) {
                     iAddQuran?.uploadRecitation()
@@ -425,7 +361,6 @@ class AddQuranFragment : Fragment {
                 iAddQuran = null
             }
 
-            // Reader name text view
             val tvReader = root.findViewById<TextCustumFont>(R.id.tv_reader)
             tv_reader_name = tvReader
             tvReader.setOnClickListener {
@@ -446,11 +381,6 @@ class AddQuranFragment : Fragment {
         return root
     }
 
-    /**
-     * Initialises the horizontal RecyclerView for Quran icon selection.
-     * Displays four icon options (hafes, shamerli, nour_hode, amiri)
-     * and restores the previously selected icon index.
-     */
     private fun initIconRv(view: View) {
         val recyclerView = view.findViewById<RecyclerView>(R.id.rv)
         recyclerView.layoutManager = LinearLayoutManager(context, RecyclerView.HORIZONTAL, false)
@@ -466,10 +396,6 @@ class AddQuranFragment : Fragment {
         recyclerView.adapter = adapter
     }
 
-    /**
-     * Hides the reader name upload UI elements and resets the recitation state.
-     * Called when the user selects a different reciter from the spinner.
-     */
     private fun goneReaderNameUpload() {
         uri_recitation = null
         iv_done_upload?.visibility = View.GONE
@@ -493,11 +419,6 @@ class AddQuranFragment : Fragment {
         } catch (_: Exception) {}
     }
 
-    /**
-     * Restores spinner positions from saved preferences when returning
-     * from a search. Sets the isFromSearch flag so the from-ayah
-     * listener can properly sync the to-ayah spinner.
-     */
     fun addAyaIndex() {
         try {
             isFromSearch = true
@@ -518,11 +439,6 @@ class AddQuranFragment : Fragment {
         } catch (_: Exception) {}
     }
 
-    /**
-     * Updates the reader name and recitation URI after an upload.
-     * Shows the done indicator if a valid URI is provided, and
-     * underlines the reader name if it's non-empty.
-     */
     fun setNameReader(str: String?, uri: Uri?, str2: String?) {
         uri_recitation = uri
         path_video_copy = str2
@@ -540,20 +456,6 @@ class AddQuranFragment : Fragment {
         tv_reader_name?.text = name
     }
 
-    /**
-     * Splits an ayah text into chunks of approximately 5 "long" words
-     * (words with length > 1 character) for display on the timeline.
-     *
-     * Short ayahs (4 or fewer words) are added as a single entity
-     * with the " نص" suffix. Long ayahs are split so each chunk
-     * contains roughly 5 long words, with intermediate chunks having
-     * text-length and aya-number set to -1 (not final) and the last
-     * chunk carrying the verse number marker.
-     *
-     * @param str The ayah text to split
-     * @param str2 Optional comma-separated word-level translation
-     * @param ayaNum The ayah number (1-based within the surah)
-     */
     fun splitAya(str: String, str2: String?, ayaNum: Int) {
         val trim = str.trim()
         val split = trim.replace("\\s*([\u06D6-\u06ED])".toRegex(), "$1")
@@ -592,7 +494,6 @@ class AddQuranFragment : Fragment {
                 val endIndex = (chunkStart + longWordCount) - (newTotalCount - longWordCount)
 
                 if (loopIndex == lastIndex) {
-                    // Last word in the aya — this chunk carries the verse number
                     val chunkText = sb.toString().trim()
                     iAddQuran?.onAdd(
                         chunkText + nasMark, trim,
@@ -600,7 +501,6 @@ class AddQuranFragment : Fragment {
                         str2, chunkText.length, ayaNum, icon, chunkStart, endIndex
                     )
                 } else {
-                    // Middle chunk — not final, so text-length and aya-number are -1
                     val chunkText = sb.toString().trim()
                     val transWords = if (split2 != null)
                         getWords(split2, chunkStart, endIndex) else null
@@ -620,7 +520,6 @@ class AddQuranFragment : Fragment {
             loopIndex++
         }
 
-        // Remaining words after the last 5-long-word boundary
         if (sb.isNotEmpty()) {
             val chunkText = sb.toString().trim()
             val transWords = if (split2 != null)
@@ -632,16 +531,6 @@ class AddQuranFragment : Fragment {
         }
     }
 
-    /**
-     * Extracts a space-joined substring from a word array, with bounds clamping.
-     * Used to get the translation words that correspond to a specific chunk
-     * of the Arabic ayah text.
-     *
-     * @param strArr The full array of translation words
-     * @param start The start index (clamped to 0 if negative)
-     * @param end The end index (clamped to array length if over)
-     * @return Space-joined words from the sub-range, or empty string if invalid
-     */
     fun getWords(strArr: Array<String>?, start: Int, end: Int): String {
         if (strArr == null || strArr.isEmpty()) return ""
         var s = start
@@ -652,22 +541,6 @@ class AddQuranFragment : Fragment {
         return strArr.copyOfRange(s, e).joinToString(" ")
     }
 
-    /**
-     * Recursively processes each ayah in the selected range.
-     *
-     * For each ayah, this method:
-     * 1. Reads the Arabic text from Quran assets
-     * 2. Optionally reads the translation text
-     * 3. Splits the ayah into chunks via [splitAya]
-     * 4. Adds the translation text via [IAddQuran.onAddTranslation]
-     * 5. Adds the reciter model for audio resolution
-     * 6. On the last ayah, calls [IAddQuran.onDone] with the appropriate
-     *    overload (custom upload vs online reciter)
-     *
-     * @param from Current ayah number (1-based), incremented on each recursive call
-     * @param to The last ayah number to process
-     * @param surahNumber The surah number (1-based)
-     */
     fun addAyaEntityRecursive(from: Int, to: Int, surahNumber: Int) {
         try {
             val ayahText = quranReader?.getAyahText(surahNumber, from) ?: run {
@@ -712,21 +585,11 @@ class AddQuranFragment : Fragment {
             }
             addAyaEntityRecursive(from + 1, to, surahNumber)
         } catch (e: Exception) {
-            // BEFORE: Silent catch — spinner stays forever when any exception occurs
-            // WHY_CHANGED: Exceptions (like NPE from onAdd callback) were swallowed silently
-            // FIXED_BY: Log the error and ensure spinner is stopped
-            // REF: Original Java had e.printStackTrace() here
-            // VISUAL_IMPACT: Spinner no longer runs forever on error
             e.printStackTrace()
             iAddQuran?.onCancel()
         }
     }
 
-    /**
-     * Saves the current spinner selections and checkbox states to
-     * SharedPreferences so they can be restored when the fragment
-     * is recreated.
-     */
     private fun savePreference() {
         quranPreference?.savePreferences(
             spinnerSurah?.selectedItemPosition ?: 0,

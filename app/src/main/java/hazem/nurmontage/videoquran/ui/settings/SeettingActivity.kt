@@ -328,44 +328,6 @@ class SeettingActivity : BaseActivity() {
         }
     }
 
-    // ── Contact email ────────────────────────────────────────────────
-
-    private fun contact() {
-        val subject = getString(R.string.support_team)
-        val emailAddresses = arrayOf("nurmontage.contact@gmail.com")
-        if (isGmailAvailable(this)) {
-            val intent = Intent(Intent.ACTION_SEND)
-            intent.putExtra(Intent.EXTRA_EMAIL, emailAddresses)
-            intent.putExtra(Intent.EXTRA_BCC, emailAddresses)
-            intent.putExtra(Intent.EXTRA_SUBJECT, subject)
-            intent.type = "message/rfc822"
-            intent.setPackage("com.google.android.gm")
-            try {
-                startActivity(intent)
-                return
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-        try {
-            val intent = Intent(Intent.ACTION_SEND)
-            intent.putExtra(Intent.EXTRA_EMAIL, emailAddresses)
-            intent.putExtra(Intent.EXTRA_BCC, emailAddresses)
-            intent.putExtra(Intent.EXTRA_SUBJECT, subject)
-            intent.type = "message/rfc822"
-            startActivity(Intent.createChooser(intent, "Send email using"))
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun isGmailAvailable(context: Context): Boolean {
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.type = "message/rfc822"
-        intent.setPackage("com.google.android.gm")
-        return !context.packageManager.queryIntentActivities(intent, 0).isEmpty()
-    }
-
     // ── Copyright dialog ─────────────────────────────────────────────
 
     private fun dialogCopyRight() {

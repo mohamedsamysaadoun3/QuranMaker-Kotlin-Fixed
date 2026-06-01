@@ -13,36 +13,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.adapter.ColorAdapter
-import hazem.nurmontage.videoquran.core.common.Constants.AyaTextPreset
 import hazem.nurmontage.videoquran.core.common.Constants
+import hazem.nurmontage.videoquran.core.common.Constants.AyaTextPreset
 import hazem.nurmontage.videoquran.databinding.FragmentColorAyaBinding
 import hazem.nurmontage.videoquran.fragment.EditTrslEntityFragment
 import hazem.nurmontage.videoquran.model.data.QuranEntity
 import hazem.nurmontage.videoquran.utils.Utils
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
-/**
- * Fragment for selecting the color and text preset (None/Outline/Shadow/Glow)
- * for a Quran Aya entity.
- *
- * Displays a horizontal color palette via [ColorAdapter] with the
- * [Constants.MUSLIM_AYA_COLORS] array, plus four preset buttons below.
- * When a color is selected, the callback's [ColorTrslAyaFragment.IEditEntityCallback.updateAya]
- * or [ColorTrslAyaFragment.IEditEntityCallback.updateTrsl] is called depending
- * on the selected tab (Aya vs Translation).
- * When a preset button is tapped, [ColorTrslAyaFragment.IEditEntityCallback.updatePreset] is called.
- *
- * The "Done" button confirms the selection via [ColorTrslAyaFragment.IEditEntityCallback.onDone].
- *
- * If the entity has no translation, the tab layout is hidden and only the
- * Aya color palette is shown.
- *
- * Converted from ColorAyaFragment.java (188 lines).
- */
 class ColorAyaFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: ColorAyaFragment? = null
 
         fun getInstance(
@@ -102,7 +83,6 @@ class ColorAyaFragment : Fragment {
             }
         }
 
-        // Determine which preset is currently active
         val entity = entitySelect ?: return
         val currentPreset = AyaTextPreset.values()[entity.get(entity.getmPreset()).ordinal]
         val selectedIndex = when (currentPreset) {

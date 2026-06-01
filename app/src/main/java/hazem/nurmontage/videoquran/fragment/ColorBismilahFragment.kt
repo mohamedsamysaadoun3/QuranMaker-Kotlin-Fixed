@@ -12,31 +12,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.adapter.ColorAdapter
-import hazem.nurmontage.videoquran.core.common.Constants.AyaTextPreset
 import hazem.nurmontage.videoquran.core.common.Constants
+import hazem.nurmontage.videoquran.core.common.Constants.AyaTextPreset
 import hazem.nurmontage.videoquran.databinding.FragmentColorAyaBinding
 import hazem.nurmontage.videoquran.fragment.EditBismilahEntityFragment
 import hazem.nurmontage.videoquran.model.data.BismilahEntity
 import hazem.nurmontage.videoquran.utils.Utils
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
-/**
- * Fragment for selecting the color and text preset (None/Outline/Shadow/Glow)
- * for a Bismillah entity.
- *
- * Displays a horizontal color palette via [ColorAdapter] with the
- * [Constants.MUSLIM_AYA_COLORS] array, plus four preset buttons below.
- * When a color is selected, [IBismilahEntityCallback.updateAya] is called.
- * When a preset button is tapped, [IBismilahEntityCallback.updatePreset] is called.
- *
- * The "Done" button confirms the selection via [IBismilahEntityCallback.onDone].
- *
- * Converted from ColorBismilahFragment.java (162 lines).
- */
 class ColorBismilahFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: ColorBismilahFragment? = null
 
         fun getInstance(
@@ -50,8 +36,6 @@ class ColorBismilahFragment : Fragment {
             return instance!!
         }
     }
-
-
 
     private var adapter: ColorAdapter? = null
     private var binding: FragmentColorAyaBinding? = null
@@ -97,7 +81,6 @@ class ColorBismilahFragment : Fragment {
             }
         }
 
-        // Determine which preset is currently active
         val entity = entitySelect ?: return
         val currentPreset = AyaTextPreset.values()[entity.getmPreset()]
         val selectedIndex = when (currentPreset) {

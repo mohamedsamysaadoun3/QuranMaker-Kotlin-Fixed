@@ -150,9 +150,9 @@ class ChoiceLangActivity : BaseActivity() {
             }
         }
 
+        // Java: setFlags(268468224) = 0x10008000 = FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-            Intent.FLAG_ACTIVITY_CLEAR_TASK or
-            Intent.FLAG_ACTIVITY_CLEAR_TOP
+            Intent.FLAG_ACTIVITY_CLEAR_TASK
 
         startActivity(intent)
         finish()
@@ -180,9 +180,9 @@ class ChoiceLangActivity : BaseActivity() {
         // Navigate to FullscreenActivity with from_setting flag to route back to settings
         val intent = Intent(this, FullscreenActivity::class.java)
         intent.putExtra("from_setting", true)
+        // Java: setFlags(268468224) = 0x10008000 = FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-            Intent.FLAG_ACTIVITY_CLEAR_TASK or
-            Intent.FLAG_ACTIVITY_CLEAR_TOP
+            Intent.FLAG_ACTIVITY_CLEAR_TASK
 
         startActivity(intent)
         finish()

@@ -11,16 +11,6 @@ import hazem.nurmontage.videoquran.core.common.Constants.NUMBER_CHAR
 import hazem.nurmontage.videoquran.model.Transition
 import hazem.nurmontage.videoquran.model.data.TranslationQuranEntity
 
-/**
- * Timeline block representing a translation text on the editor timeline.
- *
- * Renders the translation text inside a rounded-rect block with optional
- * trim handles.  The block colour is [COLOR_BLOCK_TRANSLATION] and the text
- * colour is [COLOR_AYA].  Number characters are replaced with "…" for the
- * timeline preview.
- *
- * Originally: `hazem.nurmontage.videoquran.entity_timeline.EntityTrslTimeline`
- */
 class EntityTrslTimeline(
     val quranEntity: TranslationQuranEntity,
     left: Float,
@@ -30,9 +20,6 @@ class EntityTrslTimeline(
     secondInScreen: Float
 ) : Entity(secondInScreen) {
 
-    // ──────────────────────────────────────────────
-    //  Private state
-    // ──────────────────────────────────────────────
     internal var h: Float = height
     internal var centerY: Float = 0f
     internal var downX: Float = 0f
@@ -46,20 +33,12 @@ class EntityTrslTimeline(
     private val paintText: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val textBound: Rect = Rect()
 
-    // ──────────────────────────────────────────────
-    //  Property overrides
-    // ──────────────────────────────────────────────
-
     override var right: Float
         get() = super.right
         set(value) {
             super.right = value
             rect.right = value
         }
-
-    // ──────────────────────────────────────────────
-    //  Initialisation
-    // ──────────────────────────────────────────────
 
     init {
         rect = RectF(left, top, right, height)
@@ -78,16 +57,8 @@ class EntityTrslTimeline(
         padding = height * 0.07f
     }
 
-    // ──────────────────────────────────────────────
-    //  Transition
-    // ──────────────────────────────────────────────
-
     fun getTransition(): Transition? = transition
     fun setTransition(transition: Transition?) { this.transition = transition }
-
-    // ──────────────────────────────────────────────
-    //  File paths (FFmpeg input/output)
-    // ──────────────────────────────────────────────
 
     fun getFile(): String? = file
     fun setFile(file: String?) { this.file = file }
@@ -95,10 +66,6 @@ class EntityTrslTimeline(
     fun setFile_in(fileIn: String?) { file_in = fileIn }
     fun getFile_out(): String? = file_out
     fun setFile_out(fileOut: String?) { file_out = fileOut }
-
-    // ──────────────────────────────────────────────
-    //  Abstract method implementations
-    // ──────────────────────────────────────────────
 
     override fun updateStartTrim() {}
 

@@ -3,20 +3,8 @@ package hazem.nurmontage.videoquran.utils
 import hazem.nurmontage.videoquran.R
 import java.util.Random
 
-/**
- * Helper for resolving drawable resource IDs by name.
- * Provides static maps for icon and background drawable lookups,
- * plus a random background selector.
- *
- * Originally: DrawableHelper.java
- * Converted to: DrawableHelper.kt — idiomatic Kotlin, map-based lookups with fallbacks
- *
- * Used by adapters (IconQuranAdabters, BgAdapter) to resolve drawable
- * resource IDs from string identifiers without reflection.
- */
 object DrawableHelper {
 
-    /** Map of Quran reader/reciter icon names to drawable resource IDs. */
     private val drawableIconMap: Map<String, Int> = mapOf(
         "hafes" to R.drawable.hafes_icon,
         "warach" to R.drawable.warach_icon,
@@ -26,7 +14,6 @@ object DrawableHelper {
         "taha" to R.drawable.taha_icon
     )
 
-    /** Map of background drawable names to resource IDs (bg_1 through bg_38). */
     private val drawableMap: Map<String, Int> = mapOf(
         "bg_1" to R.drawable.bg_1, "bg_2" to R.drawable.bg_2,
         "bg_3" to R.drawable.bg_3, "bg_4" to R.drawable.bg_4,
@@ -49,13 +36,6 @@ object DrawableHelper {
         "bg_37" to R.drawable.bg_37, "bg_38" to R.drawable.bg_38
     )
 
-    /**
-     * Resolves a platform identifier string to the corresponding social media icon.
-     * Falls back to Instagram icon for null or unrecognized identifiers.
-     *
-     * @param platformId Platform identifier (e.g., "y_16:9" for YouTube, "t" for TikTok)
-     * @return The drawable resource ID for the platform icon
-     */
     fun getIdResource(platformId: String?): Int {
         if (platformId == null || platformId.contains("init")) {
             return R.drawable.ic_instagram
@@ -67,34 +47,14 @@ object DrawableHelper {
         }
     }
 
-    /**
-     * Resolves a Quran reader icon name to its drawable resource ID.
-     * Falls back to "hafes_icon" if the name is not found.
-     *
-     * @param name The icon name (e.g., "hafes", "warach", "amiri")
-     * @return The drawable resource ID
-     */
     fun getIDDrawableIconByName(name: String): Int {
         return drawableIconMap[name] ?: R.drawable.hafes_icon
     }
 
-    /**
-     * Resolves a background drawable name to its resource ID.
-     * Falls back to "bg_24" if the name is not found.
-     *
-     * @param name The background name (e.g., "bg_1", "bg_24")
-     * @return The drawable resource ID
-     */
     fun getIDDrawableByName(name: String): Int {
         return drawableMap[name] ?: R.drawable.bg_24
     }
 
-    /**
-     * Returns a random background drawable entry from the map.
-     * Used for default/random background selection in the editor.
-     *
-     * @return A random Map.Entry containing the name and resource ID
-     */
     fun getRandomDrawableEntry(): Map.Entry<String, Int> {
         val entries = drawableMap.entries.toList()
         return entries[Random().nextInt(entries.size)]

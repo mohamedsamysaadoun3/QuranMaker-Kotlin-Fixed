@@ -17,24 +17,9 @@ import hazem.nurmontage.videoquran.utils.AppUtils
 import hazem.nurmontage.videoquran.utils.ScreenUtils
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
-/**
- * Fragment for selecting and changing the video background.
- *
- * Displays a horizontal scrolling background picker via [BgAdapter] with
- * 38 predefined backgrounds. Also provides options to upload custom
- * images or videos as backgrounds.
- *
- * The [IChangeBgCallback] extends [IBgCallback] so it can be passed
- * directly to [BgAdapter] for background selection events.
- *
- * All features are available (billing removed).
- *
- * Converted from ChangeBgFragment.java (295 lines).
- */
 class ChangeBgFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: ChangeBgFragment? = null
 
         fun getInstance(
@@ -49,11 +34,6 @@ class ChangeBgFragment : Fragment {
         }
     }
 
-    /**
-     * Callback interface for background change events.
-     * Extends [IBgCallback] so this callback can be passed directly
-     * to [BgAdapter] for background selection.
-     */
     interface IChangeBgCallback : IBgCallback {
         fun onCancel()
         fun onCrop()

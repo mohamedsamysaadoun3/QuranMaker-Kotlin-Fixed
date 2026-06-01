@@ -3,24 +3,21 @@ package hazem.nurmontage.videoquran.ui.editor
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.media.MediaMetadataRetriever
+import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
+import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.lifecycle.lifecycleScope
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.core.base.BaseActivity
 import hazem.nurmontage.videoquran.core.common.Common
 import hazem.nurmontage.videoquran.databinding.ActivityChoiceBgFromVideoBinding
 import hazem.nurmontage.videoquran.utils.LocaleHelper
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import hazem.nurmontage.videoquran.views.VideoFrameSelectorView
 
 /**
  * Activity for selecting a video frame as a background image.
@@ -36,12 +33,7 @@ import kotlinx.coroutines.withContext
 class ChoiceBgFromVideoActivity : BaseActivity() {
 
     private lateinit var binding: ActivityChoiceBgFromVideoBinding
-
-    private var videoUri: String? = null
-    private var videoDurationUs: Long = 0L
-    private var currentFrameTimeUs: Long = 0L
-    private var currentBitmap: Bitmap? = null
-    private var retriever: MediaMetadataRetriever? = null
+    private var imageView: ImageView? = null
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -79,7 +71,10 @@ class ChoiceBgFromVideoActivity : BaseActivity() {
             windowInsets
         }
 
-        binding.tvTittleFragment.text = getString(R.string.choice_bg)
+        val mResources = resources
+        if (mResources != null) {
+            binding.tvTittleFragment.text = mResources.getString(R.string.choice_bg)
+        }
 
         binding.btnCancel.setOnClickListener {
             cancel()
@@ -90,100 +85,26 @@ class ChoiceBgFromVideoActivity : BaseActivity() {
         }
     }
 
-    private fun init(uri: android.net.Uri?) {
+    private fun init(uri: Uri?) {
         if (uri == null) {
             return
         }
-
-        videoUri = uri.toString()
-
+        imageView = binding.ivView
+        val videoFrameSelectorView = binding.frameSelectorView
+        videoFrameSelectorView.setVideoUri(uri)
+        videoFrameSelectorView.setOnFrameSelectedListener(object : VideoFrameSelectorView.OnFrameSelectedListener {
+            override fun onFrameSelected(value: Int, bitmap: Bitmap) {
+                if (imageView == null) return
+                imageView?.setImageBitmap(bitmap)
+            }
+        })
         binding.btnDone.setOnClickListener {
-            val bitmap = currentBitmap
-            if (bitmap != null && !bitmap.isRecycled) {
-                // Match Java: store bitmap in Common.bitmap, return RESULT_OK with empty Intent
-                Common.bitmap = bitmap
+            val frame = videoFrameSelectorView.getFrameBitmap()
+            if (frame != null) {
+                Common.bitmap = frame.getBitmap()
                 setResult(RESULT_OK, Intent())
                 finish()
             }
         }
-
-        initVideoRetriever()
-    }
-
-    /**
-     * Initialize the MediaMetadataRetriever and set up the frame selector.
-     */
-    private fun initVideoRetriever() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                retriever = MediaMetadataRetriever()
-                retriever?.setDataSource(videoUri)
-
-                val durationStr = retriever?.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-                videoDurationUs = (durationStr?.toLongOrNull() ?: 0L) * 1000L // ms to us
-
-                withContext(Dispatchers.Main) {
-                    setupFrameSelector()
-                    showFrameAt(0L)
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        this@ChoiceBgFromVideoActivity,
-                        "Failed to load video",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    finish()
-                }
-            }
-        }
-    }
-
-    /**
-     * Set up the VideoFrameSelectorView with callback for frame scrubbing.
-     */
-    private fun setupFrameSelector() {
-        binding.frameSelectorView.setOnFrameSeekListener(object : hazem.nurmontage.videoquran.views.VideoFrameSelectorView.OnFrameSeekListener {
-            override fun onSeekTo(timeUs: Long) {
-                currentFrameTimeUs = timeUs.coerceIn(0L, videoDurationUs)
-                showFrameAt(currentFrameTimeUs)
-            }
-        })
-        binding.frameSelectorView.setDuration(videoDurationUs)
-        videoUri?.let { binding.frameSelectorView.setVideoPath(it) }
-    }
-
-    /**
-     * Display the video frame at the specified time position.
-     */
-    private fun showFrameAt(timeUs: Long) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val bitmap = retriever?.getFrameAtTime(timeUs, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
-                bitmap?.let {
-                    val oldBitmap = currentBitmap
-                    currentBitmap = it
-                    oldBitmap?.recycle()
-                    withContext(Dispatchers.Main) {
-                        binding.ivView.setImageBitmap(it)
-                    }
-                }
-            } catch (_: Exception) {
-                // Frame extraction failed for this timestamp — keep previous frame
-            }
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        try {
-            retriever?.release()
-        } catch (_: Exception) {
-            // Retriever may already be released
-        }
-        retriever = null
-        // Note: do NOT recycle currentBitmap here — it may have been stored in Common.bitmap
-        // and will be used by the caller (EngineActivity.onChoiceBgResult)
-        currentBitmap = null
     }
 }

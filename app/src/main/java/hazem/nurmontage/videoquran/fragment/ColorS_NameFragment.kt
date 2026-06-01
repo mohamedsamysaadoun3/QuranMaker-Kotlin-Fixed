@@ -12,32 +12,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.adapter.ColorAdapter
-import hazem.nurmontage.videoquran.core.common.Constants.AyaTextPreset
 import hazem.nurmontage.videoquran.core.common.Constants
+import hazem.nurmontage.videoquran.core.common.Constants.AyaTextPreset
 import hazem.nurmontage.videoquran.databinding.FragmentColorAyaBinding
 import hazem.nurmontage.videoquran.model.SurahNameEntity
 import hazem.nurmontage.videoquran.utils.Utils
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
-/**
- * Fragment for selecting the color and text preset (None/Outline/Shadow/Glow)
- * for a Surah name entity.
- *
- * Displays a horizontal color palette via [ColorAdapter] with the
- * [Constants.MUSLIM_AYA_COLORS] array, plus four preset buttons below.
- * When a color is selected, [SurahNameEntity.setColor] is called and
- * [EditS_NameFragment.IEditS_Name.update] fires.
- * When a preset button is tapped, [SurahNameEntity.setPreset] is called
- * and [EditS_NameFragment.IEditS_Name.update] fires.
- *
- * The "Done" button confirms the selection via [EditS_NameFragment.IEditS_Name.onDone].
- *
- * Converted from ColorS_NameFragment.java (164 lines).
- */
 class ColorS_NameFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: ColorS_NameFragment? = null
 
         fun getInstance(
@@ -97,7 +81,6 @@ class ColorS_NameFragment : Fragment {
             }
         }
 
-        // Determine which preset is currently active
         val entity = entitySelect ?: return
         val currentPreset = entity.get(entity.getmPreset())
         val selectedIndex = when (currentPreset) {

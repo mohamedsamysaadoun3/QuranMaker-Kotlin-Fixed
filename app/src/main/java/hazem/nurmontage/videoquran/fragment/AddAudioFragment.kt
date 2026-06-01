@@ -11,23 +11,9 @@ import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.databinding.FragmentAddAudioBinding
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
-/**
- * Bottom-sheet fragment for adding audio to a project.
- *
- * Presents three options to the user:
- * - **Upload**: Pick an audio file from the device
- * - **Extract**: Extract audio from an existing video
- * - **Close**: Dismiss the fragment
- *
- * Each option fires a callback on [IAudioCallback]. The singleton pattern
- * ensures only one instance exists at a time.
- *
- * Converted from AddAudioFragment.java (84 lines).
- */
 class AddAudioFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: AddAudioFragment? = null
 
         fun getInstance(callback: IAudioCallback?, resources: Resources?): AddAudioFragment {
@@ -38,9 +24,6 @@ class AddAudioFragment : Fragment {
         }
     }
 
-    /**
-     * Callback interface for audio source selection events.
-     */
     interface IAudioCallback {
         fun cancel()
         fun extract()

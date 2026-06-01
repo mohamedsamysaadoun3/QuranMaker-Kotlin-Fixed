@@ -37,13 +37,6 @@ class VideoFrameSelectorView @JvmOverloads constructor(
         fun onFrameSelected(value: Int, bitmap: Bitmap)
     }
 
-    interface OnFrameSeekListener {
-        fun onSeekTo(timeUs: Long)
-    }
-
-    private var onFrameSeekListener: OnFrameSeekListener? = null
-    private var videoDurationUs: Long = 0L
-
     private fun init() {
         framePaint.color = -7829368
         cursorPaint.color = SupportMenu.CATEGORY_MASK
@@ -142,6 +135,12 @@ class VideoFrameSelectorView @JvmOverloads constructor(
             var count = (max / (frameWidth + frameSpacing)).toInt()
             selectedFrameIndex = count
             selectedFrameIndex = Math.max(0, Math.min(count, frameCount - 1))
+            // Notify listener of frame selection (Java original set the listener but never
+            // called it — this fix makes the preview actually work)
+            val frame = getFrameBitmap()
+            if (frame != null) {
+                onFrameSelectedListener?.onFrameSelected(selectedFrameIndex, frame.getBitmap())
+            }
             invalidate()
             return true
         }
@@ -158,22 +157,6 @@ class VideoFrameSelectorView @JvmOverloads constructor(
 
     fun setOnFrameSelectedListener(onFrameSelectedListener: OnFrameSelectedListener?) {
         this.onFrameSelectedListener = onFrameSelectedListener
-    }
-
-    fun setOnFrameSeekListener(listener: OnFrameSeekListener?) {
-        this.onFrameSeekListener = listener
-    }
-
-    fun setDuration(durationUs: Long) {
-        this.videoDurationUs = durationUs
-    }
-
-    fun setVideoPath(path: String) {
-        if (path.startsWith("content://") || path.startsWith("file://")) {
-            setVideoUri(Uri.parse(path))
-        } else {
-            setVideoUri(Uri.fromFile(java.io.File(path)))
-        }
     }
 
     init {
