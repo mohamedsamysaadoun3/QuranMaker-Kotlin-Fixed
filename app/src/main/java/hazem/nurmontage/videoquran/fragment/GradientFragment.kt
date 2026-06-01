@@ -130,5 +130,6 @@ class GradientFragment : Fragment {
         super.onDestroyView()
         instance = null
         binding = null
+        iIpadEditCallback = null
     }
 }

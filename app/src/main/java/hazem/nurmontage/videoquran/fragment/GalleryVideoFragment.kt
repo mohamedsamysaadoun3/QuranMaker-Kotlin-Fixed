@@ -144,8 +144,8 @@ class GalleryVideoFragment : Fragment {
 
     fun changeFolder(file: File?) {
         adabters?.clear()
-        if (file != null && file.exists() && file.isDirectory) {
-            val files = file.listFiles() ?: return
+        val files = if (file != null && file.exists() && file.isDirectory) file.listFiles() else null
+        if (files != null) {
             val items = arrayListOf<VideoItem>()
             for (f in files) {
                 if (f.isFile && isVideoFile(f)) {

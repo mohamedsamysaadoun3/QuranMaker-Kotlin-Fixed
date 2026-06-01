@@ -19,7 +19,6 @@ import hazem.nurmontage.videoquran.model.ItemDimension
 import hazem.nurmontage.videoquran.utils.ScreenUtils
 import hazem.nurmontage.videoquran.utils.Utils
 
-
 class ResizeFragment : Fragment {
 
     companion object {
