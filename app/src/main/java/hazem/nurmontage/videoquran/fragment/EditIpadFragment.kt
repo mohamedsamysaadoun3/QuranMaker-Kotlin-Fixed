@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
@@ -18,27 +17,9 @@ import hazem.nurmontage.videoquran.databinding.FragmentEditIpadBinding
 import hazem.nurmontage.videoquran.model.IpadItem
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
-/**
- * Fragment for selecting Quran verse frame styles (iPad-style containers)
- * and color/gradient sub-options.
- *
- * The fragment is structured as:
- * - **Top**: Horizontal RecyclerView of frame type icons ([FrameAdapter])
- * - **Bottom**: TabLayout switching between [ColorsFragment] and [GradientFragment]
- * - **Buttons**: Done / Cancel controls
- *
- * Architecture decisions:
- * - Singleton pattern preserved from original for Fragment transaction reuse.
- * - 16 frame types defined as [IpadItem] list with drawable resources.
- * - [IIpadEditCallback] bridges frame selection events back to the host Activity.
- * - TabLayout uses custom [TextCustumFont] views for tab labels.
- *
- * Converted from EditIpadFragment.java.
- */
 class EditIpadFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: EditIpadFragment? = null
 
         fun getInstance(
@@ -49,17 +30,13 @@ class EditIpadFragment : Fragment {
             isGradient: Boolean,
             isGlass: Boolean
         ): EditIpadFragment {
-            // Always create a new instance with updated params to ensure
-            // callback, ipadType, and other state are current
-            instance = EditIpadFragment(resources, ipadType, callback, indexSelect, isGradient, isGlass)
+            if (instance == null) {
+                instance = EditIpadFragment(resources, ipadType, callback, indexSelect, isGradient, isGlass)
+            }
             return instance!!
         }
     }
 
-    /**
-     * Callback interface for iPad frame editing events.
-     * The host Activity implements this to react to user selections.
-     */
     interface IIpadEditCallback {
         fun onCancel()
         fun onChangeType(type: Int)
@@ -69,7 +46,6 @@ class EditIpadFragment : Fragment {
         fun onGlassType(isGlass: Boolean)
     }
 
-    // ── State ────────────────────────────────────────────────────────
     private var fragmentBinding: FragmentEditIpadBinding? = null
     private var iIpadEditCallback: IIpadEditCallback? = null
     private var indexSelect: Int = 0
@@ -81,8 +57,8 @@ class EditIpadFragment : Fragment {
     private var resourcesRef: Resources? = null
     private var rvType: RecyclerView? = null
 
-    // ── Constructors ─────────────────────────────────────────────────
     constructor()
+
     constructor(
         resources: Resources?,
         ipadType: Int,
@@ -99,11 +75,6 @@ class EditIpadFragment : Fragment {
         this.isGradient = isGradient
     }
 
-    // ── Lifecycle ────────────────────────────────────────────────────
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -115,7 +86,6 @@ class EditIpadFragment : Fragment {
 
         rvType = root.findViewById(R.id.rv_type)
 
-        // Build the list of all available frame types
         val ipadItems = arrayListOf<IpadItem>(
             IpadItem(R.drawable.ipad_t, IpadType.IPAD),
             IpadItem(R.drawable.ipad_unblur, IpadType.IPAD_UNBLUR),
@@ -152,7 +122,6 @@ class EditIpadFragment : Fragment {
             adapter = ipadAdapter
         }
 
-        // Scroll to the selected frame type
         if (posSelect > 3) {
             try {
                 rvType?.scrollToPosition(posSelect - 3)
@@ -160,7 +129,6 @@ class EditIpadFragment : Fragment {
             }
         }
 
-        // Done button
         root.findViewById<View>(R.id.btn_done).setOnClickListener {
             iIpadEditCallback?.onDone()
         }
@@ -169,7 +137,6 @@ class EditIpadFragment : Fragment {
         return root
     }
 
-    // ── Public helpers ───────────────────────────────────────────────
     fun scrollToSelectedPosition() {
         try {
             val lm = rvType?.layoutManager as? LinearLayoutManager ?: return
@@ -181,7 +148,6 @@ class EditIpadFragment : Fragment {
         }
     }
 
-    // ── Private helpers ──────────────────────────────────────────────
     private fun addCustomViewToTab(tab: TabLayout.Tab) {
         val customView = layoutInflater.inflate(R.layout.layout_tablayout, null as ViewGroup?)
         (customView.findViewById(R.id.name) as TextCustumFont)
@@ -228,7 +194,6 @@ class EditIpadFragment : Fragment {
             }
         })
 
-        // Load the initial child fragment
         childFragmentManager.beginTransaction()
             .replace(R.id.container, getFragment(mCurrentPosFragment))
             .addToBackStack(null)
@@ -254,7 +219,6 @@ class EditIpadFragment : Fragment {
         return 0
     }
 
-    // ── Cleanup ──────────────────────────────────────────────────────
     override fun onDestroyView() {
         super.onDestroyView()
         instance = null

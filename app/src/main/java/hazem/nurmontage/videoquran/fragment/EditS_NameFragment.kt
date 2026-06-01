@@ -12,24 +12,9 @@ import hazem.nurmontage.videoquran.databinding.FragmentEditSNameBinding
 import hazem.nurmontage.videoquran.model.SurahNameEntity
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
-/**
- * Bottom-sheet fragment for editing Surah name entities on the timeline.
- *
- * Provides three action buttons:
- * - **Font**: Change the Surah name font style
- * - **Color**: Change the Surah name color
- * - **Edit**: Open the Surah name text editor
- *
- * Each action fires a callback on [IEditS_Name] with the associated
- * [SurahNameEntity]. The singleton pattern ensures only one instance
- * exists at a time.
- *
- * Converted from EditS_NameFragment.java (95 lines).
- */
 class EditS_NameFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: EditS_NameFragment? = null
 
         fun getInstance(
@@ -44,9 +29,6 @@ class EditS_NameFragment : Fragment {
         }
     }
 
-    /**
-     * Callback interface for Surah name editing events.
-     */
     interface IEditS_Name {
         fun onColor(entity: SurahNameEntity)
         fun onDone()

@@ -18,30 +18,9 @@ import hazem.nurmontage.videoquran.entity_timeline.Entity
 import hazem.nurmontage.videoquran.model.data.QuranEntity
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
-/**
- * Bottom-sheet fragment for editing the main Quran entity on the timeline.
- *
- * Provides a scrollable horizontal action bar with buttons for:
- * - **Color / Delete / Cut / Edit**: Standard entity operations
- * - **From Now / From The Start / Until Now / Until The End**: Trim operations
- * - **Duplicate**: Clone the entity
- * - **Font**: Change the entity's typeface
- * - **Icon**: Toggle the aya number icon (only enabled when the entity has a number)
- * - **Animation**: Configure transition animations
- * - **Scroll indicators**: Left/right arrows that fade based on scroll position
- *
- * The [checkSplitEntity] method enables/disables cut/trim buttons based on
- * cursor position relative to the entity's bounds. The [checkIcon] method
- * disables the icon button when the entity has no verse number.
- *
- * Uses [IEditEntityCallback] for all action callbacks.
- *
- * Converted from EditEntityFragment.java (318 lines).
- */
 class EditEntityFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: EditEntityFragment? = null
 
         fun getInstance(
@@ -56,14 +35,10 @@ class EditEntityFragment : Fragment {
             return instance!!
         }
 
-        private const val DISABLED_COLOR = -8355712  // 0x808080 gray
-        private const val ENABLED_COLOR = -1          // 0xFFFFFF white
+        private const val DISABLED_COLOR = -8355712
+        private const val ENABLED_COLOR = -1
     }
 
-    /**
-     * Callback interface for main entity editing events.
-     * All methods correspond to the action buttons in the edit bar.
-     */
     interface IEditEntityCallback {
         fun fromNow()
         fun fromTheStart()
@@ -113,10 +88,6 @@ class EditEntityFragment : Fragment {
         this.resourcesRef = resources
         this.entitySelect = entity
         this.posCursur = posCursor
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
     }
 
     override fun onCreateView(
@@ -227,13 +198,6 @@ class EditEntityFragment : Fragment {
         return root
     }
 
-    /**
-     * Enables/disables the split/trim buttons based on the cursor position
-     * relative to the entity's bounding rectangle:
-     * - "From Now" is disabled if the entity ends before the cursor.
-     * - "Until Now" is disabled if the entity starts after the cursor.
-     * - "Cut" is only enabled if the cursor is within the entity's bounds.
-     */
     fun checkSplitEntity(entity: Entity?, cursorPos: Float) {
         if (entity == null) return
         try {
@@ -268,11 +232,6 @@ class EditEntityFragment : Fragment {
         }
     }
 
-    /**
-     * Checks whether the icon button should be enabled based on the
-     * entity's view type. If the entity is a [QuranEntity] and its
-     * number is -1 (no verse number), the icon button is disabled.
-     */
     fun checkIcon(entity: Entity?) {
         try {
             if (entity?.getEntityView() is QuranEntity) {

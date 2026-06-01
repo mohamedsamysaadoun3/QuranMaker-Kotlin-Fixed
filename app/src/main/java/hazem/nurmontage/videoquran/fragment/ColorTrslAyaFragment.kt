@@ -20,23 +20,9 @@ import hazem.nurmontage.videoquran.model.data.TranslationQuranEntity
 import hazem.nurmontage.videoquran.utils.Utils
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
-/**
- * Fragment for selecting the color and text preset (None/Outline/Shadow/Glow)
- * for a translation Aya entity.
- *
- * Displays a horizontal color palette via [ColorAdapter] with the
- * [Constants.MUSLIM_AYA_COLORS] array, plus four preset buttons below.
- * When a color is selected, [IEditEntityCallback.updateAya] is called.
- * When a preset button is tapped, [IEditEntityCallback.updatePreset] is called.
- *
- * The "Done" button confirms the selection via [IEditEntityCallback.onDone].
- *
- * Converted from ColorTrslAyaFragment.java (158 lines).
- */
 class ColorTrslAyaFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: ColorTrslAyaFragment? = null
 
         fun getInstance(
@@ -50,8 +36,6 @@ class ColorTrslAyaFragment : Fragment {
             return instance!!
         }
     }
-
-
 
     private var adapter: ColorAdapter? = null
     private var binding: FragmentColorAyaBinding? = null
@@ -97,7 +81,6 @@ class ColorTrslAyaFragment : Fragment {
             }
         }
 
-        // Determine which preset is currently active
         val entity = entitySelect ?: return
         val currentPreset = AyaTextPreset.values()[entity.get(entity.getmPreset()).ordinal]
         val selectedIndex = when (currentPreset) {

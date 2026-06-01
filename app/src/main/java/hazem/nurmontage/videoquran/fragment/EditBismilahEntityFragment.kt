@@ -16,27 +16,9 @@ import hazem.nurmontage.videoquran.databinding.FragmentEditEntityBinding
 import hazem.nurmontage.videoquran.entity_timeline.Entity
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
-/**
- * Bottom-sheet fragment for editing Bismillah entity actions on the timeline.
- *
- * Provides action buttons for a Bismillah entity:
- * - **Color / Delete**: Standard entity operations
- * - **From Now / From The Start / Until Now / Until The End**: Trim operations
- * - **Animation**: Transition effects
- *
- * Hides buttons not applicable to Bismillah entities (Duplicate, Font, Icon,
- * Edit, Cut, scroll indicators).
- *
- * Uses [IBismilahEntityCallback] for all action callbacks. The [checkSplitEntity]
- * method enables/disables trim buttons based on cursor position relative to
- * the entity's bounds.
- *
- * Converted from EditBismilahEntityFragment.java (209 lines).
- */
 class EditBismilahEntityFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: EditBismilahEntityFragment? = null
 
         fun getInstance(
@@ -51,16 +33,10 @@ class EditBismilahEntityFragment : Fragment {
             return instance!!
         }
 
-        private const val DISABLED_COLOR = -8355712  // 0x808080 gray
-        private const val ENABLED_COLOR = -1          // 0xFFFFFF white
+        private const val DISABLED_COLOR = -8355712
+        private const val ENABLED_COLOR = -1
     }
 
-    /**
-     * Callback interface for Bismillah entity editing events.
-     * Originally defined in EditBismilahEntityFragment.java; the same interface
-     * was temporarily placed in [ColorBismilahFragment] and should now
-     * reference this canonical definition.
-     */
     interface IBismilahEntityCallback {
         fun fromNow()
         fun fromTheStart()
@@ -112,7 +88,6 @@ class EditBismilahEntityFragment : Fragment {
         val root: RelativeLayout = bind.root
 
         if (iEditEntityCallback != null && resourcesRef != null) {
-            // Hide buttons not applicable to Bismillah entities
             root.findViewById<View>(R.id.btn_duplicate).visibility = View.GONE
             root.findViewById<View>(R.id.btn_font).visibility = View.GONE
             root.findViewById<View>(R.id.btn_icon).visibility = View.GONE

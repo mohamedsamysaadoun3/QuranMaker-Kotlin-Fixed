@@ -13,19 +13,9 @@ import hazem.nurmontage.videoquran.adapter.ColorAdapter
 import hazem.nurmontage.videoquran.core.common.Common
 import hazem.nurmontage.videoquran.databinding.FragmentColorsBinding
 
-/**
- * Child fragment displaying a horizontal color palette for
- * iPad frame color selection inside [EditIpadFragment].
- *
- * Uses [ColorAdapter] with [Common.MUSLIM_COLORS] as the palette source.
- * Selection events are forwarded to the host via [EditIpadFragment.IIpadEditCallback].
- *
- * Converted from ColorsFragment.java.
- */
 class ColorsFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: ColorsFragment? = null
 
         fun getInstance(
@@ -39,28 +29,19 @@ class ColorsFragment : Fragment {
         }
     }
 
-    // ── State ────────────────────────────────────────────────────────
     private var adapter: ColorAdapter? = null
     private var binding: FragmentColorsBinding? = null
     private var iIpadEditCallback: EditIpadFragment.IIpadEditCallback? = null
     private var index: Int = 0
     private var recyclerView: RecyclerView? = null
+    private var iColorCallback: ColorAdapter.IColor? = null
 
-    private val iColorCallback = object : ColorAdapter.IColor {
-        override fun onColor(color: Int, position: Int) {
-            scrollToSelectedPosition()
-            iIpadEditCallback?.onClick(color, position)
-        }
-    }
-
-    // ── Constructors ─────────────────────────────────────────────────
     constructor()
     constructor(callback: EditIpadFragment.IIpadEditCallback?, index: Int) {
         this.iIpadEditCallback = callback
         this.index = index
     }
 
-    // ── Lifecycle ────────────────────────────────────────────────────
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -70,15 +51,19 @@ class ColorsFragment : Fragment {
         binding = bind
         val root: LinearLayout = bind.root
 
+        iColorCallback = object : ColorAdapter.IColor {
+            override fun onColor(color: Int, position: Int) {
+                scrollToSelectedPosition()
+                iIpadEditCallback?.onClick(color, position)
+            }
+        }
+
         recyclerView = root.findViewById(R.id.rv_color)
         adapter = ColorAdapter(iColorCallback, Common.MUSLIM_COLORS, index)
-
-        recyclerView?.apply {
-            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-            itemAnimator = null
-            setHasFixedSize(true)
-            this@ColorsFragment.adapter?.let { adapter = it }
-        }
+        recyclerView?.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        recyclerView?.itemAnimator = null
+        recyclerView?.setHasFixedSize(true)
+        recyclerView?.adapter = adapter
 
         try {
             if (index > 3) {
@@ -90,7 +75,6 @@ class ColorsFragment : Fragment {
         return root
     }
 
-    // ── Public helpers ───────────────────────────────────────────────
     fun scrollToSelectedPosition() {
         val lm = recyclerView?.layoutManager as? LinearLayoutManager ?: return
         adapter?.let { adp ->
@@ -101,10 +85,10 @@ class ColorsFragment : Fragment {
         }
     }
 
-    // ── Cleanup ──────────────────────────────────────────────────────
     override fun onDestroyView() {
         super.onDestroyView()
         instance = null
         binding = null
+        iColorCallback = null
     }
 }

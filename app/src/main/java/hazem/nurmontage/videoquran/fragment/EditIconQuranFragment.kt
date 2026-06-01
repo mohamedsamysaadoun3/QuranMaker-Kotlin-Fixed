@@ -12,22 +12,9 @@ import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.adapter.IconQuranAdabters
 import hazem.nurmontage.videoquran.databinding.FragmentFontBinding
 
-/**
- * Bottom-sheet fragment for selecting a Quran reciter icon overlay
- * (Hafs, Shamerli, Nour Hode, Amiri, etc.).
- *
- * Displays a horizontal RecyclerView of Quran icon thumbnails via
- * [IconQuranAdabters]. The user can select an icon, confirm with
- * "Done", or cancel and revert to the previously selected icon.
- *
- * The singleton pattern ensures only one instance exists at a time.
- *
- * Converted from EditIconQuranFragment.java (107 lines).
- */
 class EditIconQuranFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: EditIconQuranFragment? = null
 
         fun getInstance(callback: IQuranIconCallback?, icon: String?): EditIconQuranFragment {
@@ -38,9 +25,6 @@ class EditIconQuranFragment : Fragment {
         }
     }
 
-    /**
-     * Callback interface for Quran icon selection events.
-     */
     interface IQuranIconCallback {
         fun add(icon: String)
         fun onCancel(lastIcon: String)

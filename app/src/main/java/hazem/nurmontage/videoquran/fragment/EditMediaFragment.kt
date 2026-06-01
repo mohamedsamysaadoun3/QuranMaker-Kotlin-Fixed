@@ -19,30 +19,9 @@ import hazem.nurmontage.videoquran.model.EffectAudio
 import hazem.nurmontage.videoquran.utils.MyPreferences
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
-/**
- * Fragment that provides the horizontal toolbar of audio editing actions:
- * Delete, Duplicate, Reverb, Enhance, Noise Removal, Echo, Volume,
- * Fade, Speed, and Cut.
- *
- * The toolbar also visually highlights active effects on their buttons.
- * Each action delegates to [IEditMediaCallback] which is implemented by
- * the host Activity (typically EngineActivity).
- *
- * Architecture decisions:
- * - Singleton pattern preserved from original for Fragment transaction reuse.
- * - Button highlight state is refreshed via [updateBtn] on creation and
- *   after each effect change.
- * - Scroll position of the horizontal toolbar is saved/restored via
- *   [MyPreferences] so it persists across fragment navigations.
- * - Cut button is only enabled when the cursor is within the audio entity's
- *   time bounds.
- *
- * Converted from EditMediaFragment.java.
- */
 class EditMediaFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: EditMediaFragment? = null
 
         fun getInstance(
@@ -58,11 +37,6 @@ class EditMediaFragment : Fragment {
         }
     }
 
-    /**
-     * Callback interface for audio editing actions.
-     * The host Activity implements this to handle effect changes,
-     * preview playback, and entity manipulation.
-     */
     interface IEditMediaCallback {
         fun echoEffect()
         fun enhanceVoice()
@@ -85,7 +59,6 @@ class EditMediaFragment : Fragment {
         fun volumeEffect()
     }
 
-    // ── State ────────────────────────────────────────────────────────
     private var btnCut: LinearLayout? = null
     private var btnEcho: LinearLayout? = null
     private var btnEnhanceVoice: LinearLayout? = null
@@ -102,8 +75,8 @@ class EditMediaFragment : Fragment {
     private var resourcesRef: Resources? = null
     private var tvCut: TextCustumFont? = null
 
-    // ── Constructors ─────────────────────────────────────────────────
     constructor()
+
     constructor(
         callback: IEditMediaCallback?,
         resources: Resources?,
@@ -116,7 +89,6 @@ class EditMediaFragment : Fragment {
         this.posCursor = posCursor
     }
 
-    // ── Lifecycle ────────────────────────────────────────────────────
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -134,14 +106,12 @@ class EditMediaFragment : Fragment {
         val scrollView: HorizontalScrollView = root.findViewById(R.id.view_scroll)
         btnCut = root.findViewById(R.id.btn_cut)
 
-        // Restore horizontal scroll position
         val scrollX = MyPreferences.getScrollX(requireContext())
         if (scrollX != 0) {
             MyPreferences.putScrollX(requireContext(), 0)
             scrollView.post { scrollView.scrollTo(scrollX, 0) }
         }
 
-        // Scroll direction indicators
         val btnShowLeft: ImageView = root.findViewById(R.id.btn_show_left)
         val btnShowRight: ImageView = root.findViewById(R.id.btn_show_right)
 
@@ -158,7 +128,6 @@ class EditMediaFragment : Fragment {
             }
         }
 
-        // Set button labels with custom font
         (root.findViewById(R.id.tv_enhance) as TextCustumFont)
             .setText(resourcesRef?.getString(R.string.enhance))
         (root.findViewById(R.id.tv_delete) as TextCustumFont)
@@ -181,7 +150,6 @@ class EditMediaFragment : Fragment {
         tvCut = root.findViewById(R.id.tv_cut) as TextCustumFont
         tvCut?.setText(resourcesRef?.getString(R.string.cut))
 
-        // ── Click Listeners ──────────────────────────────────────────
         root.findViewById<View>(R.id.btn_delete).setOnClickListener {
             iEditMediaCallback?.onDelete()
         }
@@ -249,19 +217,12 @@ class EditMediaFragment : Fragment {
             iEditMediaCallback?.onCut()
         }
 
-        // ── Visual state ─────────────────────────────────────────────
         updateBtn()
         initCheckSplit(entitySelect!!, posCursor)
 
         return root
     }
 
-    // ── Public helpers ───────────────────────────────────────────────
-
-    /**
-     * Update the visual highlight state of all effect buttons.
-     * Active effects get a highlighted background; inactive ones are transparent.
-     */
     fun updateBtn() {
         try {
             val effect = entitySelect?.effectAudio ?: return
@@ -290,26 +251,20 @@ class EditMediaFragment : Fragment {
         }
     }
 
-    /**
-     * Initial check for whether the cursor position allows splitting.
-     */
     fun initCheckSplit(entityAudio: EntityAudio, posCursor: Float) {
         try {
             if (entityAudio.rect.left <= posCursor && entityAudio.rect.right >= posCursor) {
                 btnCut?.isClickable = true
-                tvCut?.setTextColor(-0x1) // white
+                tvCut?.setTextColor(-0x1)
                 ivCut?.setColorFilter(-0x1, PorterDuff.Mode.SRC_IN)
             }
-            tvCut?.setTextColor(-0x7F7F80) // gray
+            tvCut?.setTextColor(-0x7F7F80)
             ivCut?.setColorFilter(-0x7F7F80, PorterDuff.Mode.SRC_IN)
             btnCut?.isClickable = false
         } catch (_: Exception) {
         }
     }
 
-    /**
-     * Re-check split availability when the selected entity or cursor changes.
-     */
     fun checkSplit(entityAudio: EntityAudio?, posCursor: Float) {
         if (entityAudio == null) return
         entitySelect = entityAudio
@@ -327,7 +282,6 @@ class EditMediaFragment : Fragment {
         }
     }
 
-    // ── Cleanup ──────────────────────────────────────────────────────
     override fun onDestroyView() {
         fragmentBinding = null
         instance = null
