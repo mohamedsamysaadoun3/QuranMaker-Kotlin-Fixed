@@ -12,6 +12,7 @@ import android.graphics.RectF
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.internal.view.SupportMenu
 import androidx.core.view.ViewCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -23,16 +24,6 @@ import hazem.nurmontage.videoquran.utils.LocaleHelper
 import hazem.nurmontage.videoquran.utils.ScreenUtils
 import java.util.concurrent.ExecutionException
 
-/**
- * Custom view that displays a crop hint overlay with an arrow
- * pointing from a crop rectangle on a background image to an
- * iPad/iPod illustration.
- *
- * The hint text is localized (Arabic/English) and the background
- * image is loaded asynchronously via Glide.
- *
- * Originally: CropViewHint.java (194 lines)
- */
 class CropViewHint @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
@@ -40,7 +31,7 @@ class CropViewHint @JvmOverloads constructor(
 
     private var arrowHeadSize: Int = 0
     private val arrowPaint: Paint = Paint().apply {
-        color = 0xFFFF0000.toInt() // SupportMenu.CATEGORY_MASK
+        color = SupportMenu.CATEGORY_MASK
         style = Paint.Style.FILL
         isAntiAlias = true
     }
@@ -61,7 +52,7 @@ class CropViewHint @JvmOverloads constructor(
     private val imagePaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var ipadBitmap: Bitmap? = null
     private val linePaint: Paint = Paint().apply {
-        color = 0xFFFF0000.toInt() // SupportMenu.CATEGORY_MASK
+        color = SupportMenu.CATEGORY_MASK
         strokeWidth = 5.0f
         style = Paint.Style.STROKE
         isAntiAlias = true
@@ -75,7 +66,7 @@ class CropViewHint @JvmOverloads constructor(
     private var y_text: Float = 0f
 
     init {
-        textPaint.color = -1 // white
+        textPaint.color = -1
         if (LocaleHelper.getLanguage(context) == "ar") {
             mTittle = "تحكم في شاشة الآيبود"
             textPaint.typeface = Typeface.createFromAsset(resources.assets, "fonts/ReadexPro_Medium.ttf")
@@ -128,7 +119,7 @@ class CropViewHint @JvmOverloads constructor(
                     val cropHeight = bmp.height * 0.43f
                     val rect = RectF(cropLeft, cropTop, cropLeft + cropWidth, cropTop + cropHeight)
                     cropRect = rect
-                    radius = Math.min(rect.width(), rect.height()) * 0.10800001f
+                    radius = (Math.min(rect.width(), rect.height()) * 0.10800001f).toInt().toFloat()
                     arrowHeadSize = (bmp.width * 0.1f).toInt()
                     endX = (width - ipad.width).toFloat()
                     endY = (y_bitmap + bmp.height).toFloat()

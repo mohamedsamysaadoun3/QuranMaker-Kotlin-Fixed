@@ -135,12 +135,6 @@ class VideoFrameSelectorView @JvmOverloads constructor(
             var count = (max / (frameWidth + frameSpacing)).toInt()
             selectedFrameIndex = count
             selectedFrameIndex = Math.max(0, Math.min(count, frameCount - 1))
-            // Notify listener of frame selection (Java original set the listener but never
-            // called it — this fix makes the preview actually work)
-            val frame = getFrameBitmap()
-            if (frame != null) {
-                onFrameSelectedListener?.onFrameSelected(selectedFrameIndex, frame.getBitmap())
-            }
             invalidate()
             return true
         }

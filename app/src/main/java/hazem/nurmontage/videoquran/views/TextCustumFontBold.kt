@@ -3,23 +3,7 @@ package hazem.nurmontage.videoquran.views
 import android.content.Context
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
-import hazem.nurmontage.videoquran.views.TypefaceCache
 
-/**
- * Custom TextView that applies the ReadexPro Bold font automatically.
- *
- * Originally: TextCustumFontBold.java
- * Converted to: TextCustumFontBold.kt — with shared [TypefaceCache] optimization
- *
- * Used for headings, emphasis text, and titles throughout the app.
- * Appears in XML layouts as:
- * ```xml
- * <hazem.nurmontage.videoquran.views.text.TextCustumFontBold ... />
- * ```
- *
- * @see TypefaceCache
- * @see TextCustumFont
- */
 class TextCustumFontBold : AppCompatTextView {
 
     constructor(context: Context) : super(context) { init() }

@@ -17,19 +17,6 @@ import android.view.View
 import hazem.nurmontage.videoquran.utils.LocaleHelper
 import java.util.Locale
 
-/**
- * Custom progress bar that draws a square outline (rounded rectangle)
- * with a gradient-filled partial path showing progress.
- *
- * The outline path is constructed manually with arcs at each corner.
- * A [PathMeasure] is used to extract a segment of the outline path
- * proportional to the current progress, which is then drawn with a
- * gradient shader.
- *
- * Also displays a percentage label and a hint text in the center.
- *
- * Originally: SquareOutlineProgressBar.java (213 lines)
- */
 class SquareOutlineProgressBar @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -129,8 +116,6 @@ class SquareOutlineProgressBar @JvmOverloads constructor(
         progressShader = shader
         progressPaint.shader = shader
     }
-
-
 
     fun setMaxProgress(max: Int) {
         maxProgress = Math.max(1, max)

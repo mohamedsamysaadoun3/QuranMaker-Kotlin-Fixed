@@ -7,16 +7,6 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 
-/**
- * Interactive waveform visualization view.
- *
- * Renders an amplitude-based waveform with progress tracking. Bars before
- * the current progress position are drawn in white; bars after are drawn
- * in dark gray. Touch/drag interaction allows the user to seek by tapping
- * or sliding across the waveform.
- *
- * Ported from the original reverse-engineered Java implementation.
- */
 class WaveformView : View {
 
     private var amplitudes: IntArray = intArrayOf(

@@ -100,23 +100,6 @@ import hazem.nurmontage.videoquran.views.track.calculMaxTimeExt
 import hazem.nurmontage.videoquran.views.track.undoExt
 import hazem.nurmontage.videoquran.views.track.redoExt
 
-/**
- * Custom [FrameLayout] that serves as the main timeline track editor for the
- * Quran video maker. It displays audio, Quran verse, translation, and
- * Bismilah entities on a horizontal timeline with pinch-to-zoom, scroll/fling
- * gestures, entity selection, drag-to-move, and trim operations.
- *
- * Features:
- * - Horizontal timeline with time markers and playhead cursor
- * - Pinch-to-zoom scaling (0.09x – 8x)
- * - Scroll and fling gestures for timeline navigation
- * - Entity selection, multi-select, drag, and trim
- * - Undo/redo stacks for entity actions
- * - Auto-scroll during playback and trim operations
- * - Snap-to-edge and snap-to-entity alignment guides
- *
- * Converted from TrackEntityView.java (4,582 lines).
- */
 @Suppress("DEPRECATION")
 class TrackEntityView @JvmOverloads constructor(
     context: Context,
@@ -134,7 +117,6 @@ class TrackEntityView @JvmOverloads constructor(
         internal const val CLR_BTN_DEFAULT = -13421771
     }
 
-    // ── Callback interface ──────────────────────────────────────────────
 
     interface ITrimLineCallback {
         fun enableRedo(enabled: Boolean)
@@ -157,7 +139,6 @@ class TrackEntityView @JvmOverloads constructor(
         fun progress(show: Boolean)
     }
 
-    // ── Fields ────────────────────────────────────────────────────────
 
     internal var DETECT_LEFT_MOVE: Float = 0f
     internal var DETECT_RIGHT_MOVE: Float = 0f
@@ -273,7 +254,6 @@ class TrackEntityView @JvmOverloads constructor(
     internal var width_screen: Int = 0
     var entityY: Float = 0f
 
-    // ── Gesture listener (extracted from duplicated constructors) ─────
 
     private val gestureListener = object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(motionEvent: MotionEvent): Boolean {
@@ -386,7 +366,6 @@ class TrackEntityView @JvmOverloads constructor(
         }
     }
 
-    // ── Init ────────────────────────────────────────────────────────
 
     init {
         maxTime = -1
@@ -402,7 +381,6 @@ class TrackEntityView @JvmOverloads constructor(
         scroller = Scroller(context)
     }
 
-    // ── ScaleListener inner class ──────────────────────────────────────
 
     private inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
 
@@ -426,7 +404,6 @@ class TrackEntityView @JvmOverloads constructor(
         }
     }
 
-    // ── Auto-scroll initialization ──────────────────────────────────
 
     private fun initAutoScroll() {
         autoScrollHandler = Handler()
@@ -662,7 +639,6 @@ class TrackEntityView @JvmOverloads constructor(
         autoMoveRunnable = moveRunnable
     }
 
-    // ── Public API ──────────────────────────────────────────────────
 
     internal fun setupFade(entityAudio: EntityAudio) {
         // Empty — fade is handled by the audio entity
@@ -1252,7 +1228,6 @@ class TrackEntityView @JvmOverloads constructor(
         return deselectAllAudioItemsExt()
     }
 
-    // ── Missing public API methods for Java interop ──────────────────
 
     fun getDuration(): Int = duration
 

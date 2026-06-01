@@ -10,15 +10,6 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.view.ViewCompat
 
-/**
- * Custom view that draws a stylized cassette tape illustration.
- *
- * The cassette includes a body, shadow, label area, accent stripes,
- * two reels with inner gear patterns, and four corner screws.
- * A floor area is drawn below the cassette for a 3D standing effect.
- *
- * Originally: CassetteView.java (167 lines)
- */
 class CassetteView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -45,10 +36,8 @@ class CassetteView @JvmOverloads constructor(
         val w = width.toFloat()
         val h = height.toFloat()
 
-        // Sky background
         canvas.drawColor(Color.parseColor("#87CEEB"))
 
-        // Floor area (bottom 30%)
         val floorTop = 0.7f * h
         val floorPath = Path().apply {
             moveTo(0f, floorTop)
@@ -59,18 +48,18 @@ class CassetteView @JvmOverloads constructor(
         }
         canvas.drawPath(floorPath, paintFloor)
 
-        // Shadow (slightly offset behind body)
         val leftX = w * 0.1f
         val topY = h * 0.3f
         val rightX = 0.9f * w
-        val shadowRect = RectF(leftX, topY, rightX, floorTop)
+
+        // Shadow: offset right+down from body (Java: 0.12, 0.32, 0.92, 0.72)
+        val shadowRect = RectF(w * 0.12f, h * 0.32f, w * 0.92f, h * 0.72f)
         canvas.drawRoundRect(shadowRect, 20.0f, 20.0f, paintShadow)
 
-        // Body
+        // Body: covers left+top of shadow, shadow peeks out right+bottom
         val bodyRect = RectF(leftX, topY, rightX, floorTop)
         canvas.drawRoundRect(bodyRect, 20.0f, 20.0f, paintBody)
 
-        // Top accent stripe
         val accentTopRight = w * 0.85f
         val accentTopBottom = h * 0.35f
         val accentLeft = 0.15f * w
@@ -83,7 +72,6 @@ class CassetteView @JvmOverloads constructor(
         }
         canvas.drawPath(topAccent, paintAccent)
 
-        // Bottom accent stripe
         val accentBottomTop = h * 0.65f
         val bottomAccent = Path().apply {
             moveTo(leftX, floorTop)
@@ -94,18 +82,14 @@ class CassetteView @JvmOverloads constructor(
         }
         canvas.drawPath(bottomAccent, paintAccent)
 
-        // Label area (top strip)
         val labelLeft = 0.2f * w
         val labelRight = 0.8f * w
         canvas.drawRect(RectF(labelLeft, 0.36f * h, labelRight, 0.44f * h), paintLabel)
 
-        // Label text
         canvas.drawText(labelText, (w - paintText.measureText(labelText)) / 2.0f, 0.415f * h, paintText)
 
-        // Label area (bottom strip)
         canvas.drawRect(RectF(labelLeft, 0.48f * h, labelRight, 0.62f * h), paintLabel)
 
-        // Reels
         val reelRadius = h * 0.1f
         val innerRadius = reelRadius * 0.3f
         val outerRadius = reelRadius * 0.45f
@@ -118,7 +102,6 @@ class CassetteView @JvmOverloads constructor(
         canvas.drawCircle(rightReelX, reelY, reelRadius, paintReel)
         drawInnerGear(canvas, rightReelX, reelY, innerRadius, outerRadius, 8, paintHole)
 
-        // Screws
         val screwRadius = w * 0.015f
         val screwTopY = 0.34f * h
         val screwBottomY = h * 0.66f

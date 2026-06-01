@@ -47,34 +47,20 @@ import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.min
 
-/**
- * Custom View that renders a blurred background image with overlay Quran text entities,
- * iPad-style frames, progress bars, bismillah, surah names, and watermarks.
- *
- * Supports multi-touch gestures (pinch-to-scale, drag-to-move) for entity manipulation,
- * selection tools, and various iPad frame types (classic, neumorphic, cassette, heart, battery, etc.)
- *
- * Originally: BlurredImageView.java (4,688 lines)
- * Converted to: BlurredImageView.kt — faithful Kotlin conversion
- */
 class BlurredImageView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr), View.OnTouchListener {
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Companion object (static constants)
-    // ═══════════════════════════════════════════════════════════════════
 
     companion object {
         private const val SNAP_FORCE = 0.2f
         private const val SNAP_THRESHOLD = 30.0f
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Interface
-    // ═══════════════════════════════════════════════════════════════════
 
     interface IViewCallback {
         fun onDrawFinish()
@@ -86,9 +72,7 @@ class BlurredImageView @JvmOverloads constructor(
         fun onWattermark()
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Fields — all properties from the original Java class
-    // ═══════════════════════════════════════════════════════════════════
 
     internal var backgroundPaint: Paint = Paint()
         internal set
@@ -170,9 +154,7 @@ class BlurredImageView @JvmOverloads constructor(
     internal var wmScale: Float = 1.0f
     internal var wmTranslateY: Float = 0f
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Gesture listener — defined once, used by all constructors
-    // ═══════════════════════════════════════════════════════════════════
 
     private val gestureListener: GestureDetector.SimpleOnGestureListener =
         object : GestureDetector.SimpleOnGestureListener() {
@@ -232,17 +214,13 @@ class BlurredImageView @JvmOverloads constructor(
             }
         }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  init block — calls init()
-    // ═══════════════════════════════════════════════════════════════════
 
     init {
         init()
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  init() — initializes touch listeners, paints, and detectors
-    // ═══════════════════════════════════════════════════════════════════
 
     private fun init() {
         setOnTouchListener(this)
@@ -271,9 +249,7 @@ class BlurredImageView @JvmOverloads constructor(
         paintText.typeface = UtilsFileLast.loadFontFromAsset(getContext(), "fonts/arabic/NotoNaskhArabic.ttf")
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  entity_select with custom setter logic
-    // ═══════════════════════════════════════════════════════════════════
 
     fun setEntity_select(entityView: EntityView?) {
         if (this.entity_select != entityView) {
@@ -284,9 +260,7 @@ class BlurredImageView @JvmOverloads constructor(
 
     fun getEntity_select(): EntityView? = this.entity_select
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Simple getters and setters
-    // ═══════════════════════════════════════════════════════════════════
 
     fun isRemoveWattermark(): Boolean = this.isRemoveWattermark
     fun setRemoveWattermark(z: Boolean) { this.isRemoveWattermark = z }
@@ -325,9 +299,7 @@ class BlurredImageView @JvmOverloads constructor(
     fun getmCanvas_height(): Int = this.mCanvas_height
     fun getmCanvas_width(): Int = this.mCanvas_width
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Canvas dimension initialization
-    // ═══════════════════════════════════════════════════════════════════
 
     fun initCanvasDimension(i: Int, i2: Int, i3: Int) {
         if (i3 == ResizeType.SOCIAL_STORY.ordinal) {
@@ -346,9 +318,7 @@ class BlurredImageView @JvmOverloads constructor(
     fun getW(): Int = (width - paddingStart) - paddingEnd
     fun getH(): Int = (height - paddingTop) - paddingBottom
 
-    // ═══════════════════════════════════════════════════════════════════
     //  updatePosCanvas (both overloads)
-    // ═══════════════════════════════════════════════════════════════════
 
     fun updatePosCanvas(bitmap: Bitmap?) {
         if (bitmap == null) return
@@ -370,9 +340,7 @@ class BlurredImageView @JvmOverloads constructor(
 
     fun getProgress(): Float = this.progress
 
-    // ═══════════════════════════════════════════════════════════════════
     //  addEntity (all 4 overloads)
-    // ═══════════════════════════════════════════════════════════════════
 
     fun addEntity(quranEntity: QuranEntity) {
         this.quranEntities.add(quranEntity)
@@ -413,9 +381,7 @@ class BlurredImageView @JvmOverloads constructor(
     fun setColor_gradient(gradient: Gradient?) { this.color_gradient = gradient }
     fun colorIpad(): Int = this.color_ipad
 
-    // ═══════════════════════════════════════════════════════════════════
     //  changeColorIpad
-    // ═══════════════════════════════════════════════════════════════════
 
     fun changeColorIpad() {
         if (getColor_gradient() != null) {
@@ -425,9 +391,7 @@ class BlurredImageView @JvmOverloads constructor(
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  setColorIpad(int) — per-IpadType color logic
-    // ═══════════════════════════════════════════════════════════════════
 
     fun setColorIpad(i: Int) {
         setColor_gradient(null)
@@ -469,9 +433,7 @@ class BlurredImageView @JvmOverloads constructor(
         this.paintText.color = this.paintLecture.color
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  setColorIpad(Gradient) — gradient with per-IpadType color logic
-    // ═══════════════════════════════════════════════════════════════════
 
     fun setColorIpad(gradient: Gradient) {
         setColor_gradient(gradient)
@@ -527,9 +489,7 @@ class BlurredImageView @JvmOverloads constructor(
         this.paintText.color = this.paintLecture.color
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  setIcon
-    // ═══════════════════════════════════════════════════════════════════
 
     fun setIcon(str: String, vectorDrawable: VectorDrawable) {
         for (quranEntity in this.quranEntities) {
@@ -543,9 +503,7 @@ class BlurredImageView @JvmOverloads constructor(
         invalidate()
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  setTypeface
-    // ═══════════════════════════════════════════════════════════════════
 
     fun setTypeface(typeface: Typeface, str: String) {
         val entityView = this.entity_select
@@ -567,9 +525,7 @@ class BlurredImageView @JvmOverloads constructor(
         invalidate()
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  setPreset
-    // ═══════════════════════════════════════════════════════════════════
 
     fun setPreset(ayaTextPreset: AyaTextPreset) {
         for (quranEntity in this.quranEntities) {
@@ -584,9 +540,7 @@ class BlurredImageView @JvmOverloads constructor(
         invalidate()
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  setTrslPreset
-    // ═══════════════════════════════════════════════════════════════════
 
     fun setTrslPreset(ayaTextPreset: AyaTextPreset) {
         for (t in this.translationEntities) {
@@ -595,9 +549,7 @@ class BlurredImageView @JvmOverloads constructor(
         invalidate()
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  setColorAya
-    // ═══════════════════════════════════════════════════════════════════
 
     fun setColorAya(i: Int) {
         setClr_aya(i)
@@ -613,9 +565,7 @@ class BlurredImageView @JvmOverloads constructor(
         invalidate()
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  setColorTrsl
-    // ═══════════════════════════════════════════════════════════════════
 
     fun setColorTrsl(i: Int) {
         setClr_trsl(i)
@@ -625,9 +575,7 @@ class BlurredImageView @JvmOverloads constructor(
         invalidate()
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  applyAll
-    // ═══════════════════════════════════════════════════════════════════
 
     fun applyAll(f: Float, rectF: RectF, i: Int, i2: Int) {
         val entityView = this.entity_select ?: return
@@ -660,40 +608,30 @@ class BlurredImageView @JvmOverloads constructor(
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  setCurrentTime
-    // ═══════════════════════════════════════════════════════════════════
 
     fun setCurrentTime(str: String, str2: String) {
         this.currentTime = str
         this.remainingTime = "-$str2"
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  radius_square
-    // ═══════════════════════════════════════════════════════════════════
 
     fun getRadius_square(): Int = this.radius_square
     fun setRadius_square(i: Int) { this.radius_square = i }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  setBitmapBlured
-    // ═══════════════════════════════════════════════════════════════════
 
     fun setBitmapBlured(bitmap: Bitmap?) { this.bitmapBlured = bitmap }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  setBitmapSquare
-    // ═══════════════════════════════════════════════════════════════════
 
     fun setBitmapSquare(bitmap: Bitmap?) {
         if (bitmap == null || bitmap.isRecycled) return
         this.bitmapSquare = bitmap
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  setBitmap (3 overloads) and updateBitmap (2 overloads)
-    // ═══════════════════════════════════════════════════════════════════
 
     fun setBitmap(bitmap: Bitmap?, bitmap2: Bitmap?, i: Int, i2: Int, i3: Int, rect: Rect?) {
         this.bitmapBlured = bitmap
@@ -777,10 +715,8 @@ class BlurredImageView @JvmOverloads constructor(
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  getIpad_rect, setmIpadType, changeTypeIpad, getRectSquare,
     //  getRectFAya, getRectFProgress, getRectFSurahName
-    // ═══════════════════════════════════════════════════════════════════
 
     fun getIpad_rect(): RectF? = this.ipad_rect
 
@@ -804,15 +740,11 @@ class BlurredImageView @JvmOverloads constructor(
     fun getRectFSurahName(): RectF? = this.rectFSurahName
     fun getRectFLecture(): RectF? = this.rectFLecture
 
-    // ═══════════════════════════════════════════════════════════════════
     //  getBitmapBlured
-    // ═══════════════════════════════════════════════════════════════════
 
     fun getBitmapBlured(): Bitmap? = this.bitmapBlured
 
-    // ═══════════════════════════════════════════════════════════════════
     //  reset, resetWatermark, animWatermark
-    // ═══════════════════════════════════════════════════════════════════
 
     fun reset() {
         val bitmap = this.bitmapBlured
@@ -841,17 +773,13 @@ class BlurredImageView @JvmOverloads constructor(
         invalidate()
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  setNotDraw, setiViewCallback
-    // ═══════════════════════════════════════════════════════════════════
 
     fun setNotDraw(z: Boolean) { this.isNotDraw = z }
 
     fun setiViewCallback(callback: IViewCallback?) { this.iViewCallback = callback }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Bismilah and SurahName entity helpers
-    // ═══════════════════════════════════════════════════════════════════
 
     fun getmIsti3adhaEntity(): BismilahEntity? = this.mIsti3adhaEntity
 
@@ -867,9 +795,7 @@ class BlurredImageView @JvmOverloads constructor(
 
     fun getSurahNameEntity(): SurahNameEntity? = this.surahNameEntity
 
-    // ═══════════════════════════════════════════════════════════════════
     //  updateAlignmentSurah
-    // ═══════════════════════════════════════════════════════════════════
 
     fun updateAlignmentSurah(textValue: String): Layout.Alignment {
         if (this.mIpadType == IpadType.IPAD_NEOMORPHIC.ordinal || this.mIpadType == IpadType.CASSET.ordinal || this.mIpadType == IpadType.CASSET_IMG.ordinal || this.mIpadType == IpadType.CASSET_IMG_BLUR.ordinal) {
@@ -904,10 +830,8 @@ class BlurredImageView @JvmOverloads constructor(
     fun isNotDraw(): Boolean = isNotDraw
     fun isOnScale(): Boolean = isOnScale
 
-    // ═══════════════════════════════════════════════════════════════════
     //  findEntityAtPoint — checks entities in the original Java order:
     //  surahNameEntity → mIsti3adhaEntity → bismilahEntity → quranEntities → translationEntities
-    // ═══════════════════════════════════════════════════════════════════
 
     private fun findEntityAtPoint(x: Float, y: Float): EntityView? {
         val surahName = this.surahNameEntity
@@ -937,9 +861,7 @@ class BlurredImageView @JvmOverloads constructor(
         return null
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  updateSelectionOnTap — takes MotionEvent as in the original
-    // ═══════════════════════════════════════════════════════════════════
 
     fun updateSelectionOnTap(motionEvent: MotionEvent) {
         setEntity_select(findEntityAtPoint(motionEvent.x, motionEvent.y))
@@ -955,9 +877,7 @@ class BlurredImageView @JvmOverloads constructor(
         invalidate()
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Inner class: MoveListener
-    // ═══════════════════════════════════════════════════════════════════
 
     private inner class MoveListener : MoveGestureDetector.SimpleOnMoveGestureListener() {
         override fun onMove(detector: MoveGestureDetector): Boolean {
@@ -972,9 +892,7 @@ class BlurredImageView @JvmOverloads constructor(
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Inner class: ScaleListener
-    // ═══════════════════════════════════════════════════════════════════
 
     private inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
@@ -1002,10 +920,8 @@ class BlurredImageView @JvmOverloads constructor(
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  onTouch — faithfully reproduces the original's coordinate
     //  translation, single-finger scale, and ACTION_UP logic
-    // ═══════════════════════════════════════════════════════════════════
 
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
         if (motionEvent == null) {
@@ -1076,10 +992,8 @@ class BlurredImageView @JvmOverloads constructor(
         return this.gestureDetector!!.onTouchEvent(motionEvent)
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  handleTranslate — includes snap-to-center logic with
     //  SNAP_THRESHOLD=30.0f and SNAP_FORCE=0.2f
-    // ═══════════════════════════════════════════════════════════════════
 
     fun handleTranslate(pointF: PointF) {
         if (this.entity_select != null && abs(pointF.x) <= 80.0f && abs(pointF.y) <= 80.0f) {
@@ -1131,10 +1045,8 @@ class BlurredImageView @JvmOverloads constructor(
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  distanceToCenter — ORIGINAL signature (float x, float y),
     //  calculates distance from (x, y) to entity_select center
-    // ═══════════════════════════════════════════════════════════════════
 
     fun distanceToCenter(x: Float, y: Float): Float {
         return hypot(
@@ -1143,9 +1055,7 @@ class BlurredImageView @JvmOverloads constructor(
         ).toFloat()
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  drawLineHelper — draws snap-to-center guide lines
-    // ═══════════════════════════════════════════════════════════════════
 
     fun drawLineHelper(canvas: Canvas) {
         if (this.showCenterLineX || this.showCenterLineY) {
@@ -1164,9 +1074,7 @@ class BlurredImageView @JvmOverloads constructor(
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  onDraw — delegates to BlurredRenderer.onDrawExt()
-    // ═══════════════════════════════════════════════════════════════════
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)

@@ -17,24 +17,12 @@ import android.view.View
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.utils.LocaleHelper
 
-/**
- * Custom discrete seek bar with labeled tick marks and gradient progress.
- *
- * Displays a horizontal track with discrete tick positions, each labeled
- * from a string array resource. The thumb snaps to the nearest tick
- * position on release. Supports RTL layout for Arabic.
- *
- * The gradient colors are reversed for RTL locales.
- *
- * Originally: CustomDiscreteSeekBar.java (391 lines)
- */
 class CustomDiscreteSeekBar @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    /** Callback for seek bar progress changes. */
     interface OnProgressChangeListener {
         fun onProgressChanged(seekBar: CustomDiscreteSeekBar, index: Int, label: String, fromUser: Boolean)
         fun onStartTrackingTouch(seekBar: CustomDiscreteSeekBar)

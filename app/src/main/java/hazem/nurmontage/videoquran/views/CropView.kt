@@ -16,18 +16,6 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import hazem.nurmontage.videoquran.core.common.Common
 import hazem.nurmontage.videoquran.utils.UtilsBitmap
 
-/**
- * Custom view that displays a bitmap with a movable/scaleable crop rectangle overlay.
- *
- * Originally: CropView.java – faithfully ported from the JADX decompilation.
- *
- * Features:
- *   - Displays the source bitmap scaled to fit the view
- *   - Shows a draggable crop rectangle with rounded corners
- *   - Supports pinch-to-scale the crop region via ScaleGestureDetector
- *   - Supports dragging the crop region with single-finger touch
- *   - Plays a hint animation (pulsing crop rect) on first set
- */
 class CropView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -42,14 +30,9 @@ class CropView @JvmOverloads constructor(
         private const val HINT_SCALE_MIN_FACTOR = 0.85f
     }
 
-    // Callback interface
     interface ICropCallback {
         fun onSizeChange()
     }
-
-    // ──────────────────────────────────────────────
-    //  Fields
-    // ──────────────────────────────────────────────
 
     private var bitmap: Bitmap? = null
     private val bitmapPaint: Paint
@@ -87,10 +70,6 @@ class CropView @JvmOverloads constructor(
     private var startY: Float = 0f
     private var touchTolerance: Int = 10
 
-    // ──────────────────────────────────────────────
-    //  Public getters / setters
-    // ──────────────────────────────────────────────
-
     fun setiCropCallback(callback: ICropCallback?) {
         this.iCropCallback = callback
     }
@@ -107,7 +86,6 @@ class CropView @JvmOverloads constructor(
 
     fun getmDrawingY(): Float = mDrawingY
 
-    /** Returns the crop rect in bitmap coordinates as a [Rect]. */
     fun getRectSquare(): Rect {
         return Rect(
             Math.round(cropRect.left / scale),
@@ -117,14 +95,6 @@ class CropView @JvmOverloads constructor(
         )
     }
 
-    /**
-     * Set the bitmap and crop rectangle, computing scale to fit the view.
-     *
-     * @param bmp     The source bitmap
-     * @param rect    The initial crop rectangle (in bitmap coordinates)
-     * @param radiusPx Corner radius in pixels
-     * @param isFlag  If true, skip the hint animation
-     */
     fun setBitmap(bmp: Bitmap, rect: Rect, radiusPx: Int, isFlag: Boolean) {
         this.bitmap = bmp
         this.radius = radiusPx
@@ -168,14 +138,6 @@ class CropView @JvmOverloads constructor(
         startHintAnimation()
     }
 
-    /**
-     * Set the bitmap for "last" positioning mode (full-width, centered vertically).
-     *
-     * @param bmp     The source bitmap
-     * @param rect    The crop rectangle (in view coordinates)
-     * @param radiusPx Corner radius in pixels
-     * @param isFlag  If true, skip the hint animation
-     */
     fun setBitmapLast(bmp: Bitmap, rect: Rect, radiusPx: Int, isFlag: Boolean) {
         this.bitmap = bmp
         this.cropRect = RectF(rect.left.toFloat(), rect.top.toFloat(), rect.right.toFloat(), rect.bottom.toFloat())
@@ -203,34 +165,28 @@ class CropView @JvmOverloads constructor(
         startHintAnimation()
     }
 
-    /** Normalized Y position of the crop rect (0..1). */
     fun getmY(): Float {
         if (bitmap == null) return 0.4f
         return Math.max(cropRect.top / mHeight, 0f)
     }
 
-    /** Normalized X position of the crop rect (0..1). */
     fun getmX(): Float {
         if (bitmap == null) return 0.4f
         return Math.max(cropRect.left / mWidth, 0f)
     }
 
-    /** Normalized width of the crop rect (0..1). */
     fun getmW(): Float {
         if (bitmap == null) return 1.0f
         return cropRect.width() / mWidth
     }
 
-    /** Normalized height of the crop rect (0..1). */
     fun getmH(): Float {
         if (bitmap == null) return 1.0f
         return cropRect.height() / mHeight
     }
 
-    /** Returns the crop rectangle in view coordinates. */
     fun getCropRect(): RectF = cropRect
 
-    /** Returns the cropped bitmap with round corners applied. */
     fun getCroppedBitmap(): Bitmap? {
         val bmp = bitmap ?: return null
 
@@ -251,10 +207,6 @@ class CropView @JvmOverloads constructor(
         )
     }
 
-    // ──────────────────────────────────────────────
-    //  Init
-    // ──────────────────────────────────────────────
-
     init {
         this.matrix = Matrix()
         bitmapPaint = Paint().apply {
@@ -262,7 +214,7 @@ class CropView @JvmOverloads constructor(
             isFilterBitmap = true
         }
         cropPaint = Paint().apply {
-            color = -15605  // 0xFFFFC313 — gold/yellow color
+            color = -15605
             style = Paint.Style.STROKE
             strokeWidth = 5.0f
             isAntiAlias = true
@@ -270,10 +222,6 @@ class CropView @JvmOverloads constructor(
         cropRect = RectF()
         scaleGestureDetector = ScaleGestureDetector(context, ScaleListener())
     }
-
-    // ──────────────────────────────────────────────
-    //  Hint Animation
-    // ──────────────────────────────────────────────
 
     private fun startHintAnimation() {
         hintAnimator?.let { if (it.isRunning) it.cancel() }
@@ -304,10 +252,6 @@ class CropView @JvmOverloads constructor(
         animator.start()
     }
 
-    // ──────────────────────────────────────────────
-    //  Drawing
-    // ──────────────────────────────────────────────
-
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
     }
@@ -324,37 +268,29 @@ class CropView @JvmOverloads constructor(
         canvas.restore()
     }
 
-    // ──────────────────────────────────────────────
-    //  Crop Rect Movement
-    // ──────────────────────────────────────────────
-
     private fun moveCropRect(dx: Float, dy: Float) {
         var left = cropRect.left + dx
         var top = cropRect.top + dy
         var right = cropRect.right + dx
         var bottom = cropRect.bottom + dy
 
-        // Horizontal bounds
         if (left < 0f) {
             right = cropRect.width()
             left = 0f
         }
-        if (right > mWidth) {
-            left = mWidth - cropRect.width()
-            right = mWidth
-        }
-
-        // Vertical bounds
         if (top < 0f) {
             bottom = cropRect.height()
             top = 0f
+        }
+        if (right > mWidth) {
+            left = mWidth - cropRect.width()
+            right = mWidth
         }
         if (bottom > mHeight) {
             top = mHeight - cropRect.height()
             bottom = mHeight
         }
 
-        // Enforce minimum width
         if (right - left < minW) {
             if (dx > 0f) {
                 right = left + minW
@@ -363,7 +299,6 @@ class CropView @JvmOverloads constructor(
             }
         }
 
-        // Enforce minimum height
         if (bottom - top < minH) {
             if (dy > 0f) {
                 bottom = top + minH
@@ -375,10 +310,6 @@ class CropView @JvmOverloads constructor(
         cropRect.set(left, top, right, bottom)
     }
 
-    // ──────────────────────────────────────────────
-    //  Scale Listener
-    // ──────────────────────────────────────────────
-
     private inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
 
         override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
@@ -387,9 +318,7 @@ class CropView @JvmOverloads constructor(
             return true
         }
 
-        override fun onScaleEnd(detector: ScaleGestureDetector) {
-            // no-op
-        }
+        override fun onScaleEnd(detector: ScaleGestureDetector) {}
 
         override fun onScale(detector: ScaleGestureDetector): Boolean {
             var scaleFactor = detector.scaleFactor
@@ -427,12 +356,7 @@ class CropView @JvmOverloads constructor(
         }
     }
 
-    // ──────────────────────────────────────────────
-    //  Touch Handling
-    // ──────────────────────────────────────────────
-
     override fun onTouchEvent(motionEvent: MotionEvent): Boolean {
-        // Cancel hint animation on any touch
         hintAnimator?.let { if (it.isRunning) it.cancel() }
         hintAnimationPlayed = true
 

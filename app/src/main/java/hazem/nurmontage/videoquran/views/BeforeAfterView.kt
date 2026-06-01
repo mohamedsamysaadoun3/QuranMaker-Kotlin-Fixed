@@ -24,19 +24,6 @@ import hazem.nurmontage.videoquran.utils.LocaleHelper
 import hazem.nurmontage.videoquran.utils.ScreenUtils
 import java.util.concurrent.ExecutionException
 
-/**
- * Custom view that displays a before/after image comparison with a
- * draggable divider. The left side shows the "before" image and the
- * right side shows the "after" image, with labels drawn on each.
- *
- * A hint animation oscillates the divider on first display until
- * the user touches the view. Touch drag moves the divider position.
- *
- * Also supports a text-only mode where a custom text string is
- * clipped instead of the after image.
- *
- * Originally: BeforeAfterView.java (286 lines)
- */
 class BeforeAfterView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
