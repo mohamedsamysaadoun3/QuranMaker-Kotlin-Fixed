@@ -1,11 +1,5 @@
 package hazem.nurmontage.videoquran.constant
 
-/**
- * Enum representing the canvas aspect ratio / resize mode for the video project.
- *
- * Each type carries a float value representing the width-to-height ratio
- * used by the rendering engine to determine the output dimensions.
- */
 enum class ResizeType(val value: Float) {
     IMAGE(0.0f),
     FREE(-1.0f),

@@ -2,15 +2,6 @@ package hazem.nurmontage.videoquran.core.common
 
 import android.graphics.RectF
 
-/**
- * Immutable snapshot of an [Entity][hazem.nurmontage.videoquran.entity_timeline.Entity]'s
- * geometric and timing state, used by the undo/redo stack in the timeline editor.
- *
- * Each instance captures the entity's bounding rect, offsets, start/end times,
- * and left/right edge positions at the moment the snapshot was taken.
- *
- * Originally: `hazem.nurmontage.videoquran.common.StackEntity`
- */
 class StackEntity(
     val rectF: RectF,
     val offset: Float,

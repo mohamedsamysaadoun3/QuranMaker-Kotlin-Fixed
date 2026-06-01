@@ -1,20 +1,5 @@
 package hazem.nurmontage.videoquran.constant
 
-/**
- * Enum representing all available transition animation types
- * for Quran verse and Bismilah entities on the timeline.
- *
- * Each value carries a string identifier that maps to the
- * corresponding FFmpeg/GL transition filter name. The string
- * values match the original Java constant exactly for
- * serialization and FFmpeg command compatibility.
- *
- * Duplicated from [Constants.TransitionType] as a standalone
- * file for convenient per-import access (same pattern as
- * [AyaTextPreset], [ResizeType], etc.).
- *
- * Converted from TransitionType.java (47 lines).
- */
 enum class TransitionType(val value: String) {
     NONE("none"),
     FADE("fade"),

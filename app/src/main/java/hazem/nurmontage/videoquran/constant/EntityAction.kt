@@ -1,12 +1,5 @@
 package hazem.nurmontage.videoquran.constant
 
-/**
- * Enum representing all possible actions that can be performed on
- * timeline entities (Quran ayahs, translations, media clips, etc.).
- *
- * Used by the undo/redo system and the entity editing fragments
- * to identify which property of an entity was modified.
- */
 enum class EntityAction {
     SPLIT,
     TRIM,

@@ -5,15 +5,6 @@ import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.constant.ResizeType
 import hazem.nurmontage.videoquran.model.ItemDimension
 
-/**
- * Factory for dimension presets used in the resize picker.
- *
- * Provides the complete list of aspect-ratio presets (TikTok, YouTube,
- * Instagram, etc.) with their display names, icons, [ResizeType] values,
- * and pixel dimensions.
- *
- * Converted from DataDimension.java (21 lines).
- */
 object DataDimension {
 
     fun getALl(resources: Resources): List<ItemDimension> = arrayListOf(

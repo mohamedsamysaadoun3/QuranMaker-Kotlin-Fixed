@@ -10,21 +10,7 @@ import hazem.nurmontage.videoquran.core.common.StackEntity
 import hazem.nurmontage.videoquran.model.EntityView
 import java.util.Stack
 
-/**
- * Abstract base class for every visual block on the timeline editor.
- *
- * Manages the block's bounding rectangle, trim handles, selection state,
- * undo/redo stack, scale factor, fade durations, and the rendering pipeline.
- * Concrete subclasses must implement drawing, hit-testing, and position
- * mutation methods.
- *
- * Originally: `hazem.nurmontage.videoquran.entity_timeline.Entity`
- */
 abstract class Entity(secondInScreen: Float) {
-
-    // ══════════════════════════════════════════════
-    //  Protected state (shared with subclasses)
-    // ══════════════════════════════════════════════
 
     open var rect: RectF = RectF()
     protected var rectFLeft: RectF = RectF()
@@ -47,10 +33,6 @@ abstract class Entity(secondInScreen: Float) {
         internal set
     open var indexEndThumbnail: Int = 0
         internal set
-
-    // ══════════════════════════════════════════════
-    //  Private state
-    // ══════════════════════════════════════════════
 
     private var audioId: String? = null
     private var currentStackEntity: StackEntity? = null
@@ -83,10 +65,6 @@ abstract class Entity(secondInScreen: Float) {
     private val undoRect: Stack<StackEntity> = Stack()
     private val rectList: Stack<StackEntity> = Stack()
 
-    // ══════════════════════════════════════════════
-    //  Abstract contract
-    // ══════════════════════════════════════════════
-
     abstract fun contains(point: PointF): Boolean
     abstract fun draw(canvas: Canvas)
     abstract fun draw(canvas: Canvas, w: Int, h: Int)
@@ -104,39 +82,19 @@ abstract class Entity(secondInScreen: Float) {
 
     open fun release() {}
 
-    // ══════════════════════════════════════════════
-    //  Entity group
-    // ══════════════════════════════════════════════
-
     fun getEntitiesGroup(): List<Entity>? = entitiesGroup
     fun setEntitiesGroup(entitiesGroup: List<Entity>?) { this.entitiesGroup = entitiesGroup }
-
-    // ══════════════════════════════════════════════
-    //  Selection state
-    // ══════════════════════════════════════════════
 
     fun setSelectMultiple(selectMultiple: Boolean) { isSelectMultiple = selectMultiple }
     fun isSelectMultiple(): Boolean = isSelectMultiple
 
-    // ══════════════════════════════════════════════
-    //  Color & appearance
-    // ══════════════════════════════════════════════
-
     fun setColorSelectMultiple(color: Int) { colorSelectMultiple = color }
     fun getColorSelectMultiple(): Int = colorSelectMultiple
-
-    // ══════════════════════════════════════════════
-    //  Audio & frame IDs
-    // ══════════════════════════════════════════════
 
     fun getAudioId(): String? = audioId
     fun setAudioId(audioId: String?) { this.audioId = audioId }
     fun getFrameId(): String? = frameId
     fun setFrameId(frameId: String?) { this.frameId = frameId }
-
-    // ══════════════════════════════════════════════
-    //  Trim & split
-    // ══════════════════════════════════════════════
 
     fun setTrimLeft(trimLeft: Boolean) { isTrimLeft = trimLeft }
     fun isTrimLeft(): Boolean = isTrimLeft
@@ -144,38 +102,18 @@ abstract class Entity(secondInScreen: Float) {
     fun isSplit(): Boolean = isSplit
     fun resetTrimType() { trimType = -1 }
 
-    // ══════════════════════════════════════════════
-    //  Fade
-    // ══════════════════════════════════════════════
-
     fun getFadeIn(): Float = fadeIn
     fun getFadeOut(): Float = fadeOut
     fun setFadeIn(fadeIn: Float) { this.fadeIn = fadeIn }
     fun setFadeOut(fadeOut: Float) { this.fadeOut = fadeOut }
 
-    // ══════════════════════════════════════════════
-    //  Action
-    // ══════════════════════════════════════════════
-
     fun setEntityAction(entityAction: EntityAction) { this.entityAction = entityAction }
-
-    // ══════════════════════════════════════════════
-    //  EntityView association
-    // ══════════════════════════════════════════════
 
     fun setEntityView(entityView: EntityView?) { this.entityView = entityView }
     fun getEntityView(): EntityView? = entityView
 
-    // ══════════════════════════════════════════════
-    //  Visibility (non-select)
-    // ══════════════════════════════════════════════
-
     fun visible(): Boolean = visible
     fun visible(visible: Boolean) { this.visible = visible }
-
-    // ══════════════════════════════════════════════
-    //  Offset & tap time
-    // ══════════════════════════════════════════════
 
     fun getOffsetLeft(): Float = offsetLeft
     fun setOffsetLeft(offsetLeft: Float) { this.offsetLeft = offsetLeft }
@@ -187,10 +125,6 @@ abstract class Entity(secondInScreen: Float) {
         this.onDown = onDown
     }
     fun getOnTapTime(): Float = onTapTime
-
-    // ══════════════════════════════════════════════
-    //  Current stack entity
-    // ══════════════════════════════════════════════
 
     fun getCurrentStackEntity(): StackEntity? = currentStackEntity
 
@@ -208,10 +142,6 @@ abstract class Entity(secondInScreen: Float) {
         )
     }
 
-    // ══════════════════════════════════════════════
-    //  Scale update
-    // ══════════════════════════════════════════════
-
     fun updateRect(newScale: Float) {
         if (newScale == scaleFactor) return
         rect.left = (rect.left / scaleFactor) * newScale
@@ -221,14 +151,6 @@ abstract class Entity(secondInScreen: Float) {
         scaleFactor = newScale
     }
 
-    // ══════════════════════════════════════════════
-    //  Render pipeline
-    // ══════════════════════════════════════════════
-
-    /**
-     * Main render pass — draws the block background, text content,
-     * and selection/trim handles.
-     */
     fun update(canvas: Canvas) {
         paint.color = color
         if (!isVideo) {
@@ -289,9 +211,6 @@ abstract class Entity(secondInScreen: Float) {
         }
     }
 
-    /**
-     * Render pass with additional dimension parameters for thumbnail rendering.
-     */
     fun update(canvas: Canvas, w: Int, h: Int) {
         paint.color = color
         if (!isVideo) {
@@ -349,10 +268,6 @@ abstract class Entity(secondInScreen: Float) {
             canvas.drawRoundRect(rect, round, round, paintStroke)
         }
     }
-
-    // ══════════════════════════════════════════════
-    //  Undo / Redo
-    // ══════════════════════════════════════════════
 
     fun onChange() {
         val current = currentStackEntity ?: return
