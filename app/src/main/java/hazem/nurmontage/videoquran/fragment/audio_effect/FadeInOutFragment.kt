@@ -19,31 +19,9 @@ import hazem.nurmontage.videoquran.model.EffectAudio
 import hazem.nurmontage.videoquran.views.TextCustumFont
 import java.util.Locale
 
-/**
- * Fragment for adjusting audio fade-in and fade-out durations.
- *
- * Provides two SeekBars for controlling the fade-in and fade-out
- * durations. The maximum value for each SeekBar is half the total
- * entity duration (in seconds), calculated from the entity's
- * pixel bounds and the seconds-per-screen ratio.
- *
- * When the user confirms, the fragment builds the complete FFmpeg
- * audio filter chain including the afade filters. The done() method
- * auto-applies if the fade values have changed since the fragment
- * was opened.
- *
- * Three apply modes exist:
- * - **Normal** (applyAll=false, isPreview=false): sends [IEditMediaCallback.onCmd]
- * - **Preview** (applyAll=false, isPreview=true): sends [IEditMediaCallback.onCmdPlay]
- * - **Apply All** (applyAll=true, isPreview=false): sends [IEditMediaCallback.onCmdAll]
- *   with [EffectAudioType.FADE]
- *
- * Originally: FadeInOutFragment.java (256 lines)
- */
 class FadeInOutFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: FadeInOutFragment? = null
 
         fun getInstance(
@@ -73,10 +51,6 @@ class FadeInOutFragment : Fragment {
     }
 
     constructor()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

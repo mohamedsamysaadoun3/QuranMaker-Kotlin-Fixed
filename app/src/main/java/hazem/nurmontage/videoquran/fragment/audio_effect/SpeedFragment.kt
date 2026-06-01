@@ -19,27 +19,9 @@ import hazem.nurmontage.videoquran.model.EffectAudio
 import hazem.nurmontage.videoquran.views.TextCustumFont
 import java.util.Locale
 
-/**
- * Fragment for adjusting audio playback speed/tempo.
- *
- * Provides a SeekBar (0–375) mapped to the [EffectAudio.speed] field
- * (0.25x–4.0x). The speed is converted from the SeekBar range via
- * linear mapping: speed = (progress / 375) * 3.75 + 0.25.
- *
- * When the user confirms, the fragment builds the complete FFmpeg
- * audio filter chain including the atempo filter. Since FFmpeg's
- * atempo filter only supports the range 0.5–2.0, extreme values
- * are handled by cascading multiple atempo filters via [buildSpeedFilters].
- *
- * The "Apply to All" button updates the entity globally with
- * [EffectAudioType.SPEED] and calls [IEditMediaCallback.onCmdAll].
- *
- * Originally: SpeedFragment.java (226 lines)
- */
 class SpeedFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: SpeedFragment? = null
 
         fun getInstance(

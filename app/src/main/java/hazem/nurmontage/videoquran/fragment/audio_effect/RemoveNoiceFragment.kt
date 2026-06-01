@@ -18,24 +18,9 @@ import hazem.nurmontage.videoquran.fragment.EditMediaFragment
 import hazem.nurmontage.videoquran.model.EffectAudio
 import java.util.Locale
 
-/**
- * Fragment for toggling audio noise removal (afftdn filter).
- *
- * Provides a SwitchCompat that enables/disables the `afftdn=nf=-25`
- * FFmpeg audio filter. When the user confirms, the fragment builds the
- * complete FFmpeg audio filter chain including volume, fade, noise removal,
- * enhance, reverb, echo, and speed effects, then sends it to the host via
- * [EditMediaFragment.IEditMediaCallback].
- *
- * The "Apply to All" button updates the entity globally with
- * [EffectAudioType.NOICE] and calls [IEditMediaCallback.onCmdAll].
- *
- * Originally: RemoveNoiceFragment.java (199 lines)
- */
 class RemoveNoiceFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: RemoveNoiceFragment? = null
 
         fun getInstance(
@@ -49,7 +34,6 @@ class RemoveNoiceFragment : Fragment {
         }
     }
 
-    // ── State ────────────────────────────────────────────────────────
     private var binding: FragmentRemoveNoiceBinding? = null
     private var btnPreview: ImageButton? = null
     private var btn_remove_noice: SwitchCompat? = null
@@ -57,7 +41,6 @@ class RemoveNoiceFragment : Fragment {
     private var iEditMediaCallback: EditMediaFragment.IEditMediaCallback? = null
     private var isPlay: Boolean = false
 
-    // ── Constructors ─────────────────────────────────────────────────
     constructor()
     constructor(
         iEditMediaCallback: EditMediaFragment.IEditMediaCallback?,
@@ -67,7 +50,6 @@ class RemoveNoiceFragment : Fragment {
         this.entityAudio = entityAudio
     }
 
-    // ── Lifecycle ────────────────────────────────────────────────────
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -98,14 +80,10 @@ class RemoveNoiceFragment : Fragment {
         return root
     }
 
-    // ── Public helpers ───────────────────────────────────────────────
-
     fun updateButton() {
         btnPreview?.setImageResource(R.drawable.play_arrow_24px)
         isPlay = false
     }
-
-    // ── Private logic ────────────────────────────────────────────────
 
     private fun preview() {
         val wasPlaying = isPlay
@@ -206,7 +184,6 @@ class RemoveNoiceFragment : Fragment {
         return filters
     }
 
-    // ── Cleanup ──────────────────────────────────────────────────────
     override fun onDestroyView() {
         super.onDestroyView()
         instance = null

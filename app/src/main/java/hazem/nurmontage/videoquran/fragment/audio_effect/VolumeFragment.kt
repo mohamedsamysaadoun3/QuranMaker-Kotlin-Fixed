@@ -19,24 +19,9 @@ import hazem.nurmontage.videoquran.model.EffectAudio
 import hazem.nurmontage.videoquran.views.TextCustumFont
 import java.util.Locale
 
-/**
- * Fragment for adjusting audio volume level.
- *
- * Provides a SeekBar (0–100) mapped to the [EffectAudio.volume] field
- * (0.0–1.0). When the user confirms, the fragment builds the complete
- * FFmpeg audio filter chain including volume, fade, noise removal,
- * reverb, echo, and speed effects, then sends it to the host via
- * [EditMediaFragment.IEditMediaCallback].
- *
- * The "Apply to All" button updates the entity globally with
- * [EffectAudioType.VOLUME] and calls [IEditMediaCallback.onCmdAll].
- *
- * Originally: VolumeFragment.java (225 lines)
- */
 class VolumeFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: VolumeFragment? = null
 
         fun getInstance(

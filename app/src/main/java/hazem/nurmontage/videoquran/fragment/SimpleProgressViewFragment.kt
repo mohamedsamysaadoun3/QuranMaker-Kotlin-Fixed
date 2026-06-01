@@ -9,20 +9,10 @@ import androidx.fragment.app.Fragment
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.databinding.FragmentProgressViewBinding
 
-/**
- * A lightweight progress overlay fragment that hides both progress views
- * (view_1 and view_2) and sets the background to transparent.
- *
- * Used as a placeholder / idle-state fragment in the bottom sheet area
- * where other progress fragments normally appear. The singleton pattern
- * ensures only one instance exists at a time.
- *
- * Converted from SimpleProgressViewFragment.java (41 lines).
- */
 class SimpleProgressViewFragment : Fragment() {
 
     companion object {
-        @Volatile
+        @JvmStatic
         private var _instance: SimpleProgressViewFragment? = null
 
         @JvmStatic

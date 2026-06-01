@@ -19,27 +19,9 @@ import hazem.nurmontage.videoquran.model.EffectAudio
 import hazem.nurmontage.videoquran.views.TextCustumFont
 import java.util.Locale
 
-/**
- * Fragment for toggling audio voice enhancement (equalizer preset).
- *
- * Reuses the same layout as [RemoveNoiceFragment] (fragment_remove_noice)
- * but changes the label text to "Enhance Voice" and toggles the
- * [EffectAudio.isEnhance] flag instead of the noise removal flag.
- * The enhancement applies [Common.ENHANCE_CMD] to the FFmpeg filter chain.
- *
- * When confirmed, the fragment builds the complete FFmpeg audio filter chain
- * including all active effects, then sends it to the host via
- * [EditMediaFragment.IEditMediaCallback].
- *
- * The "Apply to All" button updates the entity globally with
- * [EffectAudioType.ENHANCE] and calls [IEditMediaCallback.onCmdAll].
- *
- * Originally: EnhanceVoiceFragment.java (201 lines)
- */
 class EnhanceVoiceFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: EnhanceVoiceFragment? = null
 
         fun getInstance(
@@ -53,7 +35,6 @@ class EnhanceVoiceFragment : Fragment {
         }
     }
 
-    // ── State ────────────────────────────────────────────────────────
     private var binding: FragmentRemoveNoiceBinding? = null
     private var btnPreview: ImageButton? = null
     private var btn_remove_noice: SwitchCompat? = null
@@ -61,7 +42,6 @@ class EnhanceVoiceFragment : Fragment {
     private var iEditMediaCallback: EditMediaFragment.IEditMediaCallback? = null
     private var isPlay: Boolean = false
 
-    // ── Constructors ─────────────────────────────────────────────────
     constructor()
     constructor(
         iEditMediaCallback: EditMediaFragment.IEditMediaCallback?,
@@ -71,7 +51,6 @@ class EnhanceVoiceFragment : Fragment {
         this.entityAudio = entityAudio
     }
 
-    // ── Lifecycle ────────────────────────────────────────────────────
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -105,14 +84,10 @@ class EnhanceVoiceFragment : Fragment {
         return root
     }
 
-    // ── Public helpers ───────────────────────────────────────────────
-
     fun updateButton() {
         btnPreview?.setImageResource(R.drawable.play_arrow_24px)
         isPlay = false
     }
-
-    // ── Private logic ────────────────────────────────────────────────
 
     private fun preview() {
         val wasPlaying = isPlay
@@ -213,7 +188,6 @@ class EnhanceVoiceFragment : Fragment {
         return filters
     }
 
-    // ── Cleanup ──────────────────────────────────────────────────────
     override fun onDestroyView() {
         super.onDestroyView()
         instance = null

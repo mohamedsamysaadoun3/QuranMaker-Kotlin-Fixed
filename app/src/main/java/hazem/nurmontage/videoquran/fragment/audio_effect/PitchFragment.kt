@@ -14,25 +14,9 @@ import hazem.nurmontage.videoquran.entity_timeline.EntityAudio
 import hazem.nurmontage.videoquran.fragment.EditMediaFragment
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
-/**
- * Fragment for adjusting audio pitch.
- *
- * Provides a SeekBar (0–40, default 20) for pitch adjustment.
- * Currently applies a fixed pitch shift command using FFmpeg's
- * asetrate + atempo filter combination:
- *   asetrate=44100*1.2,atempo=0.8333
- *
- * The seekbar progress value is displayed but not yet used to
- * compute a dynamic pitch ratio — this matches the original
- * Java implementation which also had the pitch calculation
- * (Math.pow) but didn't apply it to the output command.
- *
- * Originally: PitchFragment.java (147 lines)
- */
 class PitchFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: PitchFragment? = null
 
         fun getInstance(

@@ -19,31 +19,9 @@ import hazem.nurmontage.videoquran.model.EffectAudio
 import hazem.nurmontage.videoquran.views.TextCustumFont
 import java.util.Locale
 
-/**
- * Fragment for configuring the audio echo effect (aecho filter).
- *
- * Provides three SeekBars for echo parameters:
- * - **Delay** (delaySeekBar): echo delay in milliseconds
- * - **Repeat** (repeatSeekBar): number of echo reflections (progress + 1)
- * - **Volume** (volumeSeekBar): echo gain/volume (0–100)
- *
- * The echo effect is built using FFmpeg's `aecho` filter with computed
- * delays and decays strings. The decays follow a geometric decay pattern
- * where each successive reflection is reduced by a factor of 0.8.
- *
- * When confirmed, the fragment builds the complete FFmpeg audio filter chain
- * including all active effects, then sends it to the host via
- * [EditMediaFragment.IEditMediaCallback].
- *
- * The "Apply to All" button updates the entity globally with
- * [EffectAudioType.ECHO] and calls [IEditMediaCallback.onCmdAll].
- *
- * Originally: EchoEffectFragment.java (315 lines)
- */
 class EchoEffectFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: EchoEffectFragment? = null
 
         fun getInstance(
@@ -57,7 +35,6 @@ class EchoEffectFragment : Fragment {
         }
     }
 
-    // ── State ────────────────────────────────────────────────────────
     private var binding: FragmentEchoEffectBinding? = null
     private var btnPreview: ImageButton? = null
     private var delaySeekBar: SeekBar? = null
@@ -70,7 +47,6 @@ class EchoEffectFragment : Fragment {
     private var tv_hint_volume: TextCustumFont? = null
     private var volumeSeekBar: SeekBar? = null
 
-    // ── Constructors ─────────────────────────────────────────────────
     constructor()
     constructor(
         iEchoCallback: EditMediaFragment.IEditMediaCallback?,
@@ -80,7 +56,6 @@ class EchoEffectFragment : Fragment {
         this.entityAudio = entityAudio
     }
 
-    // ── Lifecycle ────────────────────────────────────────────────────
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -98,7 +73,6 @@ class EchoEffectFragment : Fragment {
         tv_hint_repeat = root.findViewById(R.id.tv_repeat_size)
         tv_hint_volume = root.findViewById(R.id.tv_volume_size)
 
-        // Delay SeekBar
         val seekDelay = root.findViewById<SeekBar>(R.id.delaySeekBar)
         delaySeekBar = seekDelay
         seekDelay.progress = entityAudio!!.effectAudio.delays
@@ -117,7 +91,6 @@ class EchoEffectFragment : Fragment {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
-        // Repeat SeekBar
         val seekRepeat = root.findViewById<SeekBar>(R.id.repeatSeekBar)
         repeatSeekBar = seekRepeat
         seekRepeat.progress = entityAudio!!.effectAudio.decays
@@ -136,7 +109,6 @@ class EchoEffectFragment : Fragment {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
-        // Volume SeekBar
         val seekVolume = root.findViewById<SeekBar>(R.id.volumeSeekBar)
         volumeSeekBar = seekVolume
         seekVolume.progress = entityAudio!!.effectAudio.volume_echo
@@ -168,14 +140,10 @@ class EchoEffectFragment : Fragment {
         return root
     }
 
-    // ── Public helpers ───────────────────────────────────────────────
-
     fun updateButton() {
         btnPreview?.setImageResource(R.drawable.play_arrow_24px)
         isPlay = false
     }
-
-    // ── Private logic ────────────────────────────────────────────────
 
     private fun applyEchoEffect(applyAll: Boolean, isPreview: Boolean) {
         var delayProgress = delaySeekBar?.progress ?: 0
@@ -184,7 +152,6 @@ class EchoEffectFragment : Fragment {
 
         val effectAudio = entityAudio?.effectAudio ?: return
 
-        // If nothing changed and not applyAll, just start preview
         if (!applyAll &&
             effectAudio.delays == delayProgress &&
             effectAudio.decays == (repeatSeekBar?.progress ?: 0) &&
@@ -225,7 +192,6 @@ class EchoEffectFragment : Fragment {
 
         effectAudio.reverbPreset?.let { filters.add(it) }
 
-        // Echo effect computation
         val outGain: Float
         if (effectAudio.decays <= 0 || effectAudio.delays <= 0) {
             outGain = 1.0f
@@ -337,7 +303,6 @@ class EchoEffectFragment : Fragment {
         return filters
     }
 
-    // ── Cleanup ──────────────────────────────────────────────────────
     override fun onDestroyView() {
         iEchoCallback?.pausePreview()
         super.onDestroyView()

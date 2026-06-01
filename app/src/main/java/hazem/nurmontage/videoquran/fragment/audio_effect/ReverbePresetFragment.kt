@@ -18,36 +18,9 @@ import hazem.nurmontage.videoquran.entity_timeline.EntityAudio
 import hazem.nurmontage.videoquran.fragment.EditMediaFragment
 import java.util.Locale
 
-/**
- * Fragment for selecting audio reverb presets (Masjid, Studio, Quiet Room, etc.)
- * and building the complete FFmpeg audio filter chain for preview/apply.
- *
- * The filter chain is assembled in priority order:
- * 1. atrim (clip to entity time range)
- * 2. asetpts (reset timestamps)
- * 3. afftdn (noise removal, if enabled)
- * 4. volume (gain adjustment)
- * 5. afade in/out (fade envelopes)
- * 6. enhance (equalizer preset, if enabled)
- * 7. reverb preset (aecho filter)
- * 8. echo effect (aecho with custom delays/decays)
- * 9. atempo (speed adjustment, with cascading for extreme values)
- *
- * Architecture decisions:
- * - Singleton pattern preserved from original for Fragment transaction reuse.
- * - [IReverbPresetCallback] is implemented as an inner object rather than
- *   an anonymous class for clearer lifecycle management.
- * - [buildSpeedFilters] handles FFmpeg's atempo range limitation (0.5–2.0)
- *   by cascading multiple atempo filters.
- * - Stream cleanup uses Kotlin `use{}` blocks (applied in QuranSearchActivity,
- *   not needed here since we don't read files directly).
- *
- * Converted from ReverbePresetFragment.java.
- */
 class ReverbePresetFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: ReverbePresetFragment? = null
 
         fun getInstance(
@@ -61,15 +34,10 @@ class ReverbePresetFragment : Fragment {
         }
     }
 
-    // ── State ────────────────────────────────────────────────────────
     private var binding: FragmentReverbePresetBinding? = null
     private var entityAudio: EntityAudio? = null
     private var iEditMediaCallback: EditMediaFragment.IEditMediaCallback? = null
 
-    /**
-     * Callback for reverb preset selection events from [SoundAdapter].
-     * Builds the FFmpeg filter chain and delegates playback to the host.
-     */
     private var iReverbPresetCallback: SoundAdapter.IReverbPresetCallback? =
         object : SoundAdapter.IReverbPresetCallback {
 
@@ -77,7 +45,6 @@ class ReverbePresetFragment : Fragment {
                 if (iEditMediaCallback == null) return
                 val effect = entityAudio?.effectAudio ?: return
 
-                // If both the new and current preset are null, just start preview
                 if (presetCmd == null && effect.reverbPreset == null) {
                     iEditMediaCallback?.startPreview()
                     return
@@ -94,16 +61,10 @@ class ReverbePresetFragment : Fragment {
             }
         }
 
-    // ── Constructors ─────────────────────────────────────────────────
     constructor()
     constructor(callback: EditMediaFragment.IEditMediaCallback?, entityAudio: EntityAudio?) {
         this.iEditMediaCallback = callback
         this.entityAudio = entityAudio
-    }
-
-    // ── Lifecycle ────────────────────────────────────────────────────
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
     }
 
     override fun onCreateView(
@@ -124,7 +85,6 @@ class ReverbePresetFragment : Fragment {
         recyclerView.setHasFixedSize(true)
         recyclerView.itemAnimator = null
 
-        // Build the list of reverb presets
         val presets = arrayListOf(
             Reverbe(getString(R.string.reverb_normal), null),
             Reverbe(getString(R.string.reverb_masjid), "aecho=0.9:0.4:900|1800:0.20|0.15"),
@@ -141,13 +101,11 @@ class ReverbePresetFragment : Fragment {
             entityAudio!!.effectAudio.reverbPreset_index_list
         )
 
-        // Done button: pause preview and confirm
         root.findViewById<View>(R.id.btn_done).setOnClickListener {
             iEditMediaCallback?.pausePreview()
             iEditMediaCallback?.onDone()
         }
 
-        // Apply to all button: update entity and apply globally
         root.findViewById<View>(R.id.btn_appl_all).setOnClickListener {
             applyAll()
         }
@@ -155,12 +113,6 @@ class ReverbePresetFragment : Fragment {
         return root
     }
 
-    // ── Filter Chain Builder ─────────────────────────────────────────
-
-    /**
-     * Build the complete FFmpeg audio filter chain for **preview playback**.
-     * This assembles all active effects in the correct priority order.
-     */
     private fun buildFilterChain(effect: hazem.nurmontage.videoquran.model.EffectAudio): String {
         val start = effect.start / 1000f
         val end = effect.end / 1000f
@@ -206,10 +158,6 @@ class ReverbePresetFragment : Fragment {
         return TextUtils.join(",", filters)
     }
 
-    /**
-     * Apply all effects globally — update the entity and send the full
-     * filter chain for batch processing.
-     */
     private fun applyAll() {
         val effect = entityAudio?.effectAudio ?: return
         val start = effect.start / 1000f
@@ -256,14 +204,6 @@ class ReverbePresetFragment : Fragment {
         iEditMediaCallback?.onCmdAll(effect)
     }
 
-    /**
-     * Build cascading atempo filters for FFmpeg.
-     *
-     * FFmpeg's `atempo` filter only supports a range of 0.5–2.0.
-     * For values outside this range, we chain multiple filters:
-     * - Speed < 0.5: repeatedly apply atempo=0.5 until the remaining factor is >= 0.5
-     * - Speed > 2.0: repeatedly apply atempo=2.0 until the remaining factor is <= 2.0
-     */
     private fun buildSpeedFilters(speed: Float): List<String> {
         val filters = arrayListOf<String>()
         var remaining = speed
@@ -291,7 +231,6 @@ class ReverbePresetFragment : Fragment {
         return filters
     }
 
-    // ── Cleanup ──────────────────────────────────────────────────────
     override fun onDestroyView() {
         iEditMediaCallback?.pausePreview()
         iReverbPresetCallback = null
