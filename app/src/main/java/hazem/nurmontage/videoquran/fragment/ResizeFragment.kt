@@ -19,25 +19,10 @@ import hazem.nurmontage.videoquran.model.ItemDimension
 import hazem.nurmontage.videoquran.utils.ScreenUtils
 import hazem.nurmontage.videoquran.utils.Utils
 
-/**
- * Fragment for selecting canvas resize / aspect-ratio presets.
- *
- * Displays a horizontal RecyclerView of dimension presets (TikTok 9:16,
- * YouTube 16:9, Instagram 1:1, etc.) via [DimensionAdabters]. The user
- * picks a preset and confirms with the "Done" button.
- *
- * The [getListDimension] method computes the pixel dimensions for each
- * preset relative to the device screen width, while also determining
- * which preset matches the current [selectResize] identifier.
- *
- * The singleton pattern ensures only one instance exists at a time.
- *
- * Converted from ResizeFragment.java (119 lines).
- */
+
 class ResizeFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: ResizeFragment? = null
 
         fun getInstance(

@@ -24,30 +24,10 @@ import hazem.nurmontage.videoquran.model.Transition
 import hazem.nurmontage.videoquran.views.TextCustumFont
 import nl.dionsegijn.konfetti.core.Angle
 
-/**
- * Fragment for selecting and configuring transition effects on a Quran
- * Aya timeline entity.
- *
- * Similar to [EffectBismilahFragment] but operates on [EntityQuranTimeline]
- * entities. All transitions are available (billing removed).
- *
- * Provides a TabLayout with "In Transition" / "Out Transition" tabs,
- * a horizontal RecyclerView of available transition icons, a SeekBar
- * for adjusting the transition duration, and action buttons for removing
- * the current effect, applying it to all entities, or closing the fragment.
- *
- * Uses [TransitionEntityAdabters.ITransition] as the callback interface,
- * which is also used by the adapter for consistent type compatibility.
- * The adapter's `applyAll` method takes a tab index parameter so the
- * host knows whether to apply the "in" or "out" transition to all entities.
- *
- * Converted from EffectAyaFragment.java (404 lines).
- */
 @Suppress("DEPRECATION")
 class EffectAyaFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: EffectAyaFragment? = null
 
         @Synchronized
@@ -63,8 +43,8 @@ class EffectAyaFragment : Fragment {
             return instance!!
         }
 
-        private const val DISABLED_COLOR = -8355712  // 0x808080 gray
-        private const val ENABLED_COLOR = -1          // 0xFFFFFF white
+        private const val DISABLED_COLOR = -8355712
+        private const val ENABLED_COLOR = -1
     }
 
     private var btnApplyAll: LinearLayout? = null

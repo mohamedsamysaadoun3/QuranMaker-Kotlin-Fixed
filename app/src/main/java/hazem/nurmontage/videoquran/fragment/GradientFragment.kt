@@ -16,28 +16,9 @@ import hazem.nurmontage.videoquran.databinding.FragmentGradientBinding
 import hazem.nurmontage.videoquran.model.Gradient
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
-/**
- * Child fragment displaying a horizontal gradient palette and
- * an angle SeekBar for controlling gradient direction.
- *
- * Layout: `fragment_gradient.xml` (dedicated layout, NOT reusing fragment_colors.xml).
- *
- * The layout contains the same two elements as the original:
- *   - `layout_edit_gradient` include (angle label + SeekBar, initially GONE)
- *   - `rv_color` RecyclerView (horizontal gradient preset list)
- *
- * Hosted inside [EditIpadFragment]'s "Gradient" tab.
- * Uses [PresetAdapter] with [Common.getListGradientColor] as the gradient source.
- * Selection events are forwarded to the host via [EditIpadFragment.IIpadEditCallback].
- *
- * Converted from GradientFragment.java — the original also used `FragmentColorsBinding`
- * because `fragment_colors.xml` and `fragment_gradient.xml` had identical structure.
- * We now use the dedicated `FragmentGradientBinding` for type safety and clarity.
- */
 class GradientFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: GradientFragment? = null
 
         fun getInstance(
@@ -51,7 +32,6 @@ class GradientFragment : Fragment {
         }
     }
 
-    // ── State ────────────────────────────────────────────────────────
     private var adapter: PresetAdapter? = null
     private var binding: FragmentGradientBinding? = null
     private var gradient: Gradient? = null
@@ -74,14 +54,12 @@ class GradientFragment : Fragment {
         }
     }
 
-    // ── Constructors ─────────────────────────────────────────────────
     constructor()
     constructor(callback: EditIpadFragment.IIpadEditCallback?, index: Int) {
         this.iIpadEditCallback = callback
         this.index = index
     }
 
-    // ── Lifecycle ────────────────────────────────────────────────────
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -138,7 +116,6 @@ class GradientFragment : Fragment {
         return root
     }
 
-    // ── Public helpers ───────────────────────────────────────────────
     fun scrollToSelectedPosition() {
         val lm = recyclerView?.layoutManager as? LinearLayoutManager ?: return
         adapter?.let { adp ->
@@ -149,7 +126,6 @@ class GradientFragment : Fragment {
         }
     }
 
-    // ── Cleanup ──────────────────────────────────────────────────────
     override fun onDestroyView() {
         super.onDestroyView()
         instance = null

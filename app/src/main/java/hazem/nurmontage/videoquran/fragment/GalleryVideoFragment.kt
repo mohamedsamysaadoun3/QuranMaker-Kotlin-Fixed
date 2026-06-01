@@ -23,25 +23,9 @@ import hazem.nurmontage.videoquran.utils.ScreenUtils
 import java.io.File
 import java.io.IOException
 
-/**
- * Fragment for browsing and selecting videos from the device gallery.
- *
- * Displays a 3-column grid of video thumbnails with duration overlays.
- * The fragment supports two modes:
- * 1. **Folder-specific**: Shows only videos from the given [folder]
- * 2. **All media**: Queries the MediaStore for all videos on device
- *
- * Selected items are tracked via [gallerySelecteds] and the [IPicker]
- * callback. The [changeFolder] method allows switching the displayed
- * folder at runtime. The singleton pattern ensures only one instance
- * exists at a time.
- *
- * Converted from GalleryVideoFragment.java (181 lines).
- */
 class GalleryVideoFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: GalleryVideoFragment? = null
 
         @Synchronized

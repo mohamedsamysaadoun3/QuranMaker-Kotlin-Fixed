@@ -15,24 +15,9 @@ import hazem.nurmontage.videoquran.adapter.FontAdapter
 import hazem.nurmontage.videoquran.utils.FontProvider
 import hazem.nurmontage.videoquran.databinding.FragmentFontBinding
 
-/**
- * Fragment for selecting Quran font typefaces in a horizontal carousel.
- *
- * Uses a [LinearSnapHelper] to snap to the nearest font item,
- * and communicates font selection back to the host via [IFontCallback].
- *
- * Architecture decisions:
- * - Singleton pattern preserved from original for Fragment transaction reuse.
- * - [FontProvider] is instantiated per [onCreateView] to respect config changes.
- * - Initial scroll position is computed from the font name minus its extension.
- * - [isInit] flag prevents the first snap from firing a selection change.
- *
- * Converted from FontFragment.java.
- */
 class FontFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: FontFragment? = null
 
         fun getInstance(callback: IFontCallback?, fontName: String?, typeface: Typeface?): FontFragment {
@@ -43,14 +28,12 @@ class FontFragment : Fragment {
         }
     }
 
-    /** Callback interface for font selection events. */
     interface IFontCallback {
         fun onAdd(fontName: String?, typeface: Typeface?)
         fun onCancel(fontName: String?, typeface: Typeface?)
         fun onDone(fontName: String?, typeface: Typeface?)
     }
 
-    // ── State ────────────────────────────────────────────────────────
     private var fontSelect: String? = null
     private var fragmentBinding: FragmentFontBinding? = null
     private var iFontCallback: IFontCallback? = null
@@ -61,7 +44,6 @@ class FontFragment : Fragment {
     private var recyclerView: RecyclerView? = null
     private var typeface: Typeface? = null
 
-    // ── Constructors ─────────────────────────────────────────────────
     constructor()
     constructor(callback: IFontCallback?, fontName: String?, typeface: Typeface?) {
         this.iFontCallback = callback
@@ -69,13 +51,11 @@ class FontFragment : Fragment {
         this.lastTypeface = typeface
     }
 
-    // ── Public API ───────────────────────────────────────────────────
     fun add(typeface: Typeface?, fontName: String?) {
         this.typeface = typeface
         this.fontSelect = fontName
     }
 
-    // ── Lifecycle ────────────────────────────────────────────────────
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -89,7 +69,6 @@ class FontFragment : Fragment {
             val fontProvider = FontProvider(resources)
             recyclerView = root.findViewById(R.id.rv)
 
-            // Find the index of the current font (strip the .ttf extension for lookup)
             val fontIndex = fontProvider.getFontNamesQuran()
                 .indexOf(lastFont?.substring(0, lastFont!!.length - 4))
 
@@ -107,7 +86,6 @@ class FontFragment : Fragment {
                 adapter = fontAdapter
             }
 
-            // Snap helper for carousel-style scrolling
             val snapHelper = LinearSnapHelper()
             snapHelper.attachToRecyclerView(recyclerView)
 
@@ -118,7 +96,6 @@ class FontFragment : Fragment {
 
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
-                    // Skip the first scroll event (layout-triggered)
                     if (isInit) {
                         isInit = false
                         return
@@ -131,26 +108,22 @@ class FontFragment : Fragment {
                 }
             })
 
-            // Scroll to the current font position
             if (fontIndex > 1) {
                 recyclerView?.scrollToPosition(fontIndex - 1)
             } else if (fontIndex >= 0) {
                 recyclerView?.scrollToPosition(fontIndex)
             }
 
-            // Done button: apply the selected font
             root.findViewById<View>(R.id.btn_done).setOnClickListener {
                 iFontCallback?.onDone(fontSelect, typeface)
             }
 
-            // Cancel button: revert to the previous font
             root.findViewById<View>(R.id.btn_cancel).setOnClickListener {
                 if (iFontCallback != null && lastFont != null && lastTypeface != null) {
                     iFontCallback!!.onCancel(lastFont, lastTypeface)
                 }
             }
         } catch (_: Exception) {
-            // Silently absorb layout inflation errors (e.g. missing views in testing)
         }
 
         return root

@@ -23,28 +23,9 @@ import hazem.nurmontage.videoquran.utils.ScreenUtils
 import java.io.File
 import java.io.IOException
 
-/**
- * Fragment for browsing and selecting photos/images from the device gallery.
- *
- * Despite the shared adapter name ([GalleryVideoAdabters]), this fragment
- * uses the same grid layout and selection logic as [GalleryVideoFragment]
- * but queries **images** instead of videos. The [isVideoFile] method is
- * preserved from the original Java source which used the same video-file
- * check even for photos — this conversion preserves that behavior.
- *
- * The fragment supports two modes:
- * 1. **Folder-specific**: Shows only media files from the given [folder]
- * 2. **All media**: Queries the MediaStore for all videos on device
- *
- * Selected items are tracked via [gallerySelecteds] and the [IPicker]
- * callback. The singleton pattern ensures only one instance exists.
- *
- * Converted from GalleryPhotosFragment.java (181 lines).
- */
 class GalleryPhotosFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: GalleryPhotosFragment? = null
 
         @Synchronized

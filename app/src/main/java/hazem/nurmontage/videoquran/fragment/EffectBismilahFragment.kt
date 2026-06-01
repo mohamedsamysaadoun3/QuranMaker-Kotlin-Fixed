@@ -24,26 +24,10 @@ import hazem.nurmontage.videoquran.model.Transition
 import hazem.nurmontage.videoquran.views.TextCustumFont
 import nl.dionsegijn.konfetti.core.Angle
 
-/**
- * Fragment for selecting and configuring transition effects on a
- * Bismilah timeline entity.
- *
- * Provides a TabLayout with "In Transition" / "Out Transition" tabs,
- * a horizontal RecyclerView of available transition icons (fade, slide,
- * etc.), a SeekBar for adjusting the transition duration, and action
- * buttons for removing the current effect, applying it to all entities,
- * or closing the fragment.
- *
- * Uses [TransitionBismilahAdabters.ITransition] as the callback interface,
- * which is also used by the adapter for consistent type compatibility.
- *
- * Converted from EffectBismilahFragment.java (400 lines).
- */
 @Suppress("DEPRECATION")
 class EffectBismilahFragment : Fragment {
 
     companion object {
-        @Volatile
         @JvmStatic var instance: EffectBismilahFragment? = null
 
         @Synchronized
@@ -59,8 +43,8 @@ class EffectBismilahFragment : Fragment {
             return instance!!
         }
 
-        private const val DISABLED_COLOR = -8355712  // 0x808080 gray
-        private const val ENABLED_COLOR = -1          // 0xFFFFFF white
+        private const val DISABLED_COLOR = -8355712
+        private const val ENABLED_COLOR = -1
     }
 
     private var btnApplyAll: LinearLayout? = null

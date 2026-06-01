@@ -10,19 +10,9 @@ import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.databinding.FragmentProgressViewBinding
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
-/**
- * A progress overlay fragment that displays a "current/total" text counter
- * (e.g., "3/10") during export or rendering operations.
- *
- * The [update] method is called from the host to reflect progress changes.
- * The singleton pattern ensures only one instance exists at a time.
- *
- * Converted from ProgressViewFragment.java (47 lines).
- */
 class ProgressViewFragment : Fragment() {
 
     companion object {
-        @Volatile
         private var _instance: ProgressViewFragment? = null
 
         @JvmStatic
@@ -54,12 +44,6 @@ class ProgressViewFragment : Fragment() {
         _instance = null
     }
 
-    /**
-     * Updates the progress text to show "current/total".
-     *
-     * @param current The current progress step
-     * @param total   The total number of steps
-     */
     fun update(current: Int, total: Int) {
         tvProgress?.text = "$current/$total"
     }
