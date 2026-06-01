@@ -1,30 +1,37 @@
 package hazem.nurmontage.videoquran.ui.editor
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.core.base.BaseActivity
+import hazem.nurmontage.videoquran.core.common.Common
 import hazem.nurmontage.videoquran.databinding.ActivityChoiceBgFromVideoBinding
-import hazem.nurmontage.videoquran.utils.FileUtils
+import hazem.nurmontage.videoquran.utils.LocaleHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
 
 /**
  * Activity for selecting a video frame as a background image.
+ * Faithful port of original ChoiceBgFromVideoActivity.java.
  *
  * Flow:
- *   1. Receives a video URI via intent extra "video_uri"
- *   2. Shows the video preview and a frame scrubber
+ *   1. Receives a video URI via intent data
+ *   2. Shows the video preview and a frame scrubber (VideoFrameSelectorView)
  *   3. User scrubs to the desired frame
- *   4. On "Done", extracts the frame bitmap and saves it to internal storage
- *   5. Returns the saved frame URI and bg_type via RESULT_OK
+ *   4. On "Done", stores the frame bitmap in Common.bitmap and returns RESULT_OK
+ *   5. On "Cancel" or back-press, returns RESULT_CANCELED
  */
 class ChoiceBgFromVideoActivity : BaseActivity() {
 
@@ -36,43 +43,68 @@ class ChoiceBgFromVideoActivity : BaseActivity() {
     private var currentBitmap: Bitmap? = null
     private var retriever: MediaMetadataRetriever? = null
 
-    companion object {
-        const val EXTRA_VIDEO_URI = "video_uri"
-        const val EXTRA_BG_URI = "bg_uri"
-        const val EXTRA_BG_TYPE = "bg_type"
-        const val BG_TYPE_VIDEO_FRAME = 2
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            cancel()
+        }
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase))
+    }
+
+    private fun cancel() {
+        setResult(RESULT_CANCELED)
+        finish()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         binding = ActivityChoiceBgFromVideoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setStatusBarColor()
-        hideSystemBars()
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
-        videoUri = intent.getStringExtra(EXTRA_VIDEO_URI)
+        setStatusBarColor(ViewCompat.MEASURED_STATE_MASK)
+        setNavigationBarColor(ViewCompat.MEASURED_STATE_MASK)
 
-        if (videoUri.isNullOrEmpty()) {
-            // Also try to get from intent data URI
-            val dataUri = intent.data?.toString()
-            if (dataUri.isNullOrEmpty()) {
-                Toast.makeText(this, "No video provided", Toast.LENGTH_SHORT).show()
-                finish()
-                return
-            }
-            videoUri = dataUri
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController.isAppearanceLightStatusBars = false
+        insetsController.isAppearanceLightNavigationBars = false
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+            windowInsets
         }
 
-        binding.tvTittleFragment.text = getString(R.string.app_name)
+        binding.tvTittleFragment.text = getString(R.string.choice_bg)
 
         binding.btnCancel.setOnClickListener {
-            setResult(RESULT_CANCELED)
-            finish()
+            cancel()
         }
 
+        if (intent != null) {
+            init(intent.data)
+        }
+    }
+
+    private fun init(uri: android.net.Uri?) {
+        if (uri == null) {
+            return
+        }
+
+        videoUri = uri.toString()
+
         binding.btnDone.setOnClickListener {
-            saveFrameAndReturn()
+            val bitmap = currentBitmap
+            if (bitmap != null && !bitmap.isRecycled) {
+                // Match Java: store bitmap in Common.bitmap, return RESULT_OK with empty Intent
+                Common.bitmap = bitmap
+                setResult(RESULT_OK, Intent())
+                finish()
+            }
         }
 
         initVideoRetriever()
@@ -142,46 +174,6 @@ class ChoiceBgFromVideoActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Save the currently selected frame to internal storage and return the result.
-     */
-    private fun saveFrameAndReturn() {
-        val bitmap = currentBitmap
-        if (bitmap == null) {
-            Toast.makeText(this, "No frame selected", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val workDir = FileUtils.getFile(this@ChoiceBgFromVideoActivity)
-                val frameFile = File(workDir, "bg_frame_${System.currentTimeMillis()}.png")
-
-                FileOutputStream(frameFile).use { fos ->
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-                    fos.flush()
-                }
-
-                withContext(Dispatchers.Main) {
-                    val resultIntent = Intent().apply {
-                        putExtra(EXTRA_BG_URI, frameFile.absolutePath)
-                        putExtra(EXTRA_BG_TYPE, BG_TYPE_VIDEO_FRAME)
-                    }
-                    setResult(RESULT_OK, resultIntent)
-                    finish()
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        this@ChoiceBgFromVideoActivity,
-                        "Failed to save frame",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         try {
@@ -190,7 +182,8 @@ class ChoiceBgFromVideoActivity : BaseActivity() {
             // Retriever may already be released
         }
         retriever = null
-        currentBitmap?.recycle()
+        // Note: do NOT recycle currentBitmap here — it may have been stored in Common.bitmap
+        // and will be used by the caller (EngineActivity.onChoiceBgResult)
         currentBitmap = null
     }
 }

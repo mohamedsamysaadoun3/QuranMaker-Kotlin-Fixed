@@ -1,111 +1,129 @@
 package hazem.nurmontage.videoquran.ui.editor
 
+import android.content.Context
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.widget.MediaController
-import android.widget.Toast
+import android.widget.RelativeLayout
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
+import androidx.core.graphics.Insets
+import androidx.core.view.OnApplyWindowInsetsListener
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.core.base.BaseActivity
 import hazem.nurmontage.videoquran.databinding.ActivityPlayVideoBinding
 
 /**
  * Simple video playback preview activity.
+ * Faithful port of original PlayVideoActivity.java.
  *
- * Accepts a video URI (as string path or content URI) and plays it
- * in a VideoView with standard media controls.
- *
- * Input (via intent extras):
- *   - "video_path" (String) — file path to the video
- *   - "video_uri" (String) — content URI string for the video
- *   - Or intent data URI
+ * Receives a video URI via intent data and plays it in a VideoView
+ * with standard media controls.
  */
 class PlayVideoActivity : BaseActivity() {
 
     private lateinit var binding: ActivityPlayVideoBinding
     private var mediaController: MediaController? = null
+    private lateinit var parentLayout: RelativeLayout
+
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            pause()
+            finish()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         binding = ActivityPlayVideoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setStatusBarColor()
-        hideSystemBars()
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
-        // Back button
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        setStatusBarColor(ViewCompat.MEASURED_STATE_MASK)
+        setNavigationBarColor(ViewCompat.MEASURED_STATE_MASK)
+
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController.isAppearanceLightStatusBars = false
+        insetsController.isAppearanceLightNavigationBars = false
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), OnApplyWindowInsetsListener { view, windowInsets ->
+            val insets: Insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+            windowInsets
+        })
+
+        parentLayout = binding.parentLayout
+
+        if (intent != null && intent.data != null) {
+            val videoView = binding.videoView
+            val mc = MediaController(this)
+            mediaController = mc
+            mc.setMediaPlayer(videoView)
+            mc.setAnchorView(videoView)
+            videoView.setMediaController(mc)
+            videoView.setVideoURI(intent.data)
+
+            videoView.setOnCompletionListener { mediaPlayer ->
+                if (mediaController == null || mediaController!!.isShowing) return@setOnCompletionListener
+                mediaController!!.show()
+            }
+
+            videoView.setOnPreparedListener { mediaPlayer ->
+                adjustVideoViewSize(mediaPlayer)
+            }
+
+            videoView.start()
+        }
+
         binding.btnOnBack.setOnClickListener {
+            pause()
             finish()
         }
-
-        // Get video path/URI from intent
-        val videoPath = intent.getStringExtra("video_path")
-            ?: intent.getStringExtra("video_uri")
-            ?: intent.data?.toString()
-
-        if (videoPath.isNullOrEmpty()) {
-            Toast.makeText(this, "No video to play", Toast.LENGTH_SHORT).show()
-            finish()
-            return
-        }
-
-        setupVideoView(videoPath)
     }
 
-    /**
-     * Set up the VideoView with media controls and start playback.
-     */
-    private fun setupVideoView(videoPath: String) {
-        mediaController = MediaController(this).also {
-            it.setAnchorView(binding.videoView)
-            it.setMediaPlayer(binding.videoView)
+    private fun adjustVideoViewSize(mediaPlayer: MediaPlayer?) {
+        if (mediaPlayer == null) return
+        var videoWidth = mediaPlayer.videoWidth
+        var videoHeight = mediaPlayer.videoHeight
+        var width = parentLayout.width
+        var height = parentLayout.height
+        val f = videoWidth.toFloat() / videoHeight.toFloat()
+        val widthRatio = width.toFloat()
+        val heightRatio = height.toFloat()
+        if (f > widthRatio / heightRatio) {
+            height = (widthRatio / f).toInt()
+        } else {
+            width = (heightRatio * f).toInt()
         }
+        val layoutParams = RelativeLayout.LayoutParams(width, height)
+        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT)
+        binding.videoView.layoutParams = layoutParams
+    }
 
-        binding.videoView.setMediaController(mediaController)
-
-        binding.videoView.setOnPreparedListener { mediaPlayer ->
-            mediaPlayer.setOnVideoSizeChangedListener { _, _, _ ->
-                mediaController?.setAnchorView(binding.videoView)
-            }
-        }
-
-        binding.videoView.setOnCompletionListener {
-            // Return to start when playback completes
-            binding.videoView.seekTo(0)
-            mediaController?.show(0)
-        }
-
-        binding.videoView.setOnErrorListener { _, what, extra ->
-            Toast.makeText(
-                this,
-                "Error playing video (what=$what, extra=$extra)",
-                Toast.LENGTH_SHORT
-            ).show()
-            true // Error handled
-        }
-
-        // Set the video source
-        try {
-            if (videoPath.startsWith("content://") || videoPath.startsWith("http://") || videoPath.startsWith("https://")) {
-                binding.videoView.setVideoURI(Uri.parse(videoPath))
-            } else {
-                binding.videoView.setVideoPath(videoPath)
-            }
-            binding.videoView.start()
-        } catch (e: Exception) {
-            Toast.makeText(this, "Failed to play video", Toast.LENGTH_SHORT).show()
-        }
+    private fun pause() {
+        val videoView = binding.videoView
+        if (!videoView.isPlaying) return
+        videoView.pause()
     }
 
     override fun onPause() {
+        pause()
         super.onPause()
-        if (binding.videoView.isPlaying) {
-            binding.videoView.pause()
-        }
     }
 
     override fun onDestroy() {
+        val videoView = binding.videoView
+        if (videoView != null) {
+            videoView.pause()
+        }
         super.onDestroy()
-        binding.videoView.stopPlayback()
-        mediaController = null
     }
 }

@@ -10,9 +10,10 @@
     <color name="color_hint_add_quran">#ffb6b6b6</color>
     <color name="black_overlay">#66000000</color>
     <color name="ic_launcher_background">#ffffffff</color>
+    <!-- price_select kept — referenced by layouts (txt_share, row_feature, btn_to_about_) -->
     <color name="price_select">#ffffffff</color>
-    <color name="price_select_last">#ffc084fc</color>
-    <color name="text_act_pro">#ffffffff</color>
+    <!-- price_select_last DELETED (premium, unused) -->
+    <!-- text_act_pro DELETED (premium, unused) -->
     <color name="your_checked_color">#ff03dac5</color>
     <color name="your_disabled_color">#ffff0000</color>
     <color name="your_unchecked_color">#ffffffff</color>

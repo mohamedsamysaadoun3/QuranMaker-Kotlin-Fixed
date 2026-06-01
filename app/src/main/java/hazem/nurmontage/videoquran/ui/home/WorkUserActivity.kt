@@ -336,7 +336,7 @@ class WorkUserActivity : BaseActivity() {
         val btnDelete = view.findViewById<hazem.nurmontage.videoquran.views.ButtonCustumFont>(R.id.dialog_no)
         btnDelete.text = getString(R.string.delete)
         btnDelete.setTextColor(-1499549)
-        btnDelete.setBackgroundResource(R.drawable.btn_dialog)
+        btnDelete.setBackgroundResource(R.drawable.btn_dialog_delete)
         btnDelete.setOnClickListener {
             try {
                 // Delete the video file

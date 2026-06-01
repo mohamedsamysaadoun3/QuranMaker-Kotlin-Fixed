@@ -1,121 +1,99 @@
 package hazem.nurmontage.videoquran.ui.settings
 
+import android.content.Context
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.core.base.BaseActivity
 import hazem.nurmontage.videoquran.databinding.ActivityThanksYouBinding
-import nl.dionsegijn.konfetti.core.Angle
-import nl.dionsegijn.konfetti.core.Party
+import hazem.nurmontage.videoquran.utils.LocaleHelper
+import hazem.nurmontage.videoquran.utils.MyVibrationHelper
 import nl.dionsegijn.konfetti.core.PartyFactory
 import nl.dionsegijn.konfetti.core.Position
-import nl.dionsegijn.konfetti.core.Rotation
 import nl.dionsegijn.konfetti.core.Spread
 import nl.dionsegijn.konfetti.core.emitter.Emitter
 import nl.dionsegijn.konfetti.core.models.Shape
-import nl.dionsegijn.konfetti.core.models.Size
+import java.util.Arrays
 import java.util.concurrent.TimeUnit
 
-/**
- * Thank you / credits screen.
- *
- * Displays a celebratory message with confetti animation.
- * This is an informational screen — no result is returned.
- */
 class ThanksYouActivity : BaseActivity() {
 
     private lateinit var binding: ActivityThanksYouBinding
 
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            finish()
+        }
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         binding = ActivityThanksYouBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setStatusBarColor()
-
-        // Back button
-        binding.btnOnBack.setOnClickListener {
-            finish()
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main) { view, windowInsets ->
+            val insets: Insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+            windowInsets
         }
 
-        // Set donation text
-        try {
-            val pi = packageManager.getPackageInfo(packageName, 0)
-            binding.tvPriceDonate.text = getString(R.string.donate_hint, pi.versionName)
-        } catch (_: Exception) {
-            binding.tvPriceDonate.text = getString(R.string.donate_hint, "")
-        }
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+        setStatusBarColor(-1)
 
-        binding.tvThnksDonate.text = getString(R.string.thanks_hint)
-
-        // Launch confetti animation after layout is complete
-        binding.konfettiView.post {
-            startConfetti()
-        }
-    }
-
-    /**
-     * Start the confetti celebration animation using konfetti 2.x API.
-     */
-    private fun startConfetti() {
-        try {
-            val party1 = PartyFactory(
-                Emitter(2000L, TimeUnit.MILLISECONDS).max(100)
+        val mResources = resources
+        if (intent != null) {
+            binding.tvPriceDonate.text = String.format(
+                mResources.getString(R.string.donate_hint),
+                intent.getStringExtra("price")
             )
-                .angle(Angle.Companion.TOP)
-                .spread(Spread.Companion.SMALL)
-                .setSpeedBetween(1f, 5f)
-                .timeToLive(2000L)
-                .shapes(listOf(Shape.Square, Shape.Circle))
-                .sizes(listOf(Size.SMALL, Size.MEDIUM, Size.LARGE))
-                .rotation(Rotation())
-                .colors(listOf(
-                    android.graphics.Color.YELLOW,
-                    android.graphics.Color.GREEN,
-                    android.graphics.Color.MAGENTA,
-                    android.graphics.Color.RED,
-                    android.graphics.Color.CYAN
-                ))
-                .position(Position.Relative(0.5, 0.5))
-                .build()
+            binding.tvThnksDonate.text = mResources.getString(R.string.thanks_hint)
+        }
 
-            binding.konfettiView.start(listOf(party1))
+        explode()
 
-            // Second burst after a short delay
-            Handler(Looper.getMainLooper()).postDelayed({
-                try {
-                    val party2 = PartyFactory(
-                        Emitter(2500L, TimeUnit.MILLISECONDS).max(80)
-                    )
-                        .angle(Angle.Companion.TOP)
-                        .spread(Spread.Companion.SMALL)
-                        .setSpeedBetween(2f, 6f)
-                        .timeToLive(2500L)
-                        .shapes(listOf(Shape.Circle, Shape.Square))
-                        .sizes(listOf(Size.SMALL, Size.MEDIUM, Size.LARGE))
-                        .rotation(Rotation())
-                        .colors(listOf(
-                            android.graphics.Color.BLUE,
-                            android.graphics.Color.GREEN,
-                            android.graphics.Color.RED,
-                            android.graphics.Color.YELLOW
-                        ))
-                        .position(Position.Relative(0.3, 0.5))
-                        .build()
-
-                    binding.konfettiView.start(listOf(party2))
-                } catch (_: Exception) {
-                    // Konfetti view may be detached
-                }
-            }, 500)
-        } catch (_: Exception) {
-            // Konfetti library may not be properly initialized
+        binding.btnOnBack.setOnClickListener {
+            onBackPressedCallback.handleOnBackPressed()
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        // KonfettiView handles its own cleanup
+    private fun explode() {
+        val favoriteDrawable = ContextCompat.getDrawable(applicationContext, R.drawable.favorite_24px)
+        val shapes = mutableListOf<Shape>()
+        shapes.add(Shape.Square)
+        shapes.add(Shape.Circle)
+        if (favoriteDrawable != null) {
+            shapes.add(Shape.DrawableShape(favoriteDrawable, true, true))
+        }
+
+        binding.konfettiView.start(
+            PartyFactory(
+                Emitter(2800L, TimeUnit.MILLISECONDS).max(512)
+            )
+                .spread(Spread.ROUND)
+                .shapes(shapes)
+                .colors(Arrays.asList(16572810, 16740973, 16003181, 11832815))
+                .setSpeedBetween(0.0f, 30.0f)
+                .position(Position.Relative(0.5, 0.3))
+                .build()
+        )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        playVibration()
+    }
+
+    private fun playVibration() {
+        MyVibrationHelper(this).vibrate(250L)
     }
 }

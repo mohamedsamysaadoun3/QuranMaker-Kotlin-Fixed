@@ -31,9 +31,9 @@ abstract class BaseActivity : AppCompatActivity() {
     fun hideSystemBars() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            hideSystemBarsApi30(Constants.COLOR_STATUS_BAR_DEFAULT)
+            hideSystemBarsApi30(-1)
         } else {
-            hideSystemBarsBelowApi30(Constants.COLOR_STATUS_BAR_DEFAULT)
+            hideSystemBarsBelowApi30(-1)
         }
     }
 
@@ -137,7 +137,7 @@ abstract class BaseActivity : AppCompatActivity() {
      */
     open fun wakeLockAcquire() {
         try {
-            window.addFlags(WindowManagerFlags.FLAG_KEEP_SCREEN_ON)
+            window.addFlags(0x00000080) // Original Java: 128 — legacy wake lock flag
         } catch (_: Exception) {
             // Window may not be attached yet – safe to ignore
         }

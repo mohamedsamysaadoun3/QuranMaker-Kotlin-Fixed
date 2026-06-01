@@ -9,6 +9,7 @@
 
     <style name="Theme.NurMontage" parent="Base.Theme.NurMontage" />
 
+    <!-- ⚠️ INVENTED — not in NurMontage Java reference -->
     <style name="Theme.NurMontage.Fullscreen" parent="Theme.NurMontage">
         <item name="android:windowBackground">@null</item>
         <item name="android:actionBarStyle">@style/Widget.Theme.NurMontage.ActionBar.Fullscreen</item>
@@ -25,6 +26,7 @@
     <!-- Theme Overlays                             -->
     <!-- ═══════════════════════════════════════════ -->
 
+    <!-- ⚠️ INVENTED — not in NurMontage Java reference -->
     <style name="ThemeOverlay.NurMontage.FullscreenContainer" parent="">
         <item name="fullscreenBackgroundColor">@color/light_blue_600</item>
         <item name="fullscreenTextColor">@color/light_blue_A200</item>
@@ -34,6 +36,7 @@
     <!-- Custom Widgets                             -->
     <!-- ═══════════════════════════════════════════ -->
 
+    <!-- ⚠️ INVENTED — not in NurMontage Java reference -->
     <style name="CustomSeekBarStyle" parent="Widget.AppCompat.SeekBar">
         <item name="android:maxHeight">4.0dip</item>
         <item name="android:progressDrawable">@drawable/custom_track</item>
@@ -71,13 +74,13 @@
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
-    <!-- Video Player Theme -->
+    <!-- Video Player Theme (FIXED to match NurMontage Java reference) -->
     <style name="App.VideoPlayer" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowBackground">@color/black</item>
         <item name="android:windowFullscreen">true</item>
-        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
     <!-- ═══════════════════════════════════════════ -->

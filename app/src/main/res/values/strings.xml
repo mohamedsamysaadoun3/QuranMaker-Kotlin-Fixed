@@ -97,27 +97,11 @@
     <string name="all">All</string>
     <string name="post">Post</string>
     <string name="home">Done</string>
-    <!-- Premium strings kept for resource compatibility — billing removed -->
-    <string name="pro"></string>
-    <string name="upgrade"></string>
-    <string name="unlock_premium"></string>
-    <string name="premium_activated"></string>
-    <string name="subscribe_now"></string>
-    <string name="subscribe_now_l"></string>
-    <string name="subscribe_now_last"></string>
-    <string name="enjoy_all_premium_features"></string>
-    <string name="enjoy_all_premium_features_last"></string>
-    <string name="do_want_delete_watermark"></string>
     <string name="contact_us">Contact us</string>
     <string name="select_language">Select Language</string>
     <string name="choose_your_preferred_language">Choose your preferred language</string>
     <string name="lang">Language</string>
-    <string name="restort_subscribe">Restore</string>
-    <string name="subscription_restored">Subscription restored successfully.\nEnjoy all Premium features</string>
-    <string name="not_have_susbcribe">There is no subscription. Contact support.</string>
-    <string name="nothing_to_restore">Nothing to Restore</string>
     <string name="msj_connection_on">Turn on the internet and then Retry.</string>
-    <string name="msj_no_found_subscribe">"We couldn\'t find an active subscription linked to your Google Play account.If you recently subscribed, please make sure you\'re signed in with the correct account."</string>
     <string name="nurmontage_app">NurMontage app</string>
     <string name="edit_and_style">Edit and Style</string>
     <string name="enhance_voice">Enhance Voice</string>
@@ -136,23 +120,8 @@
     <string name="tab_aya">Aya</string>
     <string name="just_share">Share</string>
     <string name="Continue">Continue</string>
-    <string name="best_value">Best value - Save 69%</string>
-    <string name="year">%s / year</string>
-    <string name="forever">%s / forever</string>
-    <string name="no_commitment">SECURED BY GOOGLE - CANCEL ANY TIME</string>
-    <string name="no_commitment_l">Cancel anytime - no penalties or fees.</string>
-    <string name="no_commitment_l_l">Subscribing gives you full access to all NurMontage features.You can manage or cancel your subscription anytime through Google Play.Your subscription is securely linked to your account and can be restored even if you delete the app or change your device.Subscription is optional, and you can continue using NurMontage with limited features.</string>
-    <string name="no_commitment_last">No commitment,cancel anytime</string>
-    <string name="no_commitment_lastt">Flexible plan — cancel anytime</string>
     <string name="no_thanks">No,Thanks</string>
     <string name="i_m_youtuber">I\'m Youtuber</string>
-    <string name="dialog_billing_tittle">Free Version</string>
-    <string name="dialog_billing_watch">Watermark</string>
-    <string name="dialog_billing_susbcribe">Subscribe</string>
-    <string name="dialog_billing_maybe_later">Maybe later</string>
-    <string name="tittle_billing">Help me help you</string>
-    <string name="btn_launch_billing">Support</string>
-    <string name="you_are_premium">You\'are Premium</string>
     <string name="moment_to_rate">Tap a star to rate it on the store.</string>
     <string name="enjoying_the_app">Enjoying NurMontage?</string>
     <string name="rate_now">Rate me ❤️</string>
@@ -160,7 +129,6 @@
     <string name="my_tutorial">Share Your Tutorial</string>
     <string name="link">I made a tutorial for NurMontage. Here\'s my link:</string>
     <string name="txt_share" formatted="false">%s , %s #NurMontage_app #قرآن_كريم</string>
-    <string name="openTuffah">Tuffah</string>
     <string name="nurmontage_means">Nurmontage meaning ?</string>
     <string name="this_begeing_idea">Simply, this is how the idea started!</string>
     <string name="about_free_site">Free sites to download high-quality images and videos! 🚀</string>
@@ -184,14 +152,48 @@
     <string name="thanks_hint">"All features unlocked,JazakAllah khair for your gift. Incha\'Allah, we will provide you with the best.Thank you for your support 🎉"</string>
     <string name="choice_screen_ipod">iPod screen selection</string>
     <string name="to">To</string>
-    <string name="language_changed">Language changed successfully</string>
+    <string name="_4_8_434_reviews_28k_users">⭐ 4.8 (434 reviews) • 28K+ users</string>
+    <string name="msj_send_lnk">"🎥 Are you a content creator with over 1,000 followers? Whether you\'re on YouTube, Instagram, TikTok, or have a blog — if you\'ve made a tutorial or shared tips about our app, we\'d love to feature you! ✉️ Send us your link, and we\'ll proudly showcase your content inside the app."</string>
 
+    <!-- Premium/billing strings — values emptied, kept for layout resource linking -->
+    <string name="pro"></string>
+    <string name="upgrade"></string>
+    <string name="unlock_premium"></string>
+    <string name="premium_activated"></string>
+    <string name="subscribe_now"></string>
+    <string name="subscribe_now_l"></string>
+    <string name="subscribe_now_last"></string>
+    <string name="enjoy_all_premium_features"></string>
+    <string name="enjoy_all_premium_features_last"></string>
+    <string name="do_want_delete_watermark"></string>
+    <string name="best_value"></string>
+    <string name="year"></string>
+    <string name="forever"></string>
+    <string name="no_commitment"></string>
+    <string name="no_commitment_l"></string>
+    <string name="no_commitment_l_l"></string>
+    <string name="no_commitment_last"></string>
+    <string name="no_commitment_lastt"></string>
+    <string name="dialog_billing_tittle"></string>
+    <string name="dialog_billing_watch"></string>
+    <string name="dialog_billing_susbcribe"></string>
+    <string name="dialog_billing_maybe_later"></string>
+    <string name="tittle_billing"></string>
+    <string name="btn_launch_billing"></string>
+    <string name="you_are_premium"></string>
+    <string name="restort_subscribe"></string>
+    <string name="subscription_restored"></string>
+    <string name="not_have_susbcribe"></string>
+    <string name="nothing_to_restore"></string>
+    <string name="msj_no_found_subscribe"></string>
+    <string name="openTuffah"></string>
+
+    <!-- ⚠️ INVENTED — not in NurMontage Java reference, but used by Kotlin code/layouts -->
+    <string name="language_changed">Language changed successfully</string>
     <string name="free_layer">Free Layer</string>
     <string name="text">Text</string>
     <string name="search_pixabay">Search Pixabay</string>
     <string name="search_hint_pixabay">Search images on Pixabay</string>
-    <string name="_4_8_434_reviews_28k_users">⭐ 4.8 (434 reviews) • 28K+ users</string>
-    <string name="msj_send_lnk">"🎥 Are you a content creator with over 1,000 followers? Whether you\'re on YouTube, Instagram, TikTok, or have a blog — if you\'ve made a tutorial or shared tips about our app, we\'d love to feature you! ✉️ Send us your link, and we\'ll proudly showcase your content inside the app."</string>
 
     <string-array name="fps_labels">
         <item>15</item>

@@ -1,144 +1,196 @@
 package hazem.nurmontage.videoquran.ui.editor
 
+import android.content.Context
 import android.content.Intent
-import hazem.nurmontage.videoquran.views.CheckboxCustumFont
-import hazem.nurmontage.videoquran.views.EditTextCustumFont
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
+import android.view.inputmethod.InputMethodManager
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.arthenica.ffmpegkit.StreamInformation
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.adapter.ColorAdapter
 import hazem.nurmontage.videoquran.core.base.BaseActivity
-import hazem.nurmontage.videoquran.core.common.Constants
+import hazem.nurmontage.videoquran.core.common.Common
 import hazem.nurmontage.videoquran.databinding.ActivityEditTrslBinding
+import hazem.nurmontage.videoquran.utils.LocaleHelper
+import hazem.nurmontage.videoquran.utils.Utils
+import hazem.nurmontage.videoquran.views.EditTextCustumFont
 
 /**
  * Activity for editing translation text with style options.
+ * Faithful port of original EditTrslTxtActivity.java.
  *
- * Input (via intent extras):
- *   - "trsl_text" (String) — current translation text
- *   - "trsl_number" (int) — verse/translation number
- *   - "trsl_color" (int) — current text color
- *   - "trsl_has_bg" (boolean) — whether background is enabled
- *   - "trsl_bg_color" (int) — background color
+ * Input (via intent extras — matching Java keys):
+ *   - "reader_name" (String) — current translation text
+ *   - "surah_name" (String) — surah name (unused in this activity)
+ *   - "style" (int) — style
+ *   - "index" (String key from StreamInformation.KEY_INDEX) — surah index
+ *   - "isBg" (boolean) — whether background is enabled
+ *   - "clrBg" (int) — background color
  *
- * Output (via result intent extras):
- *   - "trsl_text" (String) — updated translation text
- *   - "trsl_number" (int) — translation number
- *   - "trsl_color" (int) — selected text color
- *   - "trsl_has_bg" (boolean) — whether background is enabled
- *   - "trsl_bg_color" (int) — background color
+ * Output (via result intent extras — matching Java keys):
+ *   - Common.READER (String) — updated translation text
+ *   - "style" (int) — style
+ *   - "index" (String key) — surah index
+ *   - "isBg" (boolean) — whether background is enabled
+ *   - "clrBg" (int) — background color
  */
 class EditTrslTxtActivity : BaseActivity() {
 
     private lateinit var binding: ActivityEditTrslBinding
 
-    private var selectedColorPos: Int = 0
-    private var selectedBgColorPos: Int = 0
-    private var hasBackground: Boolean = false
-    private var trslNumber: Int = 0
+    private var colorAdapter: ColorAdapter? = null
+    private var clrBg: Int = 0
+    private var style: Int = 0
+    private var indexSurah: Int = 0
+    private lateinit var editText: EditTextCustumFont
 
-    private lateinit var colorAdapter: ColorAdapter
+    /** Background colors array — exact values from Java */
+    private val BG_COLORS = intArrayOf(-8388608, -1, ViewCompat.MEASURED_STATE_MASK, -2838729, -16777088, -16694239, -13220529, -9404272)
 
-    companion object {
-        const val EXTRA_TRSL_TEXT = "trsl_text"
-        const val EXTRA_TRSL_NUMBER = "trsl_number"
-        const val EXTRA_TRSL_COLOR = "trsl_color"
-        const val EXTRA_TRSL_HAS_BG = "trsl_has_bg"
-        const val EXTRA_TRSL_BG_COLOR = "trsl_bg_color"
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            closeKeyboard()
+            setResult(RESULT_CANCELED, null)
+            @Suppress("DEPRECATION")
+            overridePendingTransition(0, 0)
+            finish()
+        }
+    }
+
+    private val iColor = object : ColorAdapter.IColor {
+        override fun onColor(color: Int, position: Int) {
+            clrBg = color
+            scrollToSelectedPosition()
+        }
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         binding = ActivityEditTrslBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setStatusBarColor()
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
-        // Read input extras
-        val currentText = intent.getStringExtra(EXTRA_TRSL_TEXT) ?: ""
-        trslNumber = intent.getIntExtra(EXTRA_TRSL_NUMBER, 0)
-        val currentColor = intent.getIntExtra(EXTRA_TRSL_COLOR, -1)
-        hasBackground = intent.getBooleanExtra(EXTRA_TRSL_HAS_BG, false)
-        val currentBgColor = intent.getIntExtra(EXTRA_TRSL_BG_COLOR, 0)
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController.isAppearanceLightStatusBars = false
+        insetsController.isAppearanceLightNavigationBars = false
 
-        // Set initial values
-        binding.edtReader.setText(currentText)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+            windowInsets
+        }
 
-        // Back/cancel button
-        binding.btnOnBack.setOnClickListener {
-            setResult(RESULT_CANCELED)
+        // Exact values from Java
+        setStatusBarColor(-15658735)
+        setNavigationBarColor(-14935010)
+
+        val mResources = resources
+        if (mResources == null) {
             finish()
-        }
-
-        // Done button
-        binding.btnDone.setOnClickListener {
-            returnResult()
-        }
-
-        // Background checkbox toggle
-        binding.checkboxBg.setOnCheckedChangeListener { _, isChecked ->
-            hasBackground = isChecked
-            binding.rvColor.visibility = if (isChecked) View.VISIBLE else View.GONE
-        }
-        binding.checkboxBg.isChecked = hasBackground
-
-        // Setup color adapter
-        setupColorAdapter(currentColor, currentBgColor)
-    }
-
-    /**
-     * Set up the color palette RecyclerView for background color selection.
-     */
-    private fun setupColorAdapter(currentColor: Int, currentBgColor: Int) {
-        val colors = Constants.MUSLIM_AYA_COLORS
-
-        selectedColorPos = colors.indexOfFirst { it == currentColor }.coerceAtLeast(0)
-        selectedBgColorPos = colors.indexOfFirst { it == currentBgColor }.coerceAtLeast(0)
-
-        colorAdapter = ColorAdapter(
-            object : ColorAdapter.IColor {
-                override fun onColor(color: Int, position: Int) {
-                    selectedBgColorPos = position
-                }
-            },
-            colors,
-            selectedBgColorPos
-        )
-
-        binding.rvColor.apply {
-            layoutManager = LinearLayoutManager(this@EditTrslTxtActivity, RecyclerView.HORIZONTAL, false)
-            adapter = colorAdapter
-            visibility = if (hasBackground) View.VISIBLE else View.GONE
-        }
-    }
-
-    /**
-     * Return the updated translation data to the caller.
-     */
-    private fun returnResult() {
-        val text = binding.edtReader.text?.toString()?.trim() ?: ""
-        if (text.isEmpty()) {
-            Toast.makeText(this, "Please enter translation text", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val bgColor = if (hasBackground) {
-            Constants.MUSLIM_AYA_COLORS.getOrElse(colorAdapter.getPosSelect()) { 0 }
-        } else {
-            0
+        binding.tvTittle.text = mResources.getString(R.string.edit)
+        binding.tvAddBg.text = mResources.getString(R.string.add_bg)
+
+        editText = binding.edtReader
+        editText.requestFocus()
+
+        // Read intent extras — matching Java keys
+        // Also accept "txt" key for compatibility with current Kotlin callers
+        val stringExtra = intent.getStringExtra("reader_name") ?: intent.getStringExtra("txt")
+        intent.getStringExtra("surah_name") // unused in this activity
+        style = intent.getIntExtra("style", 0)
+        clrBg = intent.getIntExtra("clrBg", ViewCompat.MEASURED_STATE_MASK)
+        binding.checkboxBg.isChecked = intent.getBooleanExtra("isBg", false)
+        editText.setText(stringExtra)
+
+        showKeyboard()
+
+        binding.btnOnBack.setOnClickListener {
+            onBackPressedCallback.handleOnBackPressed()
         }
 
-        val resultIntent = Intent().apply {
-            putExtra(EXTRA_TRSL_TEXT, text)
-            putExtra(EXTRA_TRSL_NUMBER, trslNumber)
-            putExtra(EXTRA_TRSL_COLOR, Constants.MUSLIM_AYA_COLORS.getOrElse(selectedColorPos) { -1 })
-            putExtra(EXTRA_TRSL_HAS_BG, hasBackground)
-            putExtra(EXTRA_TRSL_BG_COLOR, bgColor)
+        binding.btnDone.setOnClickListener {
+            val intent = Intent().apply {
+                putExtra(Common.READER, editText.text.toString())
+                putExtra("style", style)
+                putExtra(StreamInformation.KEY_INDEX, indexSurah)
+                putExtra("isBg", binding.checkboxBg.isChecked)
+                putExtra("clrBg", clrBg)
+            }
+            setResult(RESULT_OK, intent)
+            @Suppress("DEPRECATION")
+            overridePendingTransition(0, 0)
+            finish()
         }
-        setResult(RESULT_OK, resultIntent)
-        finish()
+
+        binding.tvAddBg.setOnClickListener {
+            binding.checkboxBg.isChecked = !binding.checkboxBg.isChecked
+        }
+
+        initRv()
+
+        binding.checkboxBg.setOnCheckedChangeListener { _, isChecked ->
+            updateColorUI(isChecked)
+        }
+        updateColorUI(binding.checkboxBg.isChecked)
+    }
+
+    private fun initRv() {
+        val recyclerView: RecyclerView = binding.rvColor
+        colorAdapter = ColorAdapter(iColor, BG_COLORS, Utils.indexOf(BG_COLORS, clrBg))
+        recyclerView.layoutManager = LinearLayoutManager(this, RecyclerView.HORIZONTAL, LocaleHelper.getLanguage(this) == "ar")
+        recyclerView.itemAnimator = null
+        recyclerView.setHasFixedSize(true)
+        recyclerView.adapter = colorAdapter
+        scrollToSelectedPosition()
+    }
+
+    private fun updateColorUI(isChecked: Boolean) {
+        binding.rvColor.isEnabled = isChecked
+        binding.rvColor.animate().alpha(if (isChecked) 1.0f else 0.4f).setDuration(180L).start()
+        colorAdapter?.enabled = isChecked
+    }
+
+    private fun scrollToSelectedPosition() {
+        val linearLayoutManager = binding.rvColor.layoutManager as? LinearLayoutManager ?: return
+        val posSelect = colorAdapter?.getPosSelect() ?: return
+        linearLayoutManager.scrollToPositionWithOffset(posSelect, binding.rvColor.width / 2 - 50)
+    }
+
+    override fun onPause() {
+        closeKeyboard()
+        super.onPause()
+    }
+
+    private fun showKeyboard() {
+        try {
+            (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
+                .showSoftInput(editText, 1)
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun closeKeyboard() {
+        try {
+            (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
+                .hideSoftInputFromWindow(editText.windowToken, 0)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }

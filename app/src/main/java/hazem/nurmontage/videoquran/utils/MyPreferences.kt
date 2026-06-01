@@ -193,4 +193,3 @@ object MyPreferences {
         prefs(context).edit().putBoolean(FIRST_RUN_KEY, false).apply()
     }
 }
-    fun isProVersion(): Boolean = true // Billing removed - all features unlocked

@@ -1,64 +1,149 @@
 package hazem.nurmontage.videoquran.ui.gallery_photos
 
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import hazem.nurmontage.videoquran.R
-import hazem.nurmontage.videoquran.adapter.WorkUserAdapter
+import hazem.nurmontage.videoquran.core.base.BaseActivity
+import hazem.nurmontage.videoquran.core.common.Common
 import hazem.nurmontage.videoquran.databinding.ActivityGalleryPickerVideoBinding
+import hazem.nurmontage.videoquran.utils.AppSettingsHelper
+import hazem.nurmontage.videoquran.utils.LocaleHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * GalleryPickerOneImage — Pick a single image from the device gallery.
+ * Activity for picking a single image from the device gallery.
+ * Faithful port of original GalleryPickerOneImage.java.
  *
- * Reuses the gallery picker video layout which has:
- *   - btn_onBack: Close button
- *   - rv: RecyclerView for grid display
- *   - view_progress: Loading indicator
- *   - tv_done: Done/confirm button
+ * Shows images in a grid with optional folder tabs.
+ * Returns the selected image URI via RESULT_OK.
  *
- * Flow:
- *   1. Activity loads device images via MediaStore
- *   2. Images displayed as thumbnail grid
- *   3. User selects one image → returns URI as result
+ * On back/cancel: clears Common.LIST_SELECT and finishes.
  */
-class GalleryPickerOneImage : AppCompatActivity() {
+class GalleryPickerOneImage : BaseActivity() {
 
     private lateinit var binding: ActivityGalleryPickerVideoBinding
     private var selectedImageUri: String? = null
+    private var isUpdate: Boolean = false
+    private var layoutSetting: android.widget.LinearLayout? = null
+
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            Common.listSelect = null
+            Common.indexListSelect = 1
+            finish()
+        }
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         binding = ActivityGalleryPickerVideoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Back button
-        binding.btnOnBack.setOnClickListener { finish() }
+        setStatusBarColor(ViewCompat.MEASURED_STATE_MASK)
+        setNavigationBarColor(ViewCompat.MEASURED_STATE_MASK)
 
-        // Done button — return selected image URI
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController.isAppearanceLightStatusBars = false
+        insetsController.isAppearanceLightNavigationBars = false
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+            windowInsets
+        }
+
+        Common.listSelect = null
+        Common.indexListSelect = 1
+
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+
+        // Done button — return selected image URI via intent data
         binding.tvDone.setOnClickListener {
             if (selectedImageUri != null) {
                 val resultIntent = Intent().apply {
-                    // Use setData() instead of putExtra() — the caller (EngineActivity)
-                    // reads the URI via data.data (intent.data), not from extras
-                    data = android.net.Uri.parse(selectedImageUri)
+                    data = Uri.parse(selectedImageUri)
                 }
                 setResult(RESULT_OK, resultIntent)
             }
             finish()
         }
 
-        // Setup grid layout for image gallery
-        binding.rv.layoutManager = GridLayoutManager(this, 3)
-
-        // Load images from MediaStore
+        initViews()
         loadGalleryImages()
+
+        // Permission checking — matches Java pattern
+        if (Build.VERSION.SDK_INT >= 33 &&
+            (ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_IMAGES") == 0 ||
+             ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_VIDEO") == 0)
+        ) {
+            setSetting(true)
+        } else if (Build.VERSION.SDK_INT >= 34 &&
+            ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_VISUAL_USER_SELECTED") == 0
+        ) {
+            setSetting(false)
+        } else if (ContextCompat.checkSelfPermission(this, "android.permission.READ_EXTERNAL_STORAGE") == 0) {
+            setSetting(true)
+        } else {
+            setSetting(false)
+        }
+    }
+
+    private fun setSetting(isFlag: Boolean) {
+        if (isFlag) return
+        val linearLayout = binding.toSetting.root as? android.widget.LinearLayout ?: return
+        layoutSetting = linearLayout
+        linearLayout.visibility = View.VISIBLE
+        layoutSetting?.setOnClickListener {
+            isUpdate = true
+            AppSettingsHelper.openAppSettings(this@GalleryPickerOneImage)
+        }
+    }
+
+    private fun updateSetting() {
+        if (Build.VERSION.SDK_INT >= 33 &&
+            (ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_IMAGES") == 0 ||
+             ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_VIDEO") == 0)
+        ) {
+            recreate()
+        } else if ((Build.VERSION.SDK_INT < 34 ||
+            ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_VISUAL_USER_SELECTED") != 0) &&
+            ContextCompat.checkSelfPermission(this, "android.permission.READ_EXTERNAL_STORAGE") == 0
+        ) {
+            recreate()
+        }
+        isUpdate = false
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (isUpdate) {
+            updateSetting()
+        }
+    }
+
+    private fun initViews() {
+        binding.btnOnBack.setOnClickListener { finish() }
     }
 
     /**
@@ -86,45 +171,39 @@ class GalleryPickerOneImage : AppCompatActivity() {
                 sortOrder
             )?.use { cursor ->
                 val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
-                val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
                 val dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
 
                 while (cursor.moveToNext()) {
                     val id = cursor.getLong(idColumn)
-                    val name = cursor.getString(nameColumn)
                     val data = cursor.getString(dataColumn)
                     val uri = android.content.ContentUris.withAppendedId(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
                     )
-                    images.add(ImageItem(uri.toString(), name, data))
+                    images.add(ImageItem(uri.toString(), data))
                 }
             }
 
             withContext(Dispatchers.Main) {
-                val adapter = GalleryImageAdapter(images, { imageItem, position ->
-                    selectedImageUri = imageItem.uri
-                    (binding.rv.adapter as? GalleryImageAdapter)?.setSelectedPosition(position)
+                val galleryAdapter = GalleryImageAdapter(images, object : (ImageItem, Int) -> Unit {
+                    override fun invoke(imageItem: ImageItem, position: Int) {
+                        selectedImageUri = imageItem.uri
+                        (binding.rv.adapter as? GalleryImageAdapter)?.setSelectedPosition(position)
+                    }
                 })
-                binding.rv.adapter = adapter
+                binding.rv.apply {
+                    layoutManager = GridLayoutManager(this@GalleryPickerOneImage, 3)
+                    setHasFixedSize(true)
+                    setItemViewCacheSize(20)
+                    itemAnimator = null
+                    this.adapter = adapter
+                }
                 binding.viewProgress.visibility = View.GONE
             }
         }
     }
 
-    /**
-     * Data class representing a gallery image item.
-     */
-    data class ImageItem(
-        val uri: String,
-        val name: String,
-        val path: String
-    )
+    data class ImageItem(val uri: String, val path: String)
 
-    /**
-     * RecyclerView adapter for displaying image thumbnails in a grid.
-     * Supports visual selection feedback with a semi-transparent overlay
-     * on the currently selected item.
-     */
     private class GalleryImageAdapter(
         private val images: List<ImageItem>,
         private val onSelect: (ImageItem, Int) -> Unit,
@@ -145,8 +224,8 @@ class GalleryPickerOneImage : AppCompatActivity() {
             viewType: Int
         ): ViewHolder {
             val frameLayout = android.widget.FrameLayout(parent.context).apply {
-                layoutParams = androidx.recyclerview.widget.GridLayoutManager.LayoutParams(
-                    androidx.recyclerview.widget.GridLayoutManager.LayoutParams.MATCH_PARENT,
+                layoutParams = GridLayoutManager.LayoutParams(
+                    GridLayoutManager.LayoutParams.MATCH_PARENT,
                     300
                 )
             }
@@ -160,15 +239,13 @@ class GalleryPickerOneImage : AppCompatActivity() {
             }
             frameLayout.addView(imageView)
 
-            // Selection overlay
-            val overlay = android.view.View(parent.context).apply {
+            val overlay = View(parent.context).apply {
                 layoutParams = android.widget.FrameLayout.LayoutParams(
                     android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
                     android.widget.FrameLayout.LayoutParams.MATCH_PARENT
                 )
-                setBackgroundColor(0x40000000.toInt()) // semi-transparent black
-                visibility = android.view.View.GONE
-                id = android.view.View.generateViewId()
+                setBackgroundColor(0x40000000.toInt())
+                visibility = View.GONE
             }
             frameLayout.addView(overlay)
 
@@ -186,7 +263,7 @@ class GalleryPickerOneImage : AppCompatActivity() {
                 .centerCrop()
                 .into(imageView)
 
-            overlay.visibility = if (position == selectedPosition) android.view.View.VISIBLE else android.view.View.GONE
+            overlay.visibility = if (position == selectedPosition) View.VISIBLE else View.GONE
 
             holder.itemView.setOnClickListener { onSelect(image, position) }
         }

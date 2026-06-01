@@ -97,7 +97,7 @@ abstract class EntityView {
     fun getCanvasH(): Int = canvasH
 
     fun setCopyRect() {
-        if (rect == null) return
+        if (canvasW == 0 || canvasH == 0) return
         copyRect = RectF(
             rect.left / canvasW,
             rect.top / canvasH,

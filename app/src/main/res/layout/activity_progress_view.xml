@@ -82,7 +82,6 @@
     <hazem.nurmontage.videoquran.views.ButtonCustumFont
         android:textColor="@color/white"
         android:layout_gravity="bottom|center"
-        android:id="@+id/btn_cancel_hidden"
         android:background="#00ffffff"
         android:visibility="gone"
         android:layout_width="match_parent"

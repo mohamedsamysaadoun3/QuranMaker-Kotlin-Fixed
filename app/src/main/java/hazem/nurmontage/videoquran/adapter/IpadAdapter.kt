@@ -16,14 +16,11 @@ import hazem.nurmontage.videoquran.model.IpadItem
  * RecyclerView adapter for displaying iPad frame style options.
  *
  * Each item shows a frame preview thumbnail. Items at positions 0, 1, 7, 8, 9
- * have a glass/matte toggle (dot indicators). Pro items (position > 1) show a
- * pro badge when the user is not subscribed — however, since billing was removed,
- * all items are now accessible to all users and the pro badge is always hidden.
+ * have a glass/matte toggle (dot indicators). All items are accessible.
  *
  * Converted from IpadAdabter.java — all logic preserved exactly.
  */
 class IpadAdapter(
-    private val isSubscribe: Boolean,
     private var posSelect: Int,
     private var ipadSelected: Int,
     val ipadEditCallback: EditIpadFragment.IIpadEditCallback?,
@@ -65,9 +62,6 @@ class IpadAdapter(
                     isGlass = !isGlass
                     ipadEditCallback?.onGlassType(isGlass)
                 }
-
-                // Since billing is removed, all items are accessible — skip premium dialog
-                // Original: if (!isSubscribe && pos > 1) → onDialogPremium()
 
                 if (ipadEditCallback != null && ipadItems != null) {
                     val ipadItem = ipadItems[pos]
@@ -113,7 +107,6 @@ class IpadAdapter(
             holder.imageView.setBackgroundResource(R.drawable.watch_btn_outline)
         }
 
-        // Since billing is removed, hide the pro badge for all items
         holder.ivPro.visibility = View.GONE
     }
 

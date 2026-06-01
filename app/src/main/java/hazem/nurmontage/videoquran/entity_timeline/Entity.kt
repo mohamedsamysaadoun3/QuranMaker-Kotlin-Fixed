@@ -248,6 +248,8 @@ abstract class Entity(secondInScreen: Float) {
         if (isSelect) {
             paintStroke.strokeWidth = rect.height() * 0.05f
             paintStroke.color = colorSelectMultiple
+            canvas.drawRoundRect(rect, round, round, paintStroke)
+            paint.color = colorSelectMultiple
             when (trimType) {
                 0 -> {
                     rectFLeft.left = rect.left - rectFLeft.width()

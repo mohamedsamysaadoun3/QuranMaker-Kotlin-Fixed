@@ -262,7 +262,7 @@ class QuranSearchActivity : BaseActivity() {
     }
 
     private fun updateCount() {
-        countAya?.text = "\u0627\u0644\u0622\u064A\u0650\u0651\u0651\u0627\u062A : (${searchQuranAdapter?.size ?: 0})"
+        countAya?.text = "الآيـــات : (${searchQuranAdapter?.size ?: 0})"
     }
 
     private fun resetFromTo() {

@@ -1,11 +1,11 @@
 package hazem.nurmontage.videoquran.ui.editor
 
+import android.content.Context
 import android.content.Intent
-import hazem.nurmontage.videoquran.views.ButtonCustumFont
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -14,13 +14,15 @@ import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.core.base.BaseActivity
 import hazem.nurmontage.videoquran.core.common.Common
 import hazem.nurmontage.videoquran.databinding.ActivityCropBitmapBinding
+import hazem.nurmontage.videoquran.utils.LocaleHelper
 import hazem.nurmontage.videoquran.utils.MyPreferences
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
 /**
  * Activity for cropping a bitmap/image using the CropView.
  *
- * Originally: CropBitmapActivity.java – faithfully ported.
+ * Faithful port of original CropBitmapActivity.java.
+ * Premium/billing code has been removed as per project policy.
  *
  * Flow:
  *   1. Reads Common.bitmap / Common.rect / Common.radius as the source
@@ -28,6 +30,7 @@ import hazem.nurmontage.videoquran.views.TextCustumFont
  *   3. User adjusts the crop region
  *   4. On "Done", crops the bitmap and stores it back in Common,
  *      returns normalized crop position (x, y, w, h) via intent extras
+ *   5. On back/cancel: returns RESULT_CANCELED
  */
 class CropBitmapActivity : BaseActivity() {
 
@@ -37,10 +40,28 @@ class CropBitmapActivity : BaseActivity() {
         var isActive: Boolean = false
     }
 
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            cancel()
+        }
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase))
+    }
+
+    private fun cancel() {
+        setResult(RESULT_CANCELED)
+        finish()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         binding = ActivityCropBitmapBinding.inflate(layoutInflater)
-        setContentView(R.layout.activity_crop_bitmap)
+        setContentView(binding.root)
+
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
         setStatusBarColor(ViewCompat.MEASURED_STATE_MASK)
         setNavigationBarColor(ViewCompat.MEASURED_STATE_MASK)
@@ -68,16 +89,6 @@ class CropBitmapActivity : BaseActivity() {
         isActive = false
     }
 
-    private fun cancel() {
-        setResult(RESULT_CANCELED)
-        finish()
-    }
-
-    @Deprecated("Use onBackPressedDispatcher instead")
-    override fun onBackPressed() {
-        cancel()
-    }
-
     private fun init() {
         binding.btnCancel.setOnClickListener {
             cancel()
@@ -100,6 +111,7 @@ class CropBitmapActivity : BaseActivity() {
 
         binding.btnDone.text = resources.getString(R.string.done)
         binding.btnDone.setOnClickListener {
+            // Premium check removed — always allow cropping
             if (!MyPreferences.isShowHint(this)) {
                 MyPreferences.putShowHint(this)
             }

@@ -68,11 +68,13 @@ object UltraFastWaveformOptimized {
                     val outputBuffer = codec.getOutputBuffer(outputBufferIndex)
                     outputBuffer!!.position(0)
                     val numSamples = bufferInfo.size / 2
-                    val samplesPerPoint = numSamples.toFloat() / numPoints.toFloat()
+                    // Java uses integer division: float f = i4 / value
+                    val samplesPerPoint = (numSamples / numPoints).toFloat()
 
                     var i = 0
                     while (i < numSamples) {
-                        val sample = outputBuffer.getShort(i * 2)
+                        // Java reads at byte offsets 0, 2, 4, ... (step by 2 bytes = 1 short)
+                        val sample = outputBuffer.getShort(i)
                         val pointIndex = (sampleIndex / samplesPerPoint).toInt()
                         if (pointIndex >= numPoints) break
                         result[pointIndex] = max(result[pointIndex], abs(sample.toInt()) / 32767.0f)

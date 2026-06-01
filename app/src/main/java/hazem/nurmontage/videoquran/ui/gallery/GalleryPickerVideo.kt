@@ -1,219 +1,222 @@
 package hazem.nurmontage.videoquran.ui.gallery
 
-import android.Manifest
+import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import com.google.android.material.tabs.TabLayout
+import android.provider.MediaStore
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.adapter.VideoGalleryAdapter
-
-import hazem.nurmontage.videoquran.model.VideoItem
 import hazem.nurmontage.videoquran.core.base.BaseActivity
+import hazem.nurmontage.videoquran.core.common.Common
 import hazem.nurmontage.videoquran.databinding.ActivityGalleryPickerVideoBinding
+import hazem.nurmontage.videoquran.utils.AppSettingsHelper
+import hazem.nurmontage.videoquran.utils.LocaleHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import hazem.nurmontage.videoquran.model.VideoItem
 import kotlinx.coroutines.withContext
 
 /**
  * Activity for picking video files from the device gallery.
+ * Faithful port of original GalleryPickerVideo.java.
  *
- * Shows videos in a grid with folder tabs.
- * Returns the selected video URI via RESULT_OK.
+ * Shows videos in a grid with optional folder tabs.
+ * Returns the selected video URI via RESULT_OK intent data.
  *
- * Output (via result intent extras):
- *   - "video_uri" (String) — path to the selected video file
+ * On back/cancel: clears Common.LIST_SELECT and finishes.
  */
 class GalleryPickerVideo : BaseActivity() {
 
     private lateinit var binding: ActivityGalleryPickerVideoBinding
-    private lateinit var videoAdapter: VideoGalleryAdapter
+    private var selectedVideoUri: String? = null
+    private var isUpdate: Boolean = false
+    private var layoutSetting: android.widget.LinearLayout? = null
 
-    private val folders = mutableListOf<FolderInfo>()
-    private var currentFolderIndex: Int = -1
-
-    companion object {
-        const val EXTRA_VIDEO_URI = "video_uri"
-
-        data class FolderInfo(val name: String, val path: String, val videos: MutableList<VideoItem>)
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            Common.listSelect = null
+            Common.indexListSelect = 1
+            finish()
+        }
     }
 
-    /** Permission request launcher for media access. */
-    private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val allGranted = permissions.all { it.value }
-        if (allGranted) {
-            loadVideos()
-        } else {
-            Toast.makeText(this, "Permission denied. Cannot access videos.", Toast.LENGTH_LONG).show()
-            binding.viewProgress.visibility = View.GONE
-            (binding.toSetting.root as View).visibility = View.VISIBLE
-        }
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         binding = ActivityGalleryPickerVideoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setStatusBarColor()
+        setStatusBarColor(ViewCompat.MEASURED_STATE_MASK)
+        setNavigationBarColor(ViewCompat.MEASURED_STATE_MASK)
 
-        // Back button
-        binding.btnOnBack.setOnClickListener {
-            setResult(RESULT_CANCELED)
+        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
+        insetsController.isAppearanceLightStatusBars = false
+        insetsController.isAppearanceLightNavigationBars = false
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+            windowInsets
+        }
+
+        Common.listSelect = null
+        Common.indexListSelect = 1
+
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+
+        // Done button — return selected video URI via intent data (matches Java)
+        binding.tvDone.setOnClickListener {
+            if (selectedVideoUri != null) {
+                val resultIntent = Intent().apply {
+                    data = Uri.parse(selectedVideoUri)
+                }
+                setResult(RESULT_OK, resultIntent)
+            }
             finish()
         }
 
-        // Done button (select current video — handled per-item click)
-        binding.tvDone.setOnClickListener {
-            // Done is only actionable after a video is selected via item click
-        }
+        initViews()
+        loadVideos()
 
-        // Setup RecyclerView
-        videoAdapter = VideoGalleryAdapter { videoItem ->
-            onVideoSelected(videoItem)
-        }
-
-        binding.rv.apply {
-            layoutManager = GridLayoutManager(this@GalleryPickerVideo, 3)
-            adapter = videoAdapter
-        }
-
-        // Tab layout for folder selection
-        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab) {
-                val position = tab.position
-                if (position >= 0 && position < folders.size) {
-                    currentFolderIndex = position
-                    showFolderVideos(folders[position])
-                }
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab) {}
-            override fun onTabReselected(tab: TabLayout.Tab) {}
-        })
-
-        // Folders text button
-        binding.tvFolders.setOnClickListener {
-            if (binding.tabLayout.visibility == View.VISIBLE) {
-                binding.tabLayout.visibility = View.GONE
-            } else {
-                binding.tabLayout.visibility = View.VISIBLE
-            }
-        }
-
-        // Check permissions and load videos
-        checkPermissionsAndLoad()
-    }
-
-    /**
-     * Check if the required permissions are granted and load videos.
-     */
-    private fun checkPermissionsAndLoad() {
-        val permissions = getRequiredPermissions()
-        val allGranted = permissions.all {
-            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
-        }
-
-        if (allGranted) {
-            loadVideos()
+        // Permission checking — matches Java pattern
+        if (Build.VERSION.SDK_INT >= 33 &&
+            (ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_IMAGES") == 0 ||
+             ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_VIDEO") == 0)
+        ) {
+            setSetting(true)
+        } else if (Build.VERSION.SDK_INT >= 34 &&
+            ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_VISUAL_USER_SELECTED") == 0
+        ) {
+            setSetting(false)
+        } else if (ContextCompat.checkSelfPermission(this, "android.permission.READ_EXTERNAL_STORAGE") == 0) {
+            setSetting(true)
         } else {
-            permissionLauncher.launch(permissions)
+            setSetting(false)
         }
     }
 
-    /**
-     * Get the required permissions based on API level.
-     */
-    private fun getRequiredPermissions(): Array<String> {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            arrayOf(
-                Manifest.permission.READ_MEDIA_VIDEO
-            )
-        } else {
-            arrayOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            )
+    private fun setSetting(isFlag: Boolean) {
+        if (isFlag) return
+        val linearLayout = binding.toSetting.root as? android.widget.LinearLayout ?: return
+        layoutSetting = linearLayout
+        linearLayout.visibility = View.VISIBLE
+        layoutSetting?.setOnClickListener {
+            isUpdate = true
+            AppSettingsHelper.openAppSettings(this@GalleryPickerVideo)
         }
     }
 
+    private fun updateSetting() {
+        if (Build.VERSION.SDK_INT >= 33 &&
+            (ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_IMAGES") == 0 ||
+             ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_VIDEO") == 0)
+        ) {
+            recreate()
+        } else if ((Build.VERSION.SDK_INT < 34 ||
+            ContextCompat.checkSelfPermission(this, "android.permission.READ_MEDIA_VISUAL_USER_SELECTED") != 0) &&
+            ContextCompat.checkSelfPermission(this, "android.permission.READ_EXTERNAL_STORAGE") == 0
+        ) {
+            recreate()
+        }
+        isUpdate = false
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (isUpdate) {
+            updateSetting()
+        }
+    }
+
+    private fun initViews() {
+        binding.btnOnBack.setOnClickListener { finish() }
+    }
+
     /**
-     * Load video files from the MediaStore in the background.
+     * Load video files from the device's MediaStore.
      */
     private fun loadVideos() {
         binding.viewProgress.visibility = View.VISIBLE
-        binding.tvFolders.visibility = View.INVISIBLE
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val videoFolders = VideoGalleryAdapter.queryVideos(this@GalleryPickerVideo)
+            val videos = mutableListOf<VideoItem>()
+
+            val projection = arrayOf(
+                MediaStore.Video.Media._ID,
+                MediaStore.Video.Media.DISPLAY_NAME,
+                MediaStore.Video.Media.DATA,
+                MediaStore.Video.Media.DURATION
+            )
+
+            val sortOrder = "${MediaStore.Video.Media.DATE_ADDED} DESC"
+
+            contentResolver.query(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                projection,
+                null,
+                null,
+                sortOrder
+            )?.use { cursor ->
+                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
+                val dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA)
+                val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
+
+                while (cursor.moveToNext()) {
+                    val id = cursor.getLong(idColumn)
+                    val data = cursor.getString(dataColumn)
+                    val duration = cursor.getInt(durationColumn)
+                    if (duration == 0) continue // skip zero-duration videos (matches Java)
+                    val uri = android.content.ContentUris.withAppendedId(
+                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id
+                    )
+                    videos.add(VideoItem("", uri.toString(), formatDuration(duration), false))
+                }
+            }
 
             withContext(Dispatchers.Main) {
+                val adapter = VideoGalleryAdapter { videoItem ->
+                    selectedVideoUri = videoItem.path
+                    // Immediately return result — matches Java behavior
+                    val resultIntent = Intent().apply {
+                        data = Uri.parse(selectedVideoUri)
+                    }
+                    setResult(RESULT_OK, resultIntent)
+                    finish()
+                }
+                binding.rv.apply {
+                    layoutManager = GridLayoutManager(this@GalleryPickerVideo, 3)
+                    setHasFixedSize(true)
+                    setItemViewCacheSize(20)
+                    itemAnimator = null
+                    this.adapter = adapter
+                }
+                adapter.submitList(videos)
                 binding.viewProgress.visibility = View.GONE
-                binding.tvFolders.visibility = View.VISIBLE
-
-                folders.clear()
-                for ((path, videos) in videoFolders) {
-                    val name = java.io.File(path).name
-                    folders.add(FolderInfo(name, path, videos))
-                }
-
-                setupFolderTabs()
-
-                // Show the first folder's videos
-                if (folders.isNotEmpty()) {
-                    currentFolderIndex = 0
-                    showFolderVideos(folders[0])
-                }
             }
         }
     }
 
-    /**
-     * Set up the TabLayout with folder names.
-     */
-    private fun setupFolderTabs() {
-        binding.tabLayout.removeAllTabs()
-
-        if (folders.size <= 1) {
-            binding.tabLayout.visibility = View.GONE
-            binding.tvFolders.visibility = View.INVISIBLE
-            return
-        }
-
-        for (folder in folders) {
-            val tab = binding.tabLayout.newTab()
-            tab.text = folder.name
-            binding.tabLayout.addTab(tab)
-        }
-
-        binding.tvFolders.visibility = View.VISIBLE
+    /** Format duration in milliseconds to "MM:SS" — matches Java formatDuration */
+    private fun formatDuration(durationMs: Int): String {
+        val seconds = durationMs / 1000
+        return String.format(java.util.Locale.ENGLISH, "%02d:%02d", (seconds / 60) % 60, seconds % 60)
     }
 
-    /**
-     * Display the videos from the specified folder in the RecyclerView.
-     */
-    private fun showFolderVideos(folder: FolderInfo) {
-        videoAdapter.submitList(folder.videos)
-    }
-
-    /**
-     * Handle video selection — return the video path to the caller.
-     */
-    private fun onVideoSelected(videoItem: VideoItem) {
-        val resultIntent = Intent().apply {
-            // Use setData() instead of putExtra() — the caller (EngineActivity)
-            // reads the URI via data.data (intent.data), not from extras
-            data = android.net.Uri.parse(videoItem.path)
-        }
-        setResult(RESULT_OK, resultIntent)
-        finish()
-    }
+    data class LocalVideoItem(val uri: String, val path: String, val duration: String)
 }

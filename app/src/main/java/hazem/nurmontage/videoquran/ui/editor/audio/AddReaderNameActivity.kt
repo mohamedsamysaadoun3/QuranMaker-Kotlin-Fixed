@@ -1,67 +1,122 @@
 package hazem.nurmontage.videoquran.ui.editor.audio
 
+import android.content.Context
 import android.content.Intent
-import hazem.nurmontage.videoquran.views.EditTextCustumFont
 import android.os.Bundle
-import android.widget.Toast
+import android.view.inputmethod.InputMethodManager
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.media3.common.MimeTypes
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.core.base.BaseActivity
 import hazem.nurmontage.videoquran.databinding.ActivityAddReaderNameBinding
 
 /**
  * Activity for adding or editing a reciter/reader name overlay.
+ * Faithful port of AddReaderNameActivity.java.
  *
  * Input (via intent extras):
- *   - "reader_name" (String) — current reader name text
+ *   - "name" (String) — current reader name text
+ *   - "audio" (String) — audio URI (MimeTypes.BASE_TYPE_AUDIO)
+ *   - "path_video_copy" (String) — video copy path
  *
- * Output (via result intent extras):
- *   - "reader_name" (String) — updated reader name text
+ * Output (via result intent extras, same keys):
+ *   - "name" (String) — updated reader name (trimmed, newlines replaced with spaces)
+ *   - "audio" (String) — passed through from input
+ *   - "path_video_copy" (String) — passed through from input
  */
 class AddReaderNameActivity : BaseActivity() {
 
     private lateinit var binding: ActivityAddReaderNameBinding
+    private lateinit var editText: android.widget.EditText
 
-    companion object {
-        const val EXTRA_READER_NAME = "reader_name"
+    private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            closeKeyboard()
+            val intent = Intent()
+            intent.putExtra("name", getIntent().getStringExtra("name"))
+            intent.putExtra(MimeTypes.BASE_TYPE_AUDIO, getIntent().getStringExtra(MimeTypes.BASE_TYPE_AUDIO))
+            intent.putExtra("path_video_copy", getIntent().getStringExtra("path_video_copy"))
+            setResult(RESULT_OK, intent)
+            finish()
+        }
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(hazem.nurmontage.videoquran.utils.LocaleHelper.onAttach(newBase))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         binding = ActivityAddReaderNameBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
-        setStatusBarColor()
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main) { view, windowInsets ->
+            val insets: Insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(insets.left, insets.top, insets.right, insets.bottom)
+            windowInsets
+        }
 
-        // Read input extras
-        val currentName = intent.getStringExtra(EXTRA_READER_NAME) ?: ""
-        binding.edtReader.setText(currentName)
+        hideSystemBars()
 
         // Cancel button
         binding.btnCancel.setOnClickListener {
-            setResult(RESULT_CANCELED)
-            finish()
+            onBackPressedCallback.handleOnBackPressed()
         }
 
         // Done button
         binding.btnDone.setOnClickListener {
-            returnResult()
+            closeKeyboard()
+            val intent = Intent()
+            intent.putExtra("name", editText.text.toString().trim().replace("\n", " "))
+            intent.putExtra(MimeTypes.BASE_TYPE_AUDIO, getIntent().getStringExtra(MimeTypes.BASE_TYPE_AUDIO))
+            intent.putExtra("path_video_copy", getIntent().getStringExtra("path_video_copy"))
+            setResult(RESULT_OK, intent)
+            finish()
+        }
+
+        // Setup EditText
+        val edt = binding.edtReader
+        editText = edt
+        editText.requestFocus()
+
+        val nameExtra = getIntent().getStringExtra("name")
+        if (nameExtra != null && nameExtra.length > 3) {
+            editText.setText(nameExtra)
+        }
+
+        showKeyboard()
+    }
+
+    override fun onPause() {
+        closeKeyboard()
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+    }
+
+    private fun showKeyboard() {
+        try {
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(editText, 1)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
-    /**
-     * Return the updated reader name to the caller.
-     */
-    private fun returnResult() {
-        val name = binding.edtReader.text?.toString()?.trim() ?: ""
-        if (name.isEmpty()) {
-            Toast.makeText(this, "Please enter a reader name", Toast.LENGTH_SHORT).show()
-            return
+    private fun closeKeyboard() {
+        try {
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(editText.windowToken, 0)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-
-        val resultIntent = Intent().apply {
-            putExtra(EXTRA_READER_NAME, name)
-        }
-        setResult(RESULT_OK, resultIntent)
-        finish()
     }
 }
