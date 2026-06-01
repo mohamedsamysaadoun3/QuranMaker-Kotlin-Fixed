@@ -23,18 +23,6 @@ import hazem.nurmontage.videoquran.utils.LocaleHelper
 import hazem.nurmontage.videoquran.utils.ScreenUtils
 import hazem.nurmontage.videoquran.views.TextCustumFont
 
-/**
- * Youtuber activity — faithful port of original YoutuberActivity.java.
- *
- * Displays a list of featured YouTubers with their tutorial videos.
- *
- * Features:
- * - 7 YouTubers with YouTube video IDs and drawable thumbnails
- * - Click opens YouTube video intent (vnd.youtube: scheme with web fallback)
- * - "Send link" button opens email to hazemourari08@gmail.com
- * - Uses external YoutuberAdabter adapter
- * - EdgeToEdge enabled
- */
 class YoutuberActivity : BaseActivity() {
 
     private lateinit var binding: ActivityYoutuberBinding
@@ -107,10 +95,6 @@ class YoutuberActivity : BaseActivity() {
 
         // Set tutorial label
         (binding.tvTutorial as? TextCustumFont)?.text = resources.getString(R.string.my_tutorial)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
     }
 
     private fun init() {

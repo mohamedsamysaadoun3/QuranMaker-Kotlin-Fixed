@@ -4,34 +4,8 @@ import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
 
-/**
- * Extracts waveform amplitude data from an audio file using [MediaCodec]
- * for full PCM decoding, then averages the amplitudes per time bucket.
- *
- * This extractor produces a higher-quality waveform than [FastWaveformExtractor]
- * because it averages all decoded samples within each time bucket rather than
- * taking a single peak per bucket.
- *
- * Extraction pipeline:
- * 1. Open the audio file with [MediaExtractor] and find the first audio track.
- * 2. Configure [MediaCodec] to decode the audio track.
- * 3. Feed input buffers and read output buffers in a synchronous loop.
- * 4. For each decoded sample, accumulate the absolute amplitude and a counter
- *    into the appropriate time bucket (based on presentationTimeUs).
- * 5. After all samples are decoded, divide each bucket's accumulated amplitude
- *    by its sample count to get the average.
- *
- * Converted from WaveformExtractor.java — logic preserved exactly.
- */
 object WaveformExtractor {
 
-    /**
-     * Extract [targetSamples] amplitude values from the audio file at [filePath].
-     *
-     * @param filePath      Path to the audio file
-     * @param targetSamples Number of amplitude buckets to produce
-     * @return Float array of normalized amplitudes (0.0–1.0), or all zeros on error
-     */
     fun extractAmplitudes(filePath: String, targetSamples: Int): FloatArray {
         val extractor = MediaExtractor()
         try {
@@ -44,7 +18,7 @@ object WaveformExtractor {
             extractor.selectTrack(audioTrackIndex)
             val format = extractor.getTrackFormat(audioTrackIndex)
             @Suppress("UNUSED_VARIABLE")
-            val sampleRate = format.getInteger("sample-rate") // kept for potential future use
+            val sampleRate = format.getInteger("sample-rate")
 
             val codec = MediaCodec.createDecoderByType(format.getString("mime")!!)
             codec.configure(format, null, null, 0)
@@ -63,7 +37,6 @@ object WaveformExtractor {
             var eos = false
 
             while (true) {
-                // Feed input
                 if (!eos) {
                     val inputIndex = codec.dequeueInputBuffer(10000L)
                     if (inputIndex >= 0) {
@@ -78,7 +51,6 @@ object WaveformExtractor {
                     }
                 }
 
-                // Read output
                 val outputIndex = codec.dequeueOutputBuffer(bufferInfo, 10000L)
                 if (outputIndex >= 0) {
                     val outputBuffer = outputBuffers[outputIndex]
@@ -101,7 +73,6 @@ object WaveformExtractor {
                 }
             }
 
-            // Normalize: divide accumulated amplitude by sample count per bucket
             for (i in 0 until targetSamples) {
                 if (counts[i] > 0f) {
                     amplitudes[i] /= counts[i]
@@ -118,10 +89,6 @@ object WaveformExtractor {
         }
     }
 
-    /**
-     * Find the index of the first audio track in the media file.
-     * @return Track index, or -1 if no audio track is found
-     */
     private fun selectAudioTrack(extractor: MediaExtractor): Int {
         for (i in 0 until extractor.trackCount) {
             if (extractor.getTrackFormat(i).getString("mime")?.startsWith("audio/") == true) {

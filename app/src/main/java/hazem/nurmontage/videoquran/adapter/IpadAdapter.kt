@@ -12,14 +12,6 @@ import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.fragment.EditIpadFragment
 import hazem.nurmontage.videoquran.model.IpadItem
 
-/**
- * RecyclerView adapter for displaying iPad frame style options.
- *
- * Each item shows a frame preview thumbnail. Items at positions 0, 1, 7, 8, 9
- * have a glass/matte toggle (dot indicators). All items are accessible.
- *
- * Converted from IpadAdabter.java — all logic preserved exactly.
- */
 class IpadAdapter(
     private var posSelect: Int,
     private var ipadSelected: Int,

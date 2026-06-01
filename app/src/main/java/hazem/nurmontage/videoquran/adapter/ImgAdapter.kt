@@ -10,20 +10,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.ObjectKey
 import hazem.nurmontage.videoquran.R
 
-/**
- * RecyclerView adapter for displaying a horizontal list of background images.
- *
- * Each item is loaded via Glide with the app version as a cache signature,
- * ensuring images refresh on app updates. Stable IDs are derived from the
- * drawable resource integers so that RecyclerView can efficiently recycle
- * views when the data set changes.
- *
- * @property appVersion Version string used as Glide cache signature
- * @property images     List of drawable resource IDs to display
- * @property size       Override dimension (width = height = size) for Glide
- *
- * Converted from ImgAdapter.java (63 lines).
- */
 class ImgAdapter(
     private val appVersion: String,
     private val images: List<Int>?,
@@ -34,13 +20,9 @@ class ImgAdapter(
         setHasStableIds(true)
     }
 
-    // ── ViewHolder ─────────────────────────────────────────────────────
-
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView: ImageView = itemView.findViewById(R.id.img)
     }
-
-    // ── Adapter overrides ──────────────────────────────────────────────
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)

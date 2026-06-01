@@ -6,24 +6,9 @@ import hazem.nurmontage.videoquran.model.FreeElement
 import hazem.nurmontage.videoquran.model.GallerySelected
 import hazem.nurmontage.videoquran.model.Gradient
 
-/**
- * Runtime shared state and utility methods for QuranMaker.
- *
- * This object holds **mutable** application-wide data that is accessed from
- * multiple Activities/Fragments during the editing session.  All compile-time
- * constants have been moved to [Constants]; this object only keeps the
- * dynamic references and helper functions.
- *
- * Originally: `hazem.nurmontage.videoquran.common.Common`
- */
 object Common {
     const val READER = "reader"
     const val SURAH = "surah"
-
-    // ──────────────────────────────────────────────
-    //  Constant aliases (delegate to Constants for
-    //  backward compatibility with converted code)
-    // ──────────────────────────────────────────────
 
     val COLOR_BLOCK_AUDIO = Constants.COLOR_BLOCK_AUDIO
     val COLOR_BLOCK_QURAN = Constants.COLOR_BLOCK_QURAN
@@ -33,57 +18,17 @@ object Common {
     val MUSLIM_COLORS = Constants.MUSLIM_COLORS
     val FONT_ENGLISH_APP = Constants.FONT_ENGLISH_APP
 
-
-    // ──────────────────────────────────────────────
-    //  Runtime mutable state
-    // ──────────────────────────────────────────────
-
-    /** Currently selected gallery items (photos / videos). */
     var listSelect: List<GallerySelected>? = null
-
-    /** Index of the currently active list-selection tab. */
     var indexListSelect: Int = 1
-
-    /** Minimum square height in pixels – set at runtime from display metrics. */
     var minSquareH: Int = 0
-
-    /** Minimum square width in pixels – set at runtime from display metrics. */
     var minSquareW: Int = 0
-
-    /** Shared bitmap used across several screens (e.g. background preview). */
     var bitmap: Bitmap? = null
-
-    /** Free-form decoration elements placed on the canvas. */
     var freeElements: List<FreeElement>? = null
-
-    /** Corner radius (px) for the current frame style. */
     var radius: Int = 0
-
-    /** Bounding rect of the main canvas area. */
     var rect: Rect? = null
-
-    /** Vertical border padding ratio. */
     var pHBorder: Float = 0.065f
-
-    /** Horizontal border padding ratio. */
     var PWBorder: Float = 0.1f
 
-    /** File path of the Pixabay background (if one was chosen). */
-    var pixabayBgFilePath: String? = null
-
-    /** MIME / type string of the Pixabay background. */
-    var pixabayBgType: String? = null
-
-    // ──────────────────────────────────────────────
-    //  Gradient palette factory
-    // ──────────────────────────────────────────────
-
-    /**
-     * Returns the complete list of gradient presets used in the app.
-     * Each [Gradient] carries three color stops that form a triple-gradient.
-     *
-     * The values are taken verbatim from the original JADX decompilation.
-     */
     fun getListGradientColor(): List<Gradient> = listOf(
         Gradient(-711565, -6000461, -10897425),
         Gradient(-4919188, -2572422, -356473),
@@ -168,9 +113,6 @@ object Common {
         Gradient(-5028051, -19559, -6708)
     )
 
-    // ──────────────────────────────────────────────
-    //  Additional constants (from original Common.java)
-    // ──────────────────────────────────────────────
     const val COLOR_TRANSLATION = -8780025
     const val TEMPLATE = "template"
 }

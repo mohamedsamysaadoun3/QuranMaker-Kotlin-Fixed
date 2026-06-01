@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -129,6 +130,7 @@ class ProgressViewActivity : BaseActivity(), ExportCommandBuilder.PreRenderExecu
         @Suppress("MagicNumber")
         window.setFlags(1536, 1536)
 
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         // ViewBinding — inflate and set content view

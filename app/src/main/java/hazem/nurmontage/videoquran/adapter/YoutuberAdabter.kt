@@ -13,20 +13,6 @@ import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.model.YoutuberModel
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation
 
-/**
- * RecyclerView adapter for displaying YouTuber / reciter profile thumbnails
- * in a horizontal list. Each item shows a rounded-corner thumbnail with a
- * play-overlay indicator and fires [IYoutuber.onClick] with the reciter's
- * link when tapped.
- *
- * @property iYoutuber  Callback for item click events
- * @property images     List of [YoutuberModel] items to display
- * @property appVersion Version string used as Glide cache signature
- * @property w          Override width for Glide
- * @property h          Override height for Glide
- *
- * Converted from YoutuberAdabter.java (73 lines).
- */
 class YoutuberAdabter(
     private val iYoutuber: IYoutuber?,
     private val images: List<YoutuberModel>?,
@@ -35,14 +21,9 @@ class YoutuberAdabter(
     private val h: Int
 ) : RecyclerView.Adapter<YoutuberAdabter.ViewHolder>() {
 
-    /**
-     * Callback interface for YouTuber item click events.
-     */
     interface IYoutuber {
         fun onClick(link: String)
     }
-
-    // ── ViewHolder ─────────────────────────────────────────────────────
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView: ImageView = itemView.findViewById(R.id.img)
@@ -59,8 +40,6 @@ class YoutuberAdabter(
             }
         }
     }
-
-    // ── Adapter overrides ──────────────────────────────────────────────
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)

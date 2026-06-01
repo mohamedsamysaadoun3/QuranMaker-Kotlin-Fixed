@@ -8,23 +8,6 @@ import androidx.recyclerview.widget.RecyclerView
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.entity_timeline.EntityBismilahTimeline
 
-/**
- * RecyclerView adapter for selecting Bismilah transition effects.
- *
- * Displays a horizontal list of transition icons. The user can pick one
- * transition for the "in" animation (entrance) or "out" animation (exit)
- * of a Bismilah entity on the timeline. The selected item is highlighted
- * with a distinct background drawable.
- *
- * The adapter tracks its own selection state and notifies the host via
- * [ITransition] callbacks. When the host calls [update] the entire data
- * set is replaced (e.g. switching from "in" to "out" transition list).
- *
- * @property iTransition         Callback for transition selection events
- * @property entityQuranTimeline The Bismilah timeline entity this adapter operates on
- *
- * Converted from TransitionBismilahAdabters.java (129 lines).
- */
 class TransitionBismilahAdabters(
     private val iTransition: ITransition?,
     list: List<TransitionItem>,
@@ -37,14 +20,6 @@ class TransitionBismilahAdabters(
     private var select: Int = select
     private var type: String = "in"
 
-    // ── Callback interface ──────────────────────────────────────────────
-
-    /**
-     * Callback for Bismilah transition selection events.
-     * Defined here because [EffectBismilahFragment] has not been converted yet;
-     * when it is, this interface should be moved into that fragment class and
-     * this adapter should import it from there.
-     */
     interface ITransition {
         fun `in`(type: String, entity: EntityBismilahTimeline)
         fun `out`(type: String, entity: EntityBismilahTimeline)
@@ -57,22 +32,11 @@ class TransitionBismilahAdabters(
         fun updateDurationOut(duration: Float, entity: EntityBismilahTimeline)
     }
 
-    // ── TransitionItem model ───────────────────────────────────────────
-
-    /**
-     * Represents a single transition effect item displayed in the list.
-     *
-     * @property type         Transition type string (matches [Constants.TransitionType.value])
-     * @property idRessource  Drawable resource ID for the transition icon
-     * @property angle        Rotation angle in degrees for the icon
-     */
     data class TransitionItem(
         val type: String,
         val idRessource: Int,
         val angle: Int
     )
-
-    // ── Public API ─────────────────────────────────────────────────────
 
     fun getSelect(): Int = select
 
@@ -93,8 +57,6 @@ class TransitionBismilahAdabters(
         notifyItemChanged(old)
     }
 
-    // ── Adapter overrides ──────────────────────────────────────────────
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.row_anim, parent, false)
@@ -113,8 +75,6 @@ class TransitionBismilahAdabters(
     }
 
     override fun getItemCount(): Int = max
-
-    // ── ViewHolder ─────────────────────────────────────────────────────
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val animationItem: ImageView = itemView.findViewById(R.id.anim_item)

@@ -66,10 +66,9 @@ class ShareWithMeActivity : BaseActivity() {
 
         progressBar = findViewById(R.id.progress_horizontal)
 
-        // Clean up any previous template data
-        LocalPersistence.deleteTemplate(this, Constants.TEMPLATE_TMP)
-
         // Route the intent to the appropriate handler
+        // Note: deleteTemplate is called inside handleIntent after null check,
+        // matching the original Java flow (only called once, not in onCreate).
         handleIntent(intent)
     }
 

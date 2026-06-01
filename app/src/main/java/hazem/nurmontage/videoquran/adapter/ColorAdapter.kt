@@ -8,22 +8,12 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import hazem.nurmontage.videoquran.R
 
-/**
- * RecyclerView adapter for displaying a horizontal color palette.
- *
- * Each item is a circular swatch from the provided [colors] array.
- * The selected position gets a white stroke highlight.
- * Clicking a swatch fires [IColor.onColor] with the color value and position.
- *
- * Converted from ColorAdabter.java (original misspelling corrected).
- */
 class ColorAdapter(
     private val iColorCallback: IColor?,
     private val colors: IntArray,
     private var posSelect: Int
 ) : RecyclerView.Adapter<ColorAdapter.ViewHolder>() {
 
-    /** Callback interface for color selection events. */
     interface IColor {
         fun onColor(color: Int, position: Int)
     }

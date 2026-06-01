@@ -18,23 +18,6 @@ import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.core.base.BaseActivity
 import hazem.nurmontage.videoquran.databinding.ActivityVideoPlayerBinding
 
-/**
- * Full-screen video player activity with ExoPlayer.
- *
- * Originally: VideoPlayerActivity.java (184 lines)
- * Converted to: VideoPlayerActivity.kt — full logic preserved
- *
- * Features:
- * - Full-screen playback with hidden system UI
- * - Decoder fallback for unsupported codecs
- * - Seek increments of 5000ms (5 seconds)
- * - Repeat mode enabled (loop playback)
- * - Play/Pause button toggle
- * - Back button to exit
- * - Rotate button to toggle portrait/landscape
- * - Proper lifecycle management (release player on stop)
- * - Retry with fallback decoder on player error
- */
 class VideoPlayerActivity : BaseActivity() {
 
     private lateinit var binding: ActivityVideoPlayerBinding
@@ -81,7 +64,7 @@ class VideoPlayerActivity : BaseActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        triggerHideSystemBars()
+        hideSystemBars()
     }
 
     private fun initializePlayer() {
@@ -169,10 +152,6 @@ class VideoPlayerActivity : BaseActivity() {
         insetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         setStatusBarColor(ViewCompat.MEASURED_STATE_MASK)
         setNavigationBarColor(ViewCompat.MEASURED_STATE_MASK)
-    }
-
-    private fun triggerHideSystemBars() {
-        hideSystemBars()
     }
 
     companion object {

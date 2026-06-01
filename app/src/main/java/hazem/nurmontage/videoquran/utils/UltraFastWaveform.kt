@@ -100,13 +100,9 @@ object UltraFastWaveform {
         codec.release()
         extractor.release()
 
-        return sampleList.toShortArray()
-    }
-
-    private fun MutableList<Short>.toShortArray(): ShortArray {
-        val result = ShortArray(this.size)
-        for (i in this.indices) {
-            result[i] = this[i]
+        val result = ShortArray(sampleList.size)
+        for (i in sampleList.indices) {
+            result[i] = sampleList[i]
         }
         return result
     }

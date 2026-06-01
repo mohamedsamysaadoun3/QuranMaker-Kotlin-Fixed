@@ -41,23 +41,6 @@ import hazem.nurmontage.videoquran.views.TextCustumFont
 import hazem.nurmontage.videoquran.views.TextCustumFontBold
 import java.io.File
 
-/**
- * Video preview / share activity — shows the rendered video thumbnail with
- * options to share, go home, or return to the editor.
- *
- * Originally: VideoViewActivity.java (345 lines)
- * Converted to: VideoViewActivity.kt — full logic preserved
- *
- * Features:
- * - Displays video thumbnail via Glide with frame extraction
- * - Click thumbnail to open full-screen VideoPlayerActivity
- * - Share video via FileProvider + share intent
- * - Home button returns to WorkUserActivity
- * - Back button returns to EngineActivity (studio)
- * - Tuffah app cross-promotion
- * - Help button opens WhatsApp support group
- * - Rating dialog after 4+ sessions
- */
 class VideoViewActivity : BaseActivity() {
 
     private lateinit var binding: ActivityVideoViewBinding

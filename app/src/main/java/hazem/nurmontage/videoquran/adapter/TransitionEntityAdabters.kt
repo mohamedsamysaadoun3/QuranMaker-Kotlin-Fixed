@@ -8,21 +8,6 @@ import androidx.recyclerview.widget.RecyclerView
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.entity_timeline.EntityQuranTimeline
 
-/**
- * RecyclerView adapter for selecting Aya (Quran verse) transition effects.
- *
- * Similar to [TransitionBismilahAdabters] but operates on [EntityQuranTimeline]
- * entities. All transitions are available (billing removed).
- *
- * The adapter tracks its own selection state and notifies the host via
- * [ITransition] callbacks. When the host calls [update] the entire data
- * set is replaced (e.g. switching from "in" to "out" transition list).
- *
- * @property iTransition        Callback for transition selection events
- * @property entityQuranTimeline The Quran timeline entity this adapter operates on
- *
- * Converted from TransitionEntityAdabters.java (144 lines).
- */
 class TransitionEntityAdabters(
     private val iTransition: ITransition?,
     list: List<TransitionItem>,
@@ -35,14 +20,6 @@ class TransitionEntityAdabters(
     private var select: Int = select
     private var type: String = "in"
 
-    // ── Callback interface ──────────────────────────────────────────────
-
-    /**
-     * Callback for Aya transition selection events.
-     * Defined here because [EffectAyaFragment] has not been converted yet;
-     * when it is, this interface should be moved into that fragment class and
-     * this adapter should import it from there.
-     */
     interface ITransition {
         fun `in`(type: String, entity: EntityQuranTimeline)
         fun `out`(type: String, entity: EntityQuranTimeline)
@@ -55,22 +32,11 @@ class TransitionEntityAdabters(
         fun updateDurationOut(duration: Float, entity: EntityQuranTimeline)
     }
 
-    // ── TransitionItem model ───────────────────────────────────────────
-
-    /**
-     * Represents a single transition effect item displayed in the list.
-     *
-     * @property type         Transition type string (matches [Constants.TransitionType.value])
-     * @property idRessource  Drawable resource ID for the transition icon
-     * @property angle        Rotation angle in degrees for the icon
-     */
     data class TransitionItem(
         val type: String,
         val idRessource: Int,
         val angle: Int
     )
-
-    // ── Public API ─────────────────────────────────────────────────────
 
     fun getSelect(): Int = select
 
@@ -91,8 +57,6 @@ class TransitionEntityAdabters(
         notifyItemChanged(old)
     }
 
-    // ── Adapter overrides ──────────────────────────────────────────────
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.row_anim, parent, false)
@@ -112,8 +76,6 @@ class TransitionEntityAdabters(
 
     override fun getItemCount(): Int = max
 
-    // ── ViewHolder ─────────────────────────────────────────────────────
-
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val animationItem: ImageView = itemView.findViewById(R.id.anim_item)
 
@@ -122,7 +84,6 @@ class TransitionEntityAdabters(
                 val pos = adapterPosition
                 if (iTransition == null) return@setOnClickListener
 
-                // Don't re-select the already selected item
                 if (select == pos) return@setOnClickListener
 
                 val oldSelect = select

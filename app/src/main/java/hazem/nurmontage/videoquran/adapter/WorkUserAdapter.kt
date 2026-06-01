@@ -14,12 +14,6 @@ import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.model.Template
 import hazem.nurmontage.videoquran.utils.MFileUtils
 
-/**
- * RecyclerView adapter for displaying saved project templates with video thumbnails.
- *
- * Converted from WorkUserAdabter.java — preserves all original logic including
- * Glide thumbnail loading with frame extraction, menu callback, and item manipulation.
- */
 class WorkUserAdapter(
     private val appVersion: String,
     private val images: List<Template>,

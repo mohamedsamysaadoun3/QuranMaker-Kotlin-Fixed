@@ -40,25 +40,6 @@ import hazem.nurmontage.videoquran.utils.ScreenUtils
 import hazem.nurmontage.videoquran.utils.LocaleHelper
 import java.io.File
 
-/**
- * Home / Main activity — displays saved projects and "Create New Project" button.
- *
- * Loads [Template] objects from SharedPreferences ("MTemplate") via Gson,
- * displays them in a RecyclerView with thumbnails, and provides a popup menu
- * for each project with Share / Duplicate / Delete actions.
- *
- * Converted from WorkUserActivity.java — all original logic preserved including:
- * - Template loading from SharedPreferences via Gson
- * - Project deletion with confirmation dialog
- * - Project duplication via Template.duplicate() + LocalPersistence
- * - Project sharing via FileProvider + share intent
- * - Popup menu with share/delete/duplicate options
- * - Double-tap back to exit with toast
- * - Lifecycle cleanup (Glide memory, dialog dismiss)
- *
- * Billing-related code (BillingPreferences, secret 5-tap unlock) removed —
- * all features are unlocked by default in this build.
- */
 class WorkUserActivity : BaseActivity() {
 
     private var dialog: Dialog? = null
