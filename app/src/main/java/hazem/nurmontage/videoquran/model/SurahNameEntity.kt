@@ -17,26 +17,6 @@ import hazem.nurmontage.videoquran.constant.SurahNameStyle
 import hazem.nurmontage.videoquran.entity_timeline.EntityQuranTimeline
 import java.io.Serializable
 
-/**
- * Renders the surah name (and optionally reader name) on the canvas.
- *
- * Extends [EntityView] and provides full rendering logic including:
- *   - Static layout creation with binary-search text-size fitting
- *   - Aya text preset support (NONE, OUTLINE, SHADOW, GLOW)
- *   - Surah name style rendering ([SurahNameStyle.ZAGHRAFAT] draws a
- *     decorative calligraphic name above the reader text)
- *   - Optional background colour behind the name
- *   - Scale, translate, and draw operations
- *
- * The surah name is determined by [index_surah] (1-114), which is used
- * to generate the [name_style] string that maps to a calligraphic font
- * glyph (e.g., "001sura", "002sura", ..., "114sura").
- *
- * Field names preserved from original JADX source for serialization
- * compatibility with saved project files.
- *
- * Converted from SurahNameEntity.java (519 lines).
- */
 class SurahNameEntity : EntityView, Serializable {
 
     companion object {
@@ -44,14 +24,12 @@ class SurahNameEntity : EntityView, Serializable {
         private const val ALPHA_BG = 120  // Matches nl.dionsegijn.konfetti.core.Angle.LEFT value (120)
     }
 
-    // ── Text paints (multiple layers for outline/shadow effects) ──────
     private val paintAya: TextPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
     private val paintAyaOutline: TextPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
     private val paintAyaStyle: TextPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
     private val paintAyaStyleOutline: TextPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
     private val paintBg: TextPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
 
-    // ── State fields (names preserved for serialization) ─────────────
     private var alignment: Layout.Alignment = Layout.Alignment.ALIGN_CENTER
     var clrBg: Int = 0
         internal set
@@ -81,35 +59,13 @@ class SurahNameEntity : EntityView, Serializable {
     var reader: String = ""
         internal set
 
-    // ── Static layouts (rendered text) ───────────────────────────────
     private var staticLayout: StaticLayout? = null
     private var staticLayoutOutline: StaticLayout? = null
     private var staticLayoutStyle: StaticLayout? = null
     private var staticLayoutStyleOutline: StaticLayout? = null
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Constructors
-    // ═══════════════════════════════════════════════════════════════════
 
-    /**
-     * Full constructor matching the original Java signature.
-     *
-     * @param alignment  Text alignment for the surah name
-     * @param name       Surah display name (e.g., "الفاتحة")
-     * @param reader     Reader name (e.g., "عبد الباسط")
-     * @param rectF      Bounding rectangle on the canvas
-     * @param typeface   Font for the reader text
-     * @param color      Text color
-     * @param factorScale  Scale factor
-     * @param fontName   Font file name
-     * @param preset     AyaTextPreset ordinal
-     * @param styleTypeface  Font for the decorative surah name
-     * @param style      SurahNameStyle ordinal
-     * @param surahIndex  Surah number (1-114)
-     * @param ipadType   IpadType ordinal
-     * @param haveBg     Whether to draw a background behind the name
-     * @param bgColor    Background colour
-     */
     constructor(
         alignment: Layout.Alignment,
         name: String,
@@ -160,18 +116,10 @@ class SurahNameEntity : EntityView, Serializable {
         }
     }
 
-    /** Required empty constructor for Fragment/Activity state restoration. */
     constructor()
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Surah name style string
-    // ═══════════════════════════════════════════════════════════════════
 
-    /**
-     * Generates the [name_style] string from [index_surah].
-     * Format: "001sura", "002sura", ..., "114sura" (zero-padded to 3 digits).
-     * This string is rendered using the calligraphic surah name font.
-     */
     fun setupSurahFont() {
         name_style = when {
             index_surah < 10 -> "00${index_surah}sura"
@@ -180,9 +128,7 @@ class SurahNameEntity : EntityView, Serializable {
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Colour & preset
-    // ═══════════════════════════════════════════════════════════════════
 
     fun setClrBg(color: Int) {
         clrBg = color
@@ -204,15 +150,8 @@ class SurahNameEntity : EntityView, Serializable {
         createStaticLayout()
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Aya preset application
-    // ═══════════════════════════════════════════════════════════════════
 
-    /**
-     * Applies the given [AyaTextPreset] effect to [paint].
-     * Handles size adjustments for ZAGHRAFAT style and supports
-     * OUTLINE, SHADOW, and GLOW effects.
-     */
     fun applyAyaPreset(
         paint: Paint,
         ayaTextPreset: AyaTextPreset,
@@ -304,9 +243,7 @@ class SurahNameEntity : EntityView, Serializable {
 
     fun initPreset(ordinal: Int) { setPreset(get(ordinal)) }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Scale & translate
-    // ═══════════════════════════════════════════════════════════════════
 
     override fun scale(factor: Float, canvasW: Int, canvasH: Int) {
         factorScale = factor
@@ -333,14 +270,8 @@ class SurahNameEntity : EntityView, Serializable {
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Text size calculation (binary search)
-    // ═══════════════════════════════════════════════════════════════════
 
-    /**
-     * Calculates the largest text size that fits [text] within [maxWidth] x [maxHeight]
-     * using a 100-iteration binary search on [paint] text bounds.
-     */
     fun calculateTextSize(text: String, paint: Paint, maxWidth: Int, maxHeight: Int): Float {
         var low = 0f
         var high = 1000f
@@ -361,9 +292,7 @@ class SurahNameEntity : EntityView, Serializable {
         return low
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Static layout creation
-    // ═══════════════════════════════════════════════════════════════════
 
     private fun createStaticLayout() {
         val displayText: String
@@ -437,9 +366,7 @@ class SurahNameEntity : EntityView, Serializable {
             .build()
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Position update
-    // ═══════════════════════════════════════════════════════════════════
 
     fun move() {
         x = rect.left
@@ -470,11 +397,12 @@ class SurahNameEntity : EntityView, Serializable {
         createStaticLayout()
     }
 
-    fun setRectBounds(rectF: RectF) {
-        rect = rectF
-        y = rectF.top
-        x = rectF.left
-    }
+    override var rect: RectF = RectF()
+        set(value) {
+            field = value
+            y = value.top
+            x = value.left
+        }
 
     fun setAlignment(alignment: Layout.Alignment) { this.alignment = alignment }
 
@@ -487,9 +415,7 @@ class SurahNameEntity : EntityView, Serializable {
         createStaticLayout()
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  Drawing
-    // ═══════════════════════════════════════════════════════════════════
 
     fun draw(canvas: Canvas) {
         val layout = staticLayout ?: return
@@ -527,14 +453,11 @@ class SurahNameEntity : EntityView, Serializable {
     }
 
     fun singleDraw(canvas: Canvas) {
-        val layout = staticLayout ?: return
         createStaticLayout()
-        layout.draw(canvas)
+        staticLayout?.draw(canvas)
     }
 
-    // ═══════════════════════════════════════════════════════════════════
     //  EntityView overrides
-    // ═══════════════════════════════════════════════════════════════════
 
     override fun endAnimator() { /* No animations in this entity */ }
 

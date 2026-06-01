@@ -760,7 +760,7 @@ class TranslationQuranEntity : EntityView, Serializable {
         if (isAnimTest) weakBlurredImageView?.get()?.invalidate()
     }
 
-    fun setZoomFactorSize(factor: Float) {
+    fun setFactorSize(factor: Float) {
         scaleX = factor
         if (isAnimTest) weakBlurredImageView?.get()?.invalidate()
     }
@@ -802,7 +802,7 @@ class TranslationQuranEntity : EntityView, Serializable {
     }
 
     fun zoomIn_In(duration: Int, repeat: Boolean) {
-        val anim = ObjectAnimator.ofFloat(this, "ZoomFactorSize", 0f, 1f)
+        val anim = ObjectAnimator.ofFloat(this, "FactorSize", 0f, 1f)
         otherAnimation = anim
         anim.duration = duration.toLong()
         if (repeat) { anim.repeatMode = ObjectAnimator.RESTART; anim.repeatCount = -1 }

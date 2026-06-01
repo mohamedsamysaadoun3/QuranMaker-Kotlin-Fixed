@@ -1,20 +1,16 @@
 package hazem.nurmontage.videoquran.model
 
-/**
- * Reciter model for online audio source resolution.
- * Stores the server identifier, zero-padded surah index, ayah number, and tarteel flag.
- *
- * Serialization-critical field names preserved verbatim:
- *   identifer (typo preserved), surah_index, number_aya, isTarteel
- */
-data class RecitersModel(
-    val identifer: String,
-    val surahIdx: Int,
-    val ayaNum: Int
+class RecitersModel(
+    identifer: String,
+    surahIdx: Int,
+    ayaNum: Int
 ) {
+    var identifer: String = identifer
+        private set
     val surah_index: String
     val number_aya: String
-    val isTarteel: Boolean
+    var isTarteel: Boolean = false
+        private set
 
     init {
         surah_index = when {

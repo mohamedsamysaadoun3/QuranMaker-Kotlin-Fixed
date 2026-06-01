@@ -13,7 +13,8 @@ abstract class EntityView {
     open var maxH: Int = 0
 
     open var factorScale: Float = 1.0f
-    open var factorSize: Float = 1.0f
+    var factorSize: Float = 1.0f
+        private set
     open var factorSizeTrl: Float = 1.0f
 
     private var canvasW: Int = 0

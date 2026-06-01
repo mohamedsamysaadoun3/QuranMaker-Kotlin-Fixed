@@ -2,59 +2,35 @@ package hazem.nurmontage.videoquran.model
 
 import java.io.Serializable
 
-/**
- * Describes the in/out/both transition configuration for a single timeline entity.
- *
- * Each transition can have an independent type and duration for the "in" and "out"
- * phases, plus an optional "both" phase. The offset-frame values store the
- * frame-relative start positions for FFmpeg-based transitions.
- *
- * All field names are preserved from the original JADX decompilation to
- * maintain serialization compatibility with saved project files.
- *
- * Originally: `hazem.nurmontage.videoquran.model.Transition`
- */
 class Transition : Serializable {
 
     companion object {
         private const val serialVersionUID = 1L
     }
 
-    // ──────────────────────────────────────────────
     //  Transition types
-    // ──────────────────────────────────────────────
     var type_in: String = "none"
     var type_out: String = "none"
     var type_both: String = "none"
 
-    // ──────────────────────────────────────────────
     //  Durations (seconds)
-    // ──────────────────────────────────────────────
     var duration_in: Float = 1.5f
     var duration_out: Float = 1.5f
     var duration_both: Float = 0.1f
 
-    // ──────────────────────────────────────────────
     //  Active flags
-    // ──────────────────────────────────────────────
     var isIn: Boolean = false
     var isOut: Boolean = false
     var isBoth: Boolean = false
 
-    // ──────────────────────────────────────────────
     //  Frame offsets (used by FFmpeg transition rendering)
-    // ──────────────────────────────────────────────
     var offset_frame_in: Float = 0f
     var offset_frame_out: Float = 0f
 
-    // ──────────────────────────────────────────────
     //  Width reference (used by some transition types)
-    // ──────────────────────────────────────────────
     var fromW: Float = 0f
 
-    // ──────────────────────────────────────────────
     //  Constructors
-    // ──────────────────────────────────────────────
 
     constructor()
 
@@ -80,13 +56,8 @@ class Transition : Serializable {
         this.isBoth = isBoth
     }
 
-    // ──────────────────────────────────────────────
     //  Duplicate
-    // ──────────────────────────────────────────────
 
-    /**
-     * Creates a deep copy of this transition, including offset frames and width reference.
-     */
     fun duplicate(): Transition {
         val copy = Transition(
             type_in, type_out, type_both,
