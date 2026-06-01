@@ -10,17 +10,6 @@ import android.graphics.Shader
 import android.util.AttributeSet
 import android.view.View
 
-/**
- * Custom view that draws a neumorphic (soft UI) rounded rectangle
- * with light and dark shadow layers for a 3D embossed effect.
- *
- * The view uses three paint layers:
- * - Light shadow (top-left offset)
- * - Dark shadow (bottom-right offset)
- * - Gradient fill background
- *
- * Originally: NeumorphicRectView.java (99 lines)
- */
 class NeumorphicRectView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -63,7 +52,6 @@ class NeumorphicRectView @JvmOverloads constructor(
         super.onSizeChanged(w, h, oldw, oldh)
         val offset = shadowOffset
         rect.set(offset * 1.5f, offset * 1.5f, w - offset * 1.5f, h - offset * 1.5f)
-
         backgroundPaint.shader = LinearGradient(
             rect.left, rect.top, rect.right, rect.bottom,
             Color.argb(

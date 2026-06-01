@@ -10,19 +10,6 @@ import android.graphics.Shader
 import android.util.AttributeSet
 import android.view.View
 
-/**
- * Custom progress bar with gradient fill and rounded corners.
- *
- * Draws a track background (white by default) with a gradient-filled
- * progress bar on top. The gradient goes from green to yellow
- * (#a8ce46 → #D2DE49 → #F4D853).
- *
- * The progress ratio is calculated as [progress] / [maxProgress],
- * and the filled portion is drawn as a rounded rectangle with the
- * gradient shader applied.
- *
- * Originally: GradientProgressBar.java (146 lines)
- */
 class GradientProgressBar @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -31,7 +18,7 @@ class GradientProgressBar @JvmOverloads constructor(
 
     private var progress: Int = 0
     private var maxProgress: Int = 100
-    private var trackColor: Int = -1 // white
+    private var trackColor: Int = -1
     private var gradientColors: IntArray = intArrayOf(
         Color.parseColor("#a8ce46"),
         Color.parseColor("#D2DE49"),
@@ -51,10 +38,6 @@ class GradientProgressBar @JvmOverloads constructor(
     private val trackRect: RectF = RectF()
     private val progressRect: RectF = RectF()
     private var progressShader: LinearGradient? = null
-
-    init {
-        createProgressShader()
-    }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
@@ -108,10 +91,8 @@ class GradientProgressBar @JvmOverloads constructor(
         super.onDraw(canvas)
         val viewWidth = width.toFloat()
         val viewHeight = height.toFloat()
-
         trackRect.set(0f, 0f, viewWidth, viewHeight)
         canvas.drawRoundRect(trackRect, cornerRadius, cornerRadius, trackPaint)
-
         progressRect.set(0f, 0f, viewWidth * (progress.toFloat() / maxProgress.toFloat()), viewHeight)
         canvas.drawRoundRect(progressRect, cornerRadius, cornerRadius, progressPaint)
     }

@@ -20,18 +20,6 @@ import com.bumptech.glide.signature.ObjectKey
 import hazem.nurmontage.videoquran.utils.AppUtils
 import java.util.concurrent.ExecutionException
 
-/**
- * Custom view that creates an "eye opening" reveal animation over a bitmap,
- * using a lens distortion effect.
- *
- * The bitmap is drawn column-by-column with a parabolic distortion that
- * compresses the image toward the center line as the eye opens. An eye-shaped
- * path is then cleared from the canvas using PorterDuff CLEAR mode.
- *
- * The [openEye] method animates the progress from 0 to 1 with 5 repeats.
- *
- * Originally: EyeView.java (175 lines)
- */
 class EyeView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -67,7 +55,7 @@ class EyeView @JvmOverloads constructor(
         super.onSizeChanged(w, h, oldw, oldh)
         val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
         eye = bmp
-        bmp.eraseColor(-16711936) // green
+        bmp.eraseColor(-16711936)
     }
 
     fun setBackground(bitmap: Bitmap?) {
@@ -86,7 +74,6 @@ class EyeView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val bitmap = this.background ?: return
-
         val drawPaint = Paint(Paint.ANTI_ALIAS_FLAG)
         var halfFactor = 2.0f
         var halfHeight = getHeight() / 2.0f
@@ -94,24 +81,19 @@ class EyeView @JvmOverloads constructor(
         val eyeW = getWidth() * 0.6f
         val eyeH = getHeight() * 0.6f * eyeProgress
         var useZ2 = false
-
         canvas.drawBitmap(bitmap, 0.0f, 0.0f, drawPaint)
-
         val eyePath = createEyePath(halfWidth, halfHeight, eyeW, eyeH)
-
         var i = 0
         while (i <= 60) {
             val x = (getWidth() * i) / 60f
             val halfEyeW = eyeW / halfFactor
             val offset = x - halfWidth
-
             if (Math.abs(offset) > halfEyeW) {
-                // Outside the eye shape, no distortion needed
+                // outside eye shape
             } else {
                 val parabolic = (eyeH / halfFactor) * (1.0f - (offset * offset) / (halfEyeW * halfEyeW))
                 val shiftedCenter = halfHeight + parabolic
                 val nextI = i + 1
-
                 val srcTop = Rect(
                     (bitmap.width * i) / 60, 0,
                     (bitmap.width * nextI) / 60, bitmap.height / 2
@@ -120,18 +102,14 @@ class EyeView @JvmOverloads constructor(
                     (bitmap.width * i) / 60, bitmap.height / 2,
                     (nextI * bitmap.width) / 60, bitmap.height
                 )
-
                 val dstTop = RectF(x, 0.0f, (getWidth() / 60f) + x, halfHeight - parabolic)
                 val dstBottom = RectF(x, shiftedCenter, (getWidth() / 60f) + x, getHeight().toFloat())
-
                 canvas.drawBitmap(bitmap, srcTop, dstTop, drawPaint)
                 canvas.drawBitmap(bitmap, srcBottom, dstBottom, drawPaint)
             }
             i++
             halfFactor = 2.0f
         }
-
-        // Clear the eye shape from canvas
         val saveLayer = canvas.saveLayer(0.0f, 0.0f, getWidth().toFloat(), getHeight().toFloat(), null)
         drawPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
         canvas.drawPath(eyePath, drawPaint)

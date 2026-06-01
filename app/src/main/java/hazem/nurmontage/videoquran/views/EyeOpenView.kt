@@ -12,15 +12,6 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
 
-/**
- * Custom view that creates an "eye opening" reveal animation over a bitmap.
- *
- * The animation gradually reveals the bitmap through an expanding oval shape,
- * creating a blink/eye-open effect. The upper and lower portions of the bitmap
- * are scaled down as the eye opens, creating a realistic eyelid motion.
- *
- * Originally: EyeOpenView.java (126 lines)
- */
 class EyeOpenView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -37,7 +28,6 @@ class EyeOpenView @JvmOverloads constructor(
     private val paint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var radiusX: Float = 0f
     private var radiusYFull: Float = 0f
-    @Suppress("unused")
     private var wrapOffset: Float = 50.0f
 
     init {
@@ -77,10 +67,7 @@ class EyeOpenView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val bmp = bitmap ?: return
-
         canvas.drawBitmap(bmp, 0.0f, 0.0f, paint)
-
-        // Clear an oval area (the "eye opening")
         eyePath.reset()
         eyeRect.set(
             centerX - radiusX, centerY - currentRY,
@@ -90,16 +77,12 @@ class EyeOpenView @JvmOverloads constructor(
         canvas.saveLayer(null, null, Canvas.ALL_SAVE_FLAG)
         canvas.drawPath(eyePath, clearPaint)
         canvas.restore()
-
-        // Draw upper portion of bitmap, scaled to compress as eye opens
         val upperScale = map(currentRY, 0.0f, radiusYFull, 1.0f, 0.0f)
         canvas.save()
         canvas.clipRect(0.0f, 0.0f, width.toFloat(), centerY - currentRY)
         canvas.scale(1.0f, upperScale, centerX, centerY - currentRY)
         canvas.drawBitmap(bmp, 0.0f, 0.0f, paint)
         canvas.restore()
-
-        // Draw lower portion of bitmap, scaled to compress as eye opens
         val lowerScale = map(currentRY, 0.0f, radiusYFull, 1.0f, 0.0f)
         canvas.save()
         canvas.clipRect(0.0f, centerY + currentRY, width.toFloat(), height.toFloat())
