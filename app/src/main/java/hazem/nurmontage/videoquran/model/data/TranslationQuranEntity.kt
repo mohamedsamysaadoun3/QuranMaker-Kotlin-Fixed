@@ -25,20 +25,6 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.round
 
-/**
- * Standalone translation text entity rendered on the canvas.
- *
- * Unlike [QuranEntity], this class handles **only** translation text —
- * there is no aya/translation dual-layer.  It supports text presets
- * (outline, shadow, glow), ObjectAnimator-driven transitions (slide,
- * fade, zoom), optional background colour, and per-frame drawing with
- * an outline layer.
- *
- * All field names are preserved from the original JADX decompilation to
- * maintain serialization compatibility with saved project files.
- *
- * Originally: `hazem.nurmontage.videoquran.model.TranslationQuranEntity`
- */
 class TranslationQuranEntity : EntityView, Serializable {
 
     companion object {
@@ -46,9 +32,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         private const val ALPHA_BG = 100
     }
 
-    // ──────────────────────────────────────────────
-    //  State fields (names preserved for serialization)
-    // ──────────────────────────────────────────────
     internal var clrAya: Int = 0
     internal var index: Int = 0
     internal var ipad_type: Int = 0
@@ -76,14 +59,6 @@ class TranslationQuranEntity : EntityView, Serializable {
     internal var isHaveBg: Boolean = true
     internal var scaleX: Float = 1.0f
 
-    // ──────────────────────────────────────────────
-    //  Constructors
-    // ──────────────────────────────────────────────
-
-    /**
-     * Full constructor: sets canvas dimensions, positions the rect at the
-     * bottom of the canvas, calculates text size, and creates the static layout.
-     */
     constructor(
         txt: String,
         rectF: RectF,
@@ -112,10 +87,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         createStaticLayout()
     }
 
-    /**
-     * Constructor with explicit canvas dimensions and pre-positioned rect.
-     * Does NOT calculate text size or create layout (caller must do that).
-     */
     constructor(
         canvasW: Int,
         canvasH: Int,
@@ -142,9 +113,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         maxW = (rect.width() * 0.85f).toInt()
     }
 
-    /**
-     * Constructor with explicit text size and copy-rect.
-     */
     constructor(
         txt: String,
         rectF: RectF,
@@ -170,9 +138,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         maxW = (rect.width() * 0.85f).toInt()
     }
 
-    /**
-     * Constructor with explicit text size but without background setup.
-     */
     constructor(
         txt: String,
         rectF: RectF,
@@ -198,10 +163,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         paintBg.alpha = ALPHA_BG
     }
 
-    // ──────────────────────────────────────────────
-    //  Background
-    // ──────────────────────────────────────────────
-
     fun getClrBg(): Int = clrBg
 
     fun setHaveBg(haveBg: Boolean) { isHaveBg = haveBg }
@@ -214,26 +175,12 @@ class TranslationQuranEntity : EntityView, Serializable {
         paintBg.alpha = ALPHA_BG
     }
 
-    // ──────────────────────────────────────────────
-    //  Preset accessors
-    // ──────────────────────────────────────────────
-
     fun getmPreset(): Int = mPreset
     fun setmPreset(preset: Int) { mPreset = preset }
     fun setIpad_type(type: Int) { ipad_type = type }
     fun getIpad_type(): Int = ipad_type
     fun getTxt(): String? = txt
 
-    // ──────────────────────────────────────────────
-    //  Aya preset application
-    // ──────────────────────────────────────────────
-
-    /**
-     * Applies the given [AyaTextPreset] effect to [paint].
-     *
-     * Replaces the JADX-generated switch-map synthetic class (`C22071`)
-     * with idiomatic Kotlin `when` expression.
-     */
     fun applyAyaPreset(
         paint: Paint,
         ayaTextPreset: AyaTextPreset,
@@ -288,10 +235,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         }
     }
 
-    /**
-     * Sets the text preset for the translation paint.
-     * For OUTLINE preset, applies a two-layer approach: outline paint + fill paint on top.
-     */
     fun setPreset(ayaTextPreset: AyaTextPreset) {
         mPreset = ayaTextPreset.ordinal
         if (ayaTextPreset == AyaTextPreset.OUTLINE) {
@@ -303,9 +246,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         }
     }
 
-    /**
-     * Converts an ordinal value back to its [AyaTextPreset] enum constant.
-     */
     fun presetFromOrdinal(ordinal: Int): AyaTextPreset = when (ordinal) {
         AyaTextPreset.SHADOW.ordinal -> AyaTextPreset.SHADOW
         AyaTextPreset.OUTLINE.ordinal -> AyaTextPreset.OUTLINE
@@ -313,12 +253,8 @@ class TranslationQuranEntity : EntityView, Serializable {
         else -> AyaTextPreset.NONE
     }
 
-    /** Backward-compatible alias kept for callers that use the original name. */
     fun get(ordinal: Int): AyaTextPreset = presetFromOrdinal(ordinal)
 
-    /**
-     * Initializes the preset from an ordinal, applying effects to the paint.
-     */
     fun initPreset(ordinal: Int) {
         mPreset = ordinal
         val ayaTextPreset = presetFromOrdinal(ordinal)
@@ -334,10 +270,6 @@ class TranslationQuranEntity : EntityView, Serializable {
 
     fun initPresetAya(ordinal: Int) = initPreset(ordinal)
 
-    // ──────────────────────────────────────────────
-    //  View references
-    // ──────────────────────────────────────────────
-
     fun setViewWeakReference(
         trackRef: WeakReference<TrackEntityView>?,
         blurRef: WeakReference<BlurredImageView>?
@@ -346,9 +278,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         weakBlurredImageView = blurRef
     }
 
-    /**
-     * Calculates the fade animation duration based on the entity's visible time span.
-     */
     fun getDuration_fade(): Int {
         val quran = entityQuran ?: return 0
         return ((abs(quran.rect.right / quran.secondInScreen) -
@@ -359,10 +288,6 @@ class TranslationQuranEntity : EntityView, Serializable {
     fun setIndex(index: Int) { this.index = index }
     fun getIndex(): Int = index
 
-    // ──────────────────────────────────────────────
-    //  Text & color
-    // ──────────────────────────────────────────────
-
     fun setClrAya(color: Int) { clrAya = color }
     fun getClrAya(): Int = clrAya
     fun getPaintAya(): TextPaint = paintAya
@@ -372,14 +297,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         createStaticLayout()
     }
 
-    // ──────────────────────────────────────────────
-    //  Text-size calculation (binary search)
-    // ──────────────────────────────────────────────
-
-    /**
-     * Calculates the largest text size that fits [text] within [maxWidth] x [maxHeight]
-     * using a 100-iteration binary search on [paint] text bounds.
-     */
     fun calculateTextSize(text: String?, paint: Paint, maxWidth: Int, maxHeight: Int): Float {
         if (text.isNullOrEmpty() || maxWidth <= 0 || maxHeight <= 0) return 0f
         paint.textSize = 1.0f
@@ -400,10 +317,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         return low
     }
 
-    /**
-     * Calculates the optimal text size using [StaticLayout] for accurate multi-line measurement.
-     * Uses binary search between 5.0f and 1000.0f.
-     */
     fun calculateOptimalTextSize(text: String, maxWidth: Int, maxHeight: Int, textPaint: TextPaint): Float {
         var low = 5f
         var high = 1000f
@@ -428,7 +341,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         return result
     }
 
-    /** Returns the maximum line width across all lines in [layout]. */
     private fun getMaxLineWidth(layout: StaticLayout): Float {
         var maxWidth = 0f
         for (i in 0 until layout.lineCount) {
@@ -437,10 +349,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         return maxWidth
     }
 
-    /**
-     * Iteratively reduces text size from 28% to 8% of rect height until
-     * the layout fits within [availableHeight].  Uses 1.12 line-spacing factor.
-     */
     private fun createBestSizeLayout(text: String, textPaint: TextPaint, maxWidth: Int, availableHeight: Int): Float {
         val minSize = rect.height() * 0.08f
         var textSize = rect.height() * 0.28f
@@ -460,17 +368,12 @@ class TranslationQuranEntity : EntityView, Serializable {
         return textPaint.textSize
     }
 
-    /** Convenience: calculates text size using the entity's own rect. */
     fun calculateTextSize(): Float {
         return createBestSizeLayout(txt!!, paintAya, (rect.width() * 0.9f).toInt(), (rect.height() * 0.95f).toInt())
     }
 
     fun setTextSize(size: Float) { paintAya.textSize = size }
 
-    /**
-     * Sets the text size and rebuilds the static layout in a loop context
-     * (used during iterative size adjustment).
-     */
     fun setTextSizeInBoucle(size: Float) {
         paintAya.textSize = size
         val spannable = SpannableString(txt!!)
@@ -483,15 +386,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         posX = rect.centerX() - (staticLayout!!.width * 0.5f)
     }
 
-    // ──────────────────────────────────────────────
-    //  Balanced layout
-    // ──────────────────────────────────────────────
-
-    /**
-     * Creates a [StaticLayout] that reduces text size until the last line
-     * has at least 2 words and occupies at least 25% of the available width,
-     * preventing orphaned words.
-     */
     private fun createBalancedLayout(
         text: String,
         textPaint: TextPaint,
@@ -515,16 +409,11 @@ class TranslationQuranEntity : EntityView, Serializable {
             val lastLineWidth = layout.getLineWidth(lastLine)
             val lastLineText = text.substring(layout.getLineStart(lastLine), layout.getLineEnd(lastLine)).trim()
             val wordCount = lastLineText.split("\\s+".toRegex()).filter { it.isNotEmpty() }.size
-            val hasOrphan = lastLineWidth < availableWidth * 0.25f || wordCount > 1
-            if (hasOrphan) break
+            if (lastLineWidth >= availableWidth * 0.25f && wordCount > 1) break
             textSize -= 1.0f
         } while (textSize > minTextSize)
         return layout
     }
-
-    // ──────────────────────────────────────────────
-    //  Scale & setup
-    // ──────────────────────────────────────────────
 
     fun setupScale(factor: Float, canvasW: Int, canvasH: Int) {
         val canvasWf = canvasW.toFloat()
@@ -582,10 +471,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         initPreset(getmPreset())
     }
 
-    // ──────────────────────────────────────────────
-    //  Apply-all helpers (batch position + size)
-    // ──────────────────────────────────────────────
-
     fun applyAll(canvasW: Int, rectF: RectF, textSize: Float, fcSize: Float, reference: TranslationQuranEntity) {
         paintAya.textSize = textSize
         val spannable = SpannableString(txt!!)
@@ -625,10 +510,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         initPreset(getmPreset())
     }
 
-    // ──────────────────────────────────────────────
-    //  Translate
-    // ──────────────────────────────────────────────
-
     override fun postTranslate(dx: Float, dy: Float) {
         rect.offset(dx, dy)
         posX = rect.centerX() - (staticLayout!!.width * 0.5f)
@@ -646,15 +527,10 @@ class TranslationQuranEntity : EntityView, Serializable {
         posY = rect.centerY() - (staticLayout!!.height * 0.5f)
     }
 
-    /** Returns the width of the text at a reference text size of 3.0f. */
     fun getWidth(): Float {
         paintAya.textSize = 3.0f
         return paintAya.measureText(txt)
     }
-
-    // ──────────────────────────────────────────────
-    //  Static-layout creation
-    // ──────────────────────────────────────────────
 
     fun createStaticLayout() {
         staticLayout = createBalancedLayout(txt!!, paintAya, viewWidth, paintAya.textSize, 2.0f)
@@ -698,10 +574,6 @@ class TranslationQuranEntity : EntityView, Serializable {
             .build()
     }
 
-    // ──────────────────────────────────────────────
-    //  Fade / animation state
-    // ──────────────────────────────────────────────
-
     fun setFadeIn(fadeIn: Boolean) { isFadeIn = fadeIn }
     fun setFadeOut(fadeOut: Boolean) { isFadeOut = fadeOut }
     fun isFadeIn(): Boolean = isFadeIn
@@ -740,10 +612,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         paintAyaOutline.alpha = paintAya.alpha
     }
 
-    // ──────────────────────────────────────────────
-    //  ObjectAnimator property setters
-    // ──────────────────────────────────────────────
-
     fun setSlideX(value: Float) {
         offsetX = value
         paintAya.alpha = round((1f - abs(value)) * 255f).toInt()
@@ -764,10 +632,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         scaleX = factor
         if (isAnimTest) weakBlurredImageView?.get()?.invalidate()
     }
-
-    // ──────────────────────────────────────────────
-    //  Transition animations
-    // ──────────────────────────────────────────────
 
     fun slidToLeft(duration: Int, repeat: Boolean) {
         val anim = ObjectAnimator.ofFloat(this, "SlideX", 1f, 0f)
@@ -842,10 +706,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         }
     }
 
-    // ──────────────────────────────────────────────
-    //  Number & update helpers
-    // ──────────────────────────────────────────────
-
     fun getNumber(): Int = number
     fun setNumber(number: Int) { this.number = number }
 
@@ -863,12 +723,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         viewWidth = rect.width().toInt()
     }
 
-    // ──────────────────────────────────────────────
-    //  EntityView overrides
-    // ──────────────────────────────────────────────
-
-    // maxH and maxW are already properties from EntityView
-
     fun getStaticLayout(): StaticLayout? = staticLayout
 
     fun setTypeface(typeface: Typeface, fontName: String) {
@@ -885,10 +739,6 @@ class TranslationQuranEntity : EntityView, Serializable {
         setClrAya(color)
         paintAya.color = color
     }
-
-    // ──────────────────────────────────────────────
-    //  Drawing
-    // ──────────────────────────────────────────────
 
     fun draw(canvas: Canvas) {
         val layout = staticLayout ?: return
@@ -945,16 +795,8 @@ class TranslationQuranEntity : EntityView, Serializable {
         layout.draw(canvas)
     }
 
-    // ──────────────────────────────────────────────
-    //  Visibility & accessors
-    // ──────────────────────────────────────────────
-
-    // isVisible is already overridden as property above
-
     fun getX(): Float = posX
     fun getY(): Float = posY
-
-    // isAnimTest is already a property from EntityView
 
     fun setUnderLine(underline: Boolean) { paintAya.isUnderlineText = underline }
 }

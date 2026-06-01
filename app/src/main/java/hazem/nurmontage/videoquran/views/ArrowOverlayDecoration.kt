@@ -8,15 +8,6 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-/**
- * RecyclerView ItemDecoration that draws directional arrow indicators
- * on the left and right edges of a horizontally scrolling list.
- *
- * - Right arrow: shown when items extend beyond the right edge
- * - Left arrow: shown when items extend beyond the left edge (mirrored)
- *
- * Originally: ArrowOverlayDecoration.java (50 lines)
- */
 class ArrowOverlayDecoration(
     context: Context,
     drawableRes: Int,
@@ -37,7 +28,6 @@ class ArrowOverlayDecoration(
         val itemCount = layoutManager.itemCount
         val halfHeight = recyclerView.height / 2
 
-        // Right arrow: items exist beyond right edge
         if (lastVisible < itemCount - 1) {
             val size = arrowSize
             val top = halfHeight - (size / 2)
@@ -46,7 +36,6 @@ class ArrowOverlayDecoration(
             arrowDrawable?.draw(canvas)
         }
 
-        // Left arrow: items exist beyond left edge (drawn by mirroring)
         if (firstVisible > 0) {
             val width = recyclerView.width
             val top = halfHeight - (arrowSize / 2)
