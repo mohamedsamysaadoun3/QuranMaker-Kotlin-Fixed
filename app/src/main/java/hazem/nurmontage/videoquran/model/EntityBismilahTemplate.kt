@@ -2,13 +2,6 @@ package hazem.nurmontage.videoquran.model
 
 import java.io.Serializable
 
-/**
- * Bismilah/Isti3ada template entity for export rendering.
- * Stores text, spatial coordinates, color, transition, and FFmpeg I/O paths.
- *
- * Serialization-critical field names preserved verbatim:
- *   file_in, file_out, btm_x, btm_y, factor_size
- */
 data class EntityBismilahTemplate(
     var transition: Transition? = null,
     var start: Float = 0f,
@@ -25,11 +18,6 @@ data class EntityBismilahTemplate(
     var x: Float = 0f
     var y: Float = 0f
     var scale: Float = 1.0f
-    var scaleFactor: Float
-        get() = scale
-        set(value) { scale = value }
-    fun setFactor_scale(fs: Float) { scale = fs }
-    fun getFactor_scale(): Float = scale
     var factor_size: Float = 1.0f
     var height: Float = 0f
     var rectF: MRectF? = null

@@ -6,7 +6,6 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
-import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import androidx.core.content.ContextCompat
 import hazem.nurmontage.videoquran.R
@@ -14,46 +13,18 @@ import hazem.nurmontage.videoquran.model.data.TranslationQuranEntity
 import hazem.nurmontage.videoquran.utils.LocaleHelper
 import hazem.nurmontage.videoquran.utils.UtilsFileLast
 
-/**
- * Renders the selection overlay (scale handle + "Apply All" button) around
- * a selected [EntityView] on the canvas.
- *
- * When the user taps an entity in the engine editor, this class draws:
- *   - A rounded-rect border around the entity bounds
- *   - A circular scale handle (with expand icon) at the bottom-left corner
- *   - An "Apply All" pill button at the top-right corner (when [isApply_all] is true)
- *
- * The scale handle bitmap is pre-rendered in the constructor using the
- * [R.drawable.ic_expand] icon, and the "Apply All" bitmap is drawn with
- * text that switches between Arabic and English based on the current locale.
- *
- * Touch-hit testing is done via [isScale] and [isApply], which check whether
- * a given (x, y) coordinate falls inside the handle/button hit rectangles.
- *
- * Converted from EntitySelectTool.java (179 lines).
- */
 class EntitySelectTool(canvasSize: Int, context: Context) {
 
-    // ── Pre-rendered bitmaps ─────────────────────────────────────────
     private val bitmapScale: Bitmap
     private val bitmapApplyAll: Bitmap
-
-    // ── Hit-test rectangles ──────────────────────────────────────────
     private val rectFScale: RectF
     private val rectApplyAll: RectF
-
-    // ── Paint ────────────────────────────────────────────────────────
     private val paint: Paint
-
-    // ── Offsets for handle positioning ───────────────────────────────
     private val offsetX: Float
     private val offsetY: Float
     private val offsetYApply: Float
-
-    // ── Corner radius for the selection border ───────────────────────
     private val round: Float
 
-    // ── Interaction state ────────────────────────────────────────────
     var isClick_apply: Boolean = false
         private set
     var isOnProgress: Boolean = false
@@ -67,40 +38,28 @@ class EntitySelectTool(canvasSize: Int, context: Context) {
     var isOnScale: Boolean = false
         private set
 
-    // ═══════════════════════════════════════════════════════════════════
-    //  Constructor — pre-renders scale handle and "Apply All" bitmaps
-    // ═══════════════════════════════════════════════════════════════════
-
     init {
-        // Load the font for "Apply All" text
         val applyAllFont = UtilsFileLast.loadFontFromAsset(context, "fonts/arabic/خط الإبل.otf")
         val applyAllText = if (LocaleHelper.getLanguage(context) == "ar") "تطبيق على الكل" else "ApplyAll"
 
-        // Initialize paint for selection border and handle rendering
         val p = Paint(Paint.ANTI_ALIAS_FLAG)
         paint = p
-        p.color = -0x6400B  // 0xFFF9BFF5 — selection color from original
+        p.color = -0x6400B
         val f = canvasSize.toFloat()
         p.strokeWidth = 0.005f * f
         round = 0.02f * f
 
-        // Calculate handle size (4.7% of canvas)
         val handleSize = (f * 0.047f).toInt()
         val handleSizeF = handleSize.toFloat()
 
-        // Scale handle rect (circular)
         rectFScale = RectF(0f, 0f, handleSizeF, handleSizeF)
-
-        // "Apply All" rect (4x wider than scale handle)
         rectApplyAll = RectF(0f, 0f, handleSize * 4f, rectFScale.height())
 
-        // Positioning offsets
         offsetX = rectFScale.width() * 0.7f
         val halfStroke = paint.strokeWidth * 0.5f
         offsetY = halfStroke
         offsetYApply = halfStroke * 3.0f
 
-        // ── Render scale handle bitmap ────────────────────────────────
         paint.style = Paint.Style.FILL
         val expandDrawable: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_expand)
         bitmapScale = Bitmap.createBitmap(handleSize, handleSize, Bitmap.Config.ARGB_8888)
@@ -116,7 +75,6 @@ class EntitySelectTool(canvasSize: Int, context: Context) {
         expandDrawable?.setBounds(inset, inset, end, end)
         expandDrawable?.draw(scaleCanvas)
 
-        // ── Render "Apply All" bitmap ─────────────────────────────────
         bitmapApplyAll = Bitmap.createBitmap(
             rectApplyAll.width().toInt(),
             rectApplyAll.height().toInt(),
@@ -126,9 +84,8 @@ class EntitySelectTool(canvasSize: Int, context: Context) {
         val cornerRadius = (rectApplyAll.height() * 0.2f).toInt().toFloat()
         scaleCanvas.drawRoundRect(rectApplyAll, cornerRadius, cornerRadius, paint)
 
-        // Draw "Apply All" text centered on the pill
         paint.style = Paint.Style.FILL
-        paint.color = -0xDE4E4E  // 0xFF21B1B1 — dark text color
+        paint.color = -0xDE4E4E
         paint.typeface = applyAllFont
         val maxTextWidth = rectApplyAll.width() * 0.8f
         val maxTextHeight = rectApplyAll.height() * 0.6f
@@ -144,17 +101,11 @@ class EntitySelectTool(canvasSize: Int, context: Context) {
             paint
         )
 
-        // Reset paint to stroke style for border drawing
         paint.color = -0x6400B
         paint.style = Paint.Style.STROKE
     }
 
-    // ═══════════════════════════════════════════════════════════════════
-    //  State setters (mutually exclusive for Move/Scale)
-    // ═══════════════════════════════════════════════════════════════════
-
     fun setClick_apply(click: Boolean) { isClick_apply = click }
-
     fun setOnProgress(onProgress: Boolean) { isOnProgress = onProgress }
 
     fun setApply_Move(move: Boolean) {
@@ -169,15 +120,6 @@ class EntitySelectTool(canvasSize: Int, context: Context) {
 
     fun setApply_all(applyAll: Boolean) { isApply_all = applyAll }
 
-    // ═══════════════════════════════════════════════════════════════════
-    //  Hit testing
-    // ═══════════════════════════════════════════════════════════════════
-
-    /**
-     * Tests whether the (x, y) touch point hits the "Apply All" button
-     * for the given [entityView]. The button is positioned at the
-     * top-right corner of the entity's bounding rect.
-     */
     fun isApply(entityView: EntityView, x: Float, y: Float): Boolean {
         if (!isApply_all) return false
         rectApplyAll.left = entityView.rect.right - bitmapApplyAll.width
@@ -187,13 +129,6 @@ class EntitySelectTool(canvasSize: Int, context: Context) {
         return rectApplyAll.contains(x, y)
     }
 
-    /**
-     * Tests whether the (x, y) touch point hits the scale handle
-     * for the given [entityView].
-     *
-     * For [TranslationQuranEntity], the handle is positioned at the
-     * top-left corner; for all other entities, it is at the bottom-left.
-     */
     fun isScale(entityView: EntityView, x: Float, y: Float): Boolean {
         if (entityView is TranslationQuranEntity) {
             rectFScale.top = entityView.rect.top - offsetY * 2.0f
@@ -210,38 +145,14 @@ class EntitySelectTool(canvasSize: Int, context: Context) {
         return isOnScale
     }
 
-    // ═══════════════════════════════════════════════════════════════════
-    //  Drawing
-    // ═══════════════════════════════════════════════════════════════════
-
-    /**
-     * Draws the selection overlay on [canvas] around [entityView]:
-     *   1. Rounded-rect border
-     *   2. Scale handle bitmap
-     *   3. "Apply All" button bitmap (if [isApply_all] is true)
-     */
     fun draw(canvas: Canvas, entityView: EntityView) {
         val rect = entityView.rect
         canvas.drawRoundRect(rect, round, round, paint)
-
-        // Scale handle position depends on entity type
         if (entityView is TranslationQuranEntity) {
-            canvas.drawBitmap(
-                bitmapScale,
-                entityView.rect.left,
-                entityView.rect.top - offsetY,
-                null
-            )
+            canvas.drawBitmap(bitmapScale, entityView.rect.left, entityView.rect.top - offsetY, null)
         } else {
-            canvas.drawBitmap(
-                bitmapScale,
-                entityView.rect.left - offsetX,
-                entityView.rect.bottom - offsetY,
-                null
-            )
+            canvas.drawBitmap(bitmapScale, entityView.rect.left - offsetX, entityView.rect.bottom - offsetY, null)
         }
-
-        // "Apply All" button at top-right
         if (isApply_all) {
             canvas.drawBitmap(
                 bitmapApplyAll,
@@ -252,11 +163,6 @@ class EntitySelectTool(canvasSize: Int, context: Context) {
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════════
-    //  Reset
-    // ═══════════════════════════════════════════════════════════════════
-
-    /** Clears all selection state (move, scale, apply-all). */
     fun reset() {
         setApply_Move(false)
         setApply_Scale(false)

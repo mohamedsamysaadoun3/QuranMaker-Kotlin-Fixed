@@ -2,14 +2,6 @@ package hazem.nurmontage.videoquran.model
 
 import java.io.Serializable
 
-/**
- * Translation template entity for export rendering.
- * Stores translated ayah text, spatial coordinates, colors, font, and background config.
- *
- * Serialization-critical field names preserved verbatim:
- *   btm_x, btm_y, factor_size, factor_sizeTrl, name_font, file_in, file_out,
- *   clr_bg, isHaveBg
- */
 data class EntityTranslationTemplate(
     var transition: Transition? = null,
     var start: Float = 0f,
@@ -28,11 +20,6 @@ data class EntityTranslationTemplate(
     var x: Float = 0f
     var y: Float = 0f
     var scale: Float = 1.0f
-    var scaleFactor: Float
-        get() = scale
-        set(value) { scale = value }
-    fun setFactor_scale(fs: Float) { scale = fs }
-    fun getFactor_scale(): Float = scale
     var factor_size: Float = 1.0f
     var factor_sizeTrl: Float = 1.0f
     var height: Float = 0f

@@ -2,13 +2,6 @@ package hazem.nurmontage.videoquran.model
 
 import java.io.Serializable
 
-/**
- * Surah name template entity for export rendering.
- * Stores name, reader, font, position, style, color, and background configuration.
- *
- * Serialization-critical field names preserved verbatim:
- *   factor_scale, name_font, clrBg, isHaveBg, index_surah
- */
 data class EntitySurahTemplate(
     var name: String = "",
     var reader: String = "",

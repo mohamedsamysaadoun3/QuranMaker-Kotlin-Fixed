@@ -23,20 +23,8 @@ import hazem.nurmontage.videoquran.views.TrackEntityView
 import java.io.Serializable
 import java.lang.ref.WeakReference
 
-/**
- * Entity that renders the "Bismillah" text on the canvas.
- *
- * Supports aya-text presets (outline, shadow, glow), ObjectAnimator-driven
- * transitions (slide, fade, zoom), and per-frame drawing with optional
- * outline layer.
- *
- * Originally: `hazem.nurmontage.videoquran.model.BismilahEntity`
- */
 class BismilahEntity : EntityView, Serializable {
 
-    // ──────────────────────────────────────────────
-    //  State
-    // ──────────────────────────────────────────────
     internal var bismilahTimeline: EntityBismilahTimeline? = null
     internal var clrAya: Int = 0
     internal var index: Int = 0
@@ -59,10 +47,6 @@ class BismilahEntity : EntityView, Serializable {
     internal var xTranslation: Float = 0f
     internal var scaleX: Float = 1.0f
     internal var nameFont: String = Constants.FONT_QURAN
-
-    // ──────────────────────────────────────────────
-    //  Constructors
-    // ──────────────────────────────────────────────
 
     constructor(txt: String, rectF: RectF, typeface: Typeface, color: Int) {
         this.txt = txt
@@ -92,10 +76,6 @@ class BismilahEntity : EntityView, Serializable {
         mPreset = preset
     }
 
-    // ──────────────────────────────────────────────
-    //  Preset
-    // ──────────────────────────────────────────────
-
     fun getmPreset(): Int = mPreset
     fun setmPreset(preset: Int) { mPreset = preset }
 
@@ -104,10 +84,6 @@ class BismilahEntity : EntityView, Serializable {
 
     fun getBismilahTimeline(): EntityBismilahTimeline? = bismilahTimeline
     fun setBismilahTimeline(timeline: EntityBismilahTimeline?) { bismilahTimeline = timeline }
-
-    // ──────────────────────────────────────────────
-    //  Aya preset application
-    // ──────────────────────────────────────────────
 
     fun applyAyaPreset(paint: Paint, preset: AyaTextPreset, color: Int, typeface: Typeface, textSize: Float) {
         paint.reset()
@@ -185,10 +161,6 @@ class BismilahEntity : EntityView, Serializable {
 
     fun initPresetAya(ordinal: Int) = initPreset(ordinal)
 
-    // ──────────────────────────────────────────────
-    //  View references
-    // ──────────────────────────────────────────────
-
     fun getViewWidth(): Int = viewWidth
 
     fun setViewWeakReference(
@@ -209,10 +181,6 @@ class BismilahEntity : EntityView, Serializable {
     fun setIndex(index: Int) { this.index = index }
     fun getIndex(): Int = index
 
-    // ──────────────────────────────────────────────
-    //  Text & color
-    // ──────────────────────────────────────────────
-
     fun setTxt(txt: String) {
         this.txt = txt
         val spannable = SpannableString(txt)
@@ -227,10 +195,6 @@ class BismilahEntity : EntityView, Serializable {
     fun setClrAya(color: Int) { clrAya = color }
     fun getClrAya(): Int = clrAya
     fun getPaintAya(): TextPaint = paintAya
-
-    // ──────────────────────────────────────────────
-    //  Text-size calculation (binary-search)
-    // ──────────────────────────────────────────────
 
     fun calculateTextSize(text: String?, paint: Paint, maxWidth: Int, maxHeight: Int): Float {
         if (text.isNullOrEmpty() || maxWidth <= 0 || maxHeight <= 0) return 0f
@@ -266,10 +230,6 @@ class BismilahEntity : EntityView, Serializable {
         posY = rect.centerY() - (staticLayout!!.height * 0.5f)
         posX = rect.centerX() - (staticLayout!!.width * 0.5f)
     }
-
-    // ──────────────────────────────────────────────
-    //  Scale & translate
-    // ──────────────────────────────────────────────
 
     fun setupScale(factor: Float, canvasW: Int, canvasH: Int) {
         paintAya.textSize = factor * canvasW
@@ -342,10 +302,6 @@ class BismilahEntity : EntityView, Serializable {
         return paintAya.measureText(txt)
     }
 
-    // ──────────────────────────────────────────────
-    //  Static-layout helpers
-    // ──────────────────────────────────────────────
-
     fun createStaticLayout() {
         val tp = paintAya
         tp.textSize = calculateTextSize(txt, tp, (viewWidth * 0.8f).toInt(), (rect.height() * 0.8f).toInt())
@@ -387,10 +343,6 @@ class BismilahEntity : EntityView, Serializable {
             .build()
     }
 
-    // ──────────────────────────────────────────────
-    //  Fade / animation state
-    // ──────────────────────────────────────────────
-
     fun setFadeIn(fadeIn: Boolean) { isFadeIn = fadeIn }
     fun setFadeOut(fadeOut: Boolean) { isFadeOut = fadeOut }
     fun isFadeIn(): Boolean = isFadeIn
@@ -427,10 +379,6 @@ class BismilahEntity : EntityView, Serializable {
         paintAyaOutline.alpha = paintAya.alpha
     }
 
-    // ──────────────────────────────────────────────
-    //  ObjectAnimator property setters
-    // ──────────────────────────────────────────────
-
     fun setSlideX(value: Float) {
         offsetX = value
         paintAya.alpha = ((1f - Math.abs(value)) * 255f).roundToInt()
@@ -449,10 +397,6 @@ class BismilahEntity : EntityView, Serializable {
         scaleX = factor
         if (isAnimTest) weakBlurredImageView?.get()?.invalidate()
     }
-
-    // ──────────────────────────────────────────────
-    //  Transition animations
-    // ──────────────────────────────────────────────
 
     fun slidToLeft(duration: Int, repeat: Boolean) {
         val anim = ObjectAnimator.ofFloat(this, "SlideX", 1f, 0f)
@@ -527,10 +471,6 @@ class BismilahEntity : EntityView, Serializable {
         }
     }
 
-    // ──────────────────────────────────────────────
-    //  Update helpers
-    // ──────────────────────────────────────────────
-
     fun update(rectF: RectF, maxW: Int, maxH: Int) {
         rect = RectF(rectF.left, rectF.top, rectF.right, rectF.bottom)
         this.maxH = maxH
@@ -554,10 +494,6 @@ class BismilahEntity : EntityView, Serializable {
         setClrAya(color)
         paintAya.color = color
     }
-
-    // ──────────────────────────────────────────────
-    //  Drawing
-    // ──────────────────────────────────────────────
 
     fun draw(canvas: Canvas) {
         val layout = staticLayout ?: return
@@ -607,12 +543,6 @@ class BismilahEntity : EntityView, Serializable {
         }
         layout.draw(canvas)
     }
-
-    // ──────────────────────────────────────────────
-    //  Visibility & accessors
-    // ──────────────────────────────────────────────
-
-    // isVisible is already overridden as property above
 
     fun getX(): Float = posX
     fun getY(): Float = posY
