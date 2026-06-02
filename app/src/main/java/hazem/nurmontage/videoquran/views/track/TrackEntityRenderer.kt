@@ -18,8 +18,6 @@ import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.round
 
-// ── Drawing extension functions for TrackEntityView ──────────────────────
-
 fun TrackEntityView.onDrawExt(canvas: Canvas) {
     if (paint_time == null || isProgress) return
     try {

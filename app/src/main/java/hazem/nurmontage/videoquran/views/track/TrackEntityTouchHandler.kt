@@ -12,8 +12,6 @@ import hazem.nurmontage.videoquran.views.TrackEntityView
 import kotlin.math.abs
 import kotlin.math.round
 
-// ── Touch handling extension functions for TrackEntityView ──────────────
-
 fun TrackEntityView.onTouchExt(view: View, motionEvent: MotionEvent): Boolean {
     if (motionEvent == null || isProgress) return false
     motionEvent.setLocation(

@@ -9,8 +9,6 @@ import hazem.nurmontage.videoquran.entity_timeline.EntityTrslTimeline
 import hazem.nurmontage.videoquran.views.TrackEntityView
 import kotlin.math.max
 
-// ── Entity management extension functions for TrackEntityView ──────────
-
 fun TrackEntityView.addStackExt(entity: Entity, entityAction: EntityAction) {
     entityList.push(Pair(entity, entityAction))
 }

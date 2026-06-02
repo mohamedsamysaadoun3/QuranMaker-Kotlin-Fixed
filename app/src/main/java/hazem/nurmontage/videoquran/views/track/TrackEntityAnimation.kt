@@ -10,8 +10,6 @@ import hazem.nurmontage.videoquran.views.TrackEntityView
 import kotlin.math.abs
 import kotlin.math.round
 
-// ── Animation / translate extension functions for TrackEntityView ───────
-
 fun TrackEntityView.setupAnimationQuran(quranEntity: QuranEntity) {
     if (!isPlaying || quranEntity.entityQuran?.getTransition() == null || quranEntity.isAnimRun()) return
     val transition = quranEntity.entityQuran?.getTransition() ?: return
