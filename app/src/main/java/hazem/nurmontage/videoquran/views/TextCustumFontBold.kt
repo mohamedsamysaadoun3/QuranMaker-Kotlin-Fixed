@@ -1,10 +1,13 @@
 package hazem.nurmontage.videoquran.views
 
 import android.content.Context
+import android.graphics.Typeface
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
 
 class TextCustumFontBold : AppCompatTextView {
+
+    private var typeface: Typeface? = null
 
     constructor(context: Context) : super(context) { init() }
 
@@ -14,7 +17,10 @@ class TextCustumFontBold : AppCompatTextView {
             super(context, attrs, defStyleAttr) { init() }
 
     private fun init() {
-        TypefaceCache.get(resources.assets, FONT_PATH)?.let { setTypeface(it) }
+        if (typeface == null) {
+            typeface = Typeface.createFromAsset(resources.assets, FONT_PATH)
+            typeface?.let { setTypeface(it) }
+        }
     }
 
     companion object {

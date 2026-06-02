@@ -34,11 +34,6 @@ class WaveformView : View {
         invalidate()
     }
 
-    fun setAmplitudes(amplitudes: IntArray) {
-        this.amplitudes = amplitudes
-        invalidate()
-    }
-
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.action == MotionEvent.ACTION_DOWN ||
             event.action == MotionEvent.ACTION_MOVE

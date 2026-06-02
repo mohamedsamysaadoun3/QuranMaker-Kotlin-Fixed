@@ -37,25 +37,14 @@ import java.io.IOException
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-// ═══════════════════════════════════════════════════════════════════════════════
 //  Extension functions for BlurredImageView that handle entity rendering,
 //  transitions, text sizing, and export frame generation.
 //
 //  Faithfully converted from BlurredImageView.java.
 //  DO NOT SIMPLIFY — the rendering code must be preserved exactly.
-// ═══════════════════════════════════════════════════════════════════════════════
 
-// ═══════════════════════════════════════════════════════════════════════════════
 //  Transition Methods — frame-by-frame animation rendering
-// ═══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Frame-by-frame slide-in from left animation.
- * Interpolates alpha and horizontal offset using AccelerateDecelerateInterpolator.
- * Each frame is saved as a PNG file.
- *
- * Original: BlurredImageView.java line 2624
- */
 fun BlurredImageView.slideInToLeft(
     canvas: Canvas,
     bitmap: Bitmap,
@@ -72,12 +61,6 @@ fun BlurredImageView.slideInToLeft(
     }
 }
 
-/**
- * Frame-by-frame slide-in from right animation.
- * Interpolates alpha and horizontal offset (negative to positive).
- *
- * Original: BlurredImageView.java line 2633
- */
 fun BlurredImageView.slideInToRight(
     canvas: Canvas,
     bitmap: Bitmap,
@@ -94,12 +77,6 @@ fun BlurredImageView.slideInToRight(
     }
 }
 
-/**
- * Frame-by-frame slide-out to right animation.
- * Alpha fades out while entity slides to the right.
- *
- * Original: BlurredImageView.java line 2642
- */
 fun BlurredImageView.slideOutToRight(
     canvas: Canvas,
     bitmap: Bitmap,
@@ -117,12 +94,6 @@ fun BlurredImageView.slideOutToRight(
     }
 }
 
-/**
- * Frame-by-frame slide-out to left animation.
- * Alpha fades out while entity slides to the left.
- *
- * Original: BlurredImageView.java line 2652
- */
 fun BlurredImageView.slideOutToLeft(
     canvas: Canvas,
     bitmap: Bitmap,
@@ -139,12 +110,6 @@ fun BlurredImageView.slideOutToLeft(
     }
 }
 
-/**
- * Frame-by-frame fade in animation.
- * Interpolates alpha from 0 to 255 using AccelerateDecelerateInterpolator.
- *
- * Original: BlurredImageView.java line 2661
- */
 fun BlurredImageView.fadeIn(
     canvas: Canvas,
     bitmap: Bitmap,
@@ -161,12 +126,6 @@ fun BlurredImageView.fadeIn(
     }
 }
 
-/**
- * Frame-by-frame fade out animation.
- * Interpolates alpha from 255 to 0 using AccelerateDecelerateInterpolator.
- *
- * Original: BlurredImageView.java line 2670
- */
 fun BlurredImageView.fadeOut(
     canvas: Canvas,
     bitmap: Bitmap,
@@ -183,19 +142,8 @@ fun BlurredImageView.fadeOut(
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
 //  Export Frame Methods — per-entity bitmap creation for video export
-// ═══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Per-entity bitmap creation for video export.
- * For each visible entity, creates a bitmap with setupCanvasDraw/restoreCanvas,
- * renders with singleDraw, and saves to file.
- *
- * Also handles bismilah and isti3adha entities.
- *
- * Original: BlurredImageView.java line 2679
- */
 fun BlurredImageView.drawEntityBitmap(file: File, size: Int, index: Int) {
     updateSizeAyaSave(size, index)
     updateSizeTrslSave(size, index)
@@ -301,12 +249,6 @@ fun BlurredImageView.drawEntityBitmap(file: File, size: Int, index: Int) {
     }
 }
 
-/**
- * Save progress bar bitmap for export.
- * Draws background line, progress line, and circle cursor.
- *
- * Original: BlurredImageView.java line 2323
- */
 fun BlurredImageView.saveProgressBitmap(file: File, blurRadius: Float) {
     val bmp = Bitmap.createBitmap(
         rectFProgress!!.width().toInt(),
@@ -344,11 +286,6 @@ fun BlurredImageView.saveProgressBitmap(file: File, blurRadius: Float) {
     saveBitmap(bmp, file, Constants.LINE_PROGRESS)
 }
 
-/**
- * Cassette progress bitmap — draws drawable into bitmap for export.
- *
- * Original: BlurredImageView.java line 2351
- */
 fun BlurredImageView.saveProgressCasetBitmap(file: File, size: Int, size145: Int, drawable: Drawable?) {
     val bmp = Bitmap.createBitmap(size, size145, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bmp)
@@ -357,12 +294,6 @@ fun BlurredImageView.saveProgressCasetBitmap(file: File, size: Int, size145: Int
     saveBitmap(bmp, file, Constants.LINE_BG)
 }
 
-/**
- * Neumorphic progress bar bitmap for export.
- * Creates rounded track with background, temporary, and progress layers.
- *
- * Original: BlurredImageView.java line 2359
- */
 fun BlurredImageView.saveProgressBitmapTypeIPAD_NEOMORPHIC(file: File, bitmap: Bitmap?) {
     val bmp = Bitmap.createBitmap(
         rectFProgress!!.width().toInt(),
@@ -413,12 +344,6 @@ fun BlurredImageView.saveProgressBitmapTypeIPAD_NEOMORPHIC(file: File, bitmap: B
     saveBitmap(bmp, file, Constants.LINE_PROGRESS)
 }
 
-/**
- * Blue type progress bar bitmap for export.
- * Draws simple line progress with thicker stroke.
- *
- * Original: BlurredImageView.java line 2394
- */
 fun BlurredImageView.saveProgressBitmapTypeBlue(file: File) {
     val bmp = Bitmap.createBitmap(
         rectFProgress!!.width().toInt(),
@@ -440,15 +365,6 @@ fun BlurredImageView.saveProgressBitmapTypeBlue(file: File) {
     saveBitmap(bmp, file, Constants.LINE_PROGRESS)
 }
 
-/**
- * Heart shape progress bitmap for export.
- * Creates heart path, draws progress fill with PorterDuff CLEAR compositing,
- * then strokes the outline.
- *
- * Returns a Pair of (fillStartY, fillHeight) for video compositing.
- *
- * Original: BlurredImageView.java line 2410
- */
 fun BlurredImageView.saveProgressBitmapTypeHeart(file: File, bitmap: Bitmap?): Pair<Float, Int> {
     val bmp = Bitmap.createBitmap(
         bitmap!!.width,
@@ -506,15 +422,6 @@ fun BlurredImageView.saveProgressBitmapTypeHeart(file: File, bitmap: Bitmap?): P
     return Pair(f6, round)
 }
 
-/**
- * Battery shape progress bitmap for export.
- * Creates battery body path with cap and lightning bolt cutout.
- * Uses PorterDuff CLEAR compositing for the cutout.
- *
- * Returns a Pair of (startX, Point(width, height)) for video compositing.
- *
- * Original: BlurredImageView.java line 2457
- */
 fun BlurredImageView.saveProgressBitmapTypeBattery(file: File, bitmap: Bitmap?): Pair<Float, Point> {
     val bmp = Bitmap.createBitmap(
         bitmap!!.width,
@@ -606,12 +513,6 @@ fun BlurredImageView.saveProgressBitmapTypeBattery(file: File, bitmap: Bitmap?):
     return Pair(left, Point(bmp2.width, bmp2.height))
 }
 
-/**
- * Save bitmap to file as PNG.
- * If file is null, uses the app's external files directory.
- *
- * Original: BlurredImageView.java line 2544
- */
 fun BlurredImageView.saveBitmap(bitmap: Bitmap, file: File?, textValue: String) {
     var targetDir = file
     if (targetDir == null) {
@@ -635,25 +536,13 @@ fun BlurredImageView.saveBitmap(bitmap: Bitmap, file: File?, textValue: String) 
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
 //  Entity Management
-// ═══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Set progress value and trigger invalidation.
- *
- * Original: BlurredImageView.java line 2592
- */
 fun BlurredImageView.setProgress(blurRadius: Float) {
     progress = blurRadius
     postInvalidate()
 }
 
-/**
- * Draw all visible quran and translation entities to canvas.
- *
- * Original: BlurredImageView.java line 2597
- */
 fun BlurredImageView.drawEntity(canvas: Canvas) {
     for (i in getQuranEntities().indices) {
         val quranEntity = getQuranEntities()[i]
@@ -669,15 +558,6 @@ fun BlurredImageView.drawEntity(canvas: Canvas) {
     }
 }
 
-/**
- * Get rendered bitmap for export with type-specific bitmap selection,
- * gradient recoloring, cassette paths, surah scaling.
- *
- * Selects bitmapNotBlur for certain types (BLACK_LAYER, BLUE_TYPE, GRADIENT,
- * MASK_BRUSH, CASSET_IMG, IPAD_UNBLUR), otherwise uses bitmapBlured.
- *
- * Original: BlurredImageView.java line 3927
- */
 fun BlurredImageView.getBitmapDraw(isFlag: Boolean, file: File?): Bitmap {
     val bitmap: Bitmap?
     if (mIpadType == IpadType.BLACK_LAYER.ordinal ||
@@ -736,13 +616,6 @@ fun BlurredImageView.getBitmapDraw(isFlag: Boolean, file: File?): Bitmap {
     return bitmap
 }
 
-/**
- * Find last visible quran entity.
- * Searches backwards with visibility and factorSize == 1.0f check.
- * Falls back to the last entity if none found with factorSize == 1.0f.
- *
- * Original: BlurredImageView.java line 3970
- */
 fun BlurredImageView.getLastAdd(): QuranEntity {
     for (i in getQuranEntities().indices.reversed()) {
         val quranEntity = getQuranEntities()[i]
@@ -753,13 +626,6 @@ fun BlurredImageView.getLastAdd(): QuranEntity {
     return getQuranEntities().last()
 }
 
-/**
- * Find last visible translation entity.
- * Searches backwards with visibility and factorSize == 1.0f check.
- * Falls back to the last entity if none found with factorSize == 1.0f.
- *
- * Original: BlurredImageView.java line 3980
- */
 fun BlurredImageView.getLastAddTrsl(): TranslationQuranEntity {
     for (i in getTranslationEntities().indices.reversed()) {
         val translationQuranEntity = getTranslationEntities()[i]
@@ -770,12 +636,6 @@ fun BlurredImageView.getLastAddTrsl(): TranslationQuranEntity {
     return getTranslationEntities().last()
 }
 
-/**
- * Complex counting logic for quran entities.
- * Returns 1 if only one entity, 2 if more than one visible, or the actual count.
- *
- * Original: BlurredImageView.java line 3990
- */
 fun BlurredImageView.countEntityQuran(): Int {
     if (getQuranEntities().size == 1) {
         return 1
@@ -792,12 +652,6 @@ fun BlurredImageView.countEntityQuran(): Int {
     return count
 }
 
-/**
- * Complex counting logic for translation entities.
- * Returns 1 if only one entity, 2 if more than one visible, or the actual count.
- *
- * Original: BlurredImageView.java line 4006
- */
 fun BlurredImageView.countEntityTrsl(): Int {
     if (getTranslationEntities().size == 1) {
         return 1
@@ -814,16 +668,8 @@ fun BlurredImageView.countEntityTrsl(): Int {
     return count
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
 //  Text Sizing Methods
-// ═══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Save-variant of aya sizing with canvas dimensions.
- * Used during export to set up entity sizes at the export resolution.
- *
- * Original: BlurredImageView.java line 4022
- */
 fun BlurredImageView.updateSizeAyaSave(size: Int, index: Int) {
     val list = getQuranEntities()
     if (list.isNullOrEmpty()) return
@@ -848,12 +694,6 @@ fun BlurredImageView.updateSizeAyaSave(size: Int, index: Int) {
     }
 }
 
-/**
- * Save-variant of translation sizing with canvas dimensions.
- * Used during export to set up entity sizes at the export resolution.
- *
- * Original: BlurredImageView.java line 4042
- */
 fun BlurredImageView.updateSizeTrslSave(size: Int, index: Int) {
     val list = getTranslationEntities()
     if (list.isNullOrEmpty()) return
@@ -878,14 +718,6 @@ fun BlurredImageView.updateSizeTrslSave(size: Int, index: Int) {
     }
 }
 
-/**
- * Full intelligent text sizing for quran entities.
- *
- * Finds the widest entity, calculates text sizes, handles single vs multiple entities,
- * applies preset, and handles translation width optimization.
- *
- * Original: BlurredImageView.java line 4062 (70+ lines with complex logic)
- */
 fun BlurredImageView.updateSizeAya() {
     val list = getQuranEntities()
     if (list.isNullOrEmpty()) return
@@ -964,12 +796,6 @@ fun BlurredImageView.updateSizeAya() {
     }
 }
 
-/**
- * Full intelligent text sizing for translation entities.
- * Handles single vs multiple entity logic with text size calculation.
- *
- * Original: BlurredImageView.java line 4133
- */
 fun BlurredImageView.updateSizeAyaTrsl() {
     val list = getTranslationEntities()
     if (list.isNullOrEmpty()) return
@@ -1016,12 +842,6 @@ fun BlurredImageView.updateSizeAyaTrsl() {
     }
 }
 
-/**
- * Resize variant of aya sizing.
- * Resets factors, updates rectFAya for all entities, then applies sizing.
- *
- * Original: BlurredImageView.java line 4180
- */
 fun BlurredImageView.updateSizeAyaResize() {
     val list = getQuranEntities()
     if (list.isNullOrEmpty()) return
@@ -1112,12 +932,6 @@ fun BlurredImageView.updateSizeAyaResize() {
     }
 }
 
-/**
- * Resize variant of translation sizing.
- * Resets factors, updates rectFAya for all translation entities, then applies sizing.
- *
- * Original: BlurredImageView.java line 4261
- */
 fun BlurredImageView.updateSizeTrslAyaResize() {
     val list = getTranslationEntities()
     if (list.isNullOrEmpty()) return
@@ -1175,21 +989,6 @@ fun BlurredImageView.updateSizeTrslAyaResize() {
     }
 }
 
-/**
- * Complex RTL/LTR alignment handling and rect repositioning for each IpadType.
- *
- * For neumorphic/cassette types, forces center alignment.
- * For non-Arabic text (LTR), aligns to the left with type-specific positioning.
- * For Arabic text (RTL), aligns to the right with type-specific positioning.
- *
- * The positioning logic varies significantly based on IpadType:
- * - IPAD/IPAD_UNBLUR/IPAD_CLASSIC: uses bitmapSquare center offset
- * - BOTTOM_RECT/BLACK_LAYER/BLUE_TYPE/GRADIENT/MASK_BRUSH/HEART/BATTERY:
- *   uses ipad_rect width with small margin
- * - Other types: uses ipad_rect with 7% margin
- *
- * Original: BlurredImageView.java line 4318 (75 lines!)
- */
 fun BlurredImageView.updatePosSurahName() {
     if (surahNameEntity == null) return
 
@@ -1283,12 +1082,6 @@ fun BlurredImageView.updatePosSurahName() {
     surahNameEntity!!.update(rectFSurahName!!)
 }
 
-/**
- * No-arg version that resets bismilah entity and isti3adha entity.
- * Uses rectFAya and canvas dimensions from the view.
- *
- * Original: BlurredImageView.java line 4393
- */
 fun BlurredImageView.updateBismilahEntity() {
     val bismilah = bismilahEntity
     if (bismilah != null && bismilah.getBismilahTimeline()?.visible() == true) {
@@ -1317,12 +1110,6 @@ fun BlurredImageView.updateBismilahEntity() {
     mIsti3adhaEntity!!.setFcSize(mIsti3adhaEntity!!.getPaintAya().textSize / getmCanvas_width())
 }
 
-/**
- * With canvas dimensions — used during export.
- * Sets copyRect, creates scaled rect, updates entity, and applies preset.
- *
- * Original: BlurredImageView.java line 4425
- */
 fun BlurredImageView.updateBismilahEntity(size: Int, ayaNumber: Int) {
     val bismilah = bismilahEntity
     if (bismilah != null && bismilah.getBismilahTimeline()?.visible() == true) {
@@ -1359,12 +1146,6 @@ fun BlurredImageView.updateBismilahEntity(size: Int, ayaNumber: Int) {
     mIsti3adhaEntity!!.initPreset(mIsti3adhaEntity!!.getmPreset())
 }
 
-/**
- * Full entity resize with surahNameEntity canvasWH.
- * Delegates to updateSizeAyaResize, updateSizeTrslAyaResize, and updateBismilahEntity.
- *
- * Original: BlurredImageView.java line 4453
- */
 fun BlurredImageView.resizeEntity() {
     val sne = surahNameEntity
     if (sne != null) {
@@ -1375,19 +1156,8 @@ fun BlurredImageView.resizeEntity() {
     updateBismilahEntity()
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
 //  Surah Name Entity Setup
-// ═══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Complex surah name entity with alignment repositioning, font loading, color scheme handling.
- *
- * Determines alignment based on IpadType and language direction (RTL/LTR),
- * repositions rectFSurahName based on type-specific logic, loads fonts,
- * handles color scheme for cassette types, and creates or updates the SurahNameEntity.
- *
- * Original: BlurredImageView.java line 3669 (105 lines!)
- */
 fun BlurredImageView.setSurahNameEntity(
     textValue: String,
     textValue2: String,
@@ -1540,18 +1310,8 @@ fun BlurredImageView.setSurahNameEntity(
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
 //  Bitmap Setup and Background Save
-// ═══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Setup bitmaps for drawing — prepares frame interval, creates rects,
- * draws entity bitmaps, saves progress bitmaps per type, and saves background.
- *
- * Returns the background file path.
- *
- * Original: BlurredImageView.java line 3839
- */
 fun BlurredImageView.setupBitmapDraw(bitmap: Bitmap, bitmap2: Bitmap, template: Template): String {
     frameInterval = 1000L / template.fps
     bitmapBlured = bitmap
@@ -1642,11 +1402,6 @@ fun BlurredImageView.setupBitmapDraw(bitmap: Bitmap, bitmap2: Bitmap, template: 
     return file.absolutePath + "/" + bgFileName
 }
 
-/**
- * Save background bitmap to file.
- *
- * Original: BlurredImageView.java line 3923
- */
 fun BlurredImageView.saveBg(textValue: String, bitmap: Bitmap, file: File) {
     saveBitmap(bitmap, file, textValue)
 }

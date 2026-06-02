@@ -9,21 +9,12 @@ import hazem.nurmontage.videoquran.core.common.Common
 import hazem.nurmontage.videoquran.views.BlurredImageView
 import kotlin.math.min
 
-// ═══════════════════════════════════════════════════════════════════════════════
 //  Extension functions for BlurredImageView that handle ipad_rect calculations
 //  and all rectF positions (aya, progress, lecture, surahName).
 //
 //  Faithfully converted from BlurredImageView.java lines 968–2106.
 //  Every pixel-calculation constant is preserved exactly as in the original.
-// ═══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Updates `ipad_rect` based on [IpadType] and [ResizeType] using the provided [bitmap].
- *
- * Also stores the passed values into `mResizetype`, `bitmapNotBlur`, and `mIpadType`.
- *
- * Original: BlurredImageView.java line 968
- */
 fun BlurredImageView.updateIpad(bitmap: Bitmap, size: Int, width117: Int) {
     this.mResizetype = width117
     this.bitmapNotBlur = bitmap
@@ -200,11 +191,6 @@ fun BlurredImageView.updateIpad(bitmap: Bitmap, size: Int, width117: Int) {
     this.paintIpad.style = Paint.Style.FILL
 }
 
-/**
- * Updates `ipad_rect` using `bitmapBlured` instead of a passed bitmap.
- *
- * Original: BlurredImageView.java line 1112
- */
 fun BlurredImageView.updateIpad() {
     val bm = this.bitmapBlured ?: return
 
@@ -379,15 +365,6 @@ fun BlurredImageView.updateIpad() {
     this.paintIpad.style = Paint.Style.FILL
 }
 
-/**
- * Creates all rectF positions (rectFAya, rectFProgress, rectFLecture, rectFSurahName)
- * for each IpadType. Also calls `updatePosSurahName()` to adjust surah name position
- * based on language direction.
- *
- * This determines where ALL visual elements are positioned on screen.
- *
- * Original: BlurredImageView.java line 1273
- */
 fun BlurredImageView.createRect() {
     this.updatePosSurahName()
     val ipad = this.ipad_rect ?: return
@@ -840,15 +817,6 @@ fun BlurredImageView.createRect() {
     this.radius_cursur = this.linePaint.strokeWidth * 4.2f
 }
 
-/**
- * Creates all rectF positions without calling `updatePosSurahName()`.
- * Used for cases where surah name positioning adjustment is not needed.
- *
- * The rect calculations are identical to [createRect]; the only difference
- * is that `updatePosSurahName()` is NOT called at the beginning.
- *
- * Original: BlurredImageView.java line 1691
- */
 fun BlurredImageView.createRectWithoutSurahName() {
     val ipad = this.ipad_rect ?: return
     val bmSq = this.bitmapSquare

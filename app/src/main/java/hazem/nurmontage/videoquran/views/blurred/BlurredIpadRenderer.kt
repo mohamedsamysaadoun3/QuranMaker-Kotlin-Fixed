@@ -29,7 +29,6 @@ import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
 
-// ═══════════════════════════════════════════════════════════════════════════════
 //  Extension functions for BlurredImageView that handle all IpadType-specific
 //  rendering. Each method faithfully reproduces the original Java logic from
 //  BlurredImageView.java lines 2764–3635.
@@ -38,15 +37,7 @@ import kotlin.math.sin
 //  effects, gradient overlays, border strokes, HSV manipulations, ShadowLayer
 //  passes, cassette gear animations, clipPath shaping, RadialGradient,
 //  PorterDuff compositing, etc. must be preserved exactly.
-// ═══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Draws a rectangle with BlurMaskFilter shadow, glass effect, gradient overlays,
- * and border strokes. When [isRounded] is true, draws a round-rect; otherwise
- * a plain rect.
- *
- * Original: BlurredImageView.java lines 2764–2840
- */
 fun BlurredImageView.drawRectWithShadow(
     canvas: Canvas,
     rect: RectF,
@@ -158,11 +149,6 @@ fun BlurredImageView.drawRectWithShadow(
     canvas.drawRect(rect, this.paintIpad)
 }
 
-/**
- * Draws bottom rectangle with optional glass effect (gradient + border + reflection).
- *
- * Original: BlurredImageView.java lines 2842–2871
- */
 fun BlurredImageView.drawRectBottom(canvas: Canvas, rect: RectF) {
     if (isGlass()) {
         min(rect.width(), rect.height()) // unused but preserved from original
@@ -215,11 +201,6 @@ fun BlurredImageView.drawRectBottom(canvas: Canvas, rect: RectF) {
     canvas.drawRect(rect, this.paintIpad)
 }
 
-/**
- * Draws the square bitmap with a BlurMaskFilter inner shadow.
- *
- * Original: BlurredImageView.java lines 2881–2906
- */
 fun BlurredImageView.drawBitmapWithShadow(canvas: Canvas) {
     val bitmap = this.bitmapSquare ?: return
     if (bitmap.isRecycled) return
@@ -245,11 +226,6 @@ fun BlurredImageView.drawBitmapWithShadow(canvas: Canvas) {
     }
 }
 
-/**
- * Draws bitmap with shadow for BOTTOM_RECT type (bitmap above the ipad rect).
- *
- * Original: BlurredImageView.java lines 2908–2924
- */
 fun BlurredImageView.drawBitmapWithShadowTypeBottom(canvas: Canvas) {
     val bitmap = this.bitmapSquare ?: return
     if (bitmap.isRecycled) return
@@ -264,12 +240,6 @@ fun BlurredImageView.drawBitmapWithShadowTypeBottom(canvas: Canvas) {
     }
 }
 
-/**
- * Draws bitmap with shadow for BOTTOM_RECT type — save/export variant
- * (uses null Paint for lossless drawing).
- *
- * Original: BlurredImageView.java lines 2926–2942
- */
 fun BlurredImageView.drawBitmapWithShadowTypeBottomSave(canvas: Canvas) {
     val bitmap = this.bitmapSquare ?: return
     if (bitmap.isRecycled) return
@@ -284,13 +254,6 @@ fun BlurredImageView.drawBitmapWithShadowTypeBottomSave(canvas: Canvas) {
     }
 }
 
-/**
- * Complex neumorphic rendering with HSV color manipulation, ShadowLayer on
- * light/dark paints, gradient on backgroundPaint, three-pass draw (light shadow,
- * dark shadow, background), and circles for home button area.
- *
- * Original: BlurredImageView.java lines 2944–2996
- */
 fun BlurredImageView.drawNeumorphicRect(canvas: Canvas, blurRadius: Float, isFlag: Boolean) {
     val baseColor: Int
     val lightenColor: Int
@@ -368,13 +331,6 @@ fun BlurredImageView.drawNeumorphicRect(canvas: Canvas, blurRadius: Float, isFla
     canvas.drawBitmap(this.bitmapSquare!!, this.left_square, this.top_square, null)
 }
 
-/**
- * Detailed cassette tape drawing with body, trapezoid top/bottom, label strip,
- * two reels with rotating gears, spinning animation, and corner dots.
- * Uses ColorSchemeGenerator.Scheme colors.
- *
- * Original: BlurredImageView.java lines 2998–3114
- */
 fun BlurredImageView.drawCaset(canvas: Canvas, isFlag: Boolean, file: File?) {
     val screen1 = this.scheme!!.screen1
     val screen2 = this.scheme!!.screen2
@@ -537,12 +493,6 @@ fun BlurredImageView.drawCaset(canvas: Canvas, isFlag: Boolean, file: File?) {
     this.paintIpad.shader = savedShader
 }
 
-/**
- * Cassette without background — draws only the cassette body over existing content.
- * Draws the bitmapSquare first when available.
- *
- * Original: BlurredImageView.java lines 3116–3214
- */
 fun BlurredImageView.drawCasetNoBg(canvas: Canvas, isFlag: Boolean, file: File?) {
     canvas.drawBitmap(this.bitmapSquare!!, 0.0f, 0.0f, null)
 
@@ -684,13 +634,6 @@ fun BlurredImageView.drawCasetNoBg(canvas: Canvas, isFlag: Boolean, file: File?)
     this.paintIpad.shader = savedShader
 }
 
-/**
- * Draws a gear/cog shape for cassette reels. The gear has [teethCount] teeth
- * alternating between outer radius [outerR] and inner radius [innerR],
- * centered at ([cx], [cy]).
- *
- * Original: BlurredImageView.java lines 3216–3242
- */
 fun BlurredImageView.drawInnerGear(
     canvas: Canvas,
     cx: Float,
@@ -719,12 +662,6 @@ fun BlurredImageView.drawInnerGear(
     canvas.drawPath(path, paint)
 }
 
-/**
- * Progress bar for neumorphic type — draws a rounded track with
- * filled portion based on progress, plus time text labels.
- *
- * Original: BlurredImageView.java lines 3244–3262
- */
 fun BlurredImageView.drawProgressNeumorphic(canvas: Canvas) {
     val savedStrokeWidth = this.linePaint.strokeWidth
     this.linePaint.strokeWidth = this.rectFProgress!!.height() * 0.18f
@@ -760,12 +697,6 @@ fun BlurredImageView.drawProgressNeumorphic(canvas: Canvas) {
     canvas.drawText(this.remainingTime, this.rectFProgress!!.right - textBounds.width(), this.rectFProgress!!.bottom, this.paintText)
 }
 
-/**
- * Lecture/playback controls for neumorphic type — draws three circular
- * neumorphic buttons (play/pause, forward, backward) with icon drawables.
- *
- * Original: BlurredImageView.java lines 3264–3296
- */
 fun BlurredImageView.drawLectureNeumorphic(canvas: Canvas) {
     val buttonHeight = this.rectFLecture!!.height() * 0.3f
     val playRect = Rect(
@@ -816,12 +747,6 @@ fun BlurredImageView.drawLectureNeumorphic(canvas: Canvas) {
     backwardDrawable.draw(canvas)
 }
 
-/**
- * Mask brush type with PorterDuff DST_OUT compositing on an offscreen bitmap.
- * Creates a colored layer, then cuts out a brush-mask shape from it.
- *
- * Original: BlurredImageView.java lines 3462–3494
- */
 fun BlurredImageView.drawMaskedBitmap(canvas: Canvas, isFlag: Boolean) {
     this.paintIpad.alpha = 255
 
@@ -880,12 +805,6 @@ fun BlurredImageView.drawMaskedBitmap(canvas: Canvas, isFlag: Boolean) {
     this.paintIpad.alpha = 190
 }
 
-/**
- * Gradient overlay — draws a linear gradient from transparent to the
- * gradient colors (or solid color) over the ipad rect.
- *
- * Original: BlurredImageView.java lines 3496–3508
- */
 fun BlurredImageView.drawGradientLayer(canvas: Canvas, isFlag: Boolean) {
     if (isFlag) {
         canvas.drawBitmap(this.bitmapSquare!!, 0.0f, 0.0f, null)
@@ -910,12 +829,6 @@ fun BlurredImageView.drawGradientLayer(canvas: Canvas, isFlag: Boolean) {
     this.paintIpad.shader = null
 }
 
-/**
- * Heart shape with shaped progress fill. Uses clipPath to restrict
- * the fill rectangle to the heart shape, then strokes the outline.
- *
- * Original: BlurredImageView.java lines 3510–3541
- */
 fun BlurredImageView.drawHeartType(canvas: Canvas, isFlag: Boolean) {
     if (!isFlag) return
 
@@ -960,12 +873,6 @@ fun BlurredImageView.drawHeartType(canvas: Canvas, isFlag: Boolean) {
     this.paintIpad.strokeWidth = savedStrokeWidth
 }
 
-/**
- * Battery shape with shaped progress fill. Uses clipPath with
- * battery outline and lightning bolt cutout for progress indication.
- *
- * Original: BlurredImageView.java lines 3543–3593
- */
 fun BlurredImageView.drawBatteryType(canvas: Canvas, isFlag: Boolean) {
     if (!isFlag) return
 
@@ -1029,12 +936,6 @@ fun BlurredImageView.drawBatteryType(canvas: Canvas, isFlag: Boolean) {
     this.paintIpad.strokeWidth = savedStrokeWidth
 }
 
-/**
- * Blue type with RadialGradient. Creates a dark overlay with a
- * radial gradient emanating from above center.
- *
- * Original: BlurredImageView.java lines 3595–3624
- */
 fun BlurredImageView.drawBlueType(canvas: Canvas, isFlag: Boolean) {
     this.paintIpad.color = ViewCompat.MEASURED_STATE_MASK
 
@@ -1087,12 +988,6 @@ fun BlurredImageView.drawBlueType(canvas: Canvas, isFlag: Boolean) {
     this.paintIpad.alpha = 190
 }
 
-/**
- * Semi-transparent black overlay — draws the bitmapSquare (if not empty)
- * then a dark rect with alpha 204 (80% opacity).
- *
- * Original: BlurredImageView.java lines 3626–3633
- */
 fun BlurredImageView.drawBlackLayer(canvas: Canvas, isFlag: Boolean, isEmpty: Boolean) {
     this.paintIpad.alpha = 204
     if (isEmpty) {
@@ -1102,13 +997,6 @@ fun BlurredImageView.drawBlackLayer(canvas: Canvas, isFlag: Boolean, isEmpty: Bo
     this.paintIpad.alpha = 190
 }
 
-/**
- * Main iPad drawing dispatcher — routes to the appropriate drawing method
- * based on the current IpadType. All rendering uses premium-quality paths
- * (billing removed — all features available to everyone).
- *
- * Original: BlurredImageView.java lines 3298–3460
- */
 fun BlurredImageView.drawIpad(canvas: Canvas, isFlag: Boolean) {
     when {
         this.mIpadType == IpadType.IPAD_CLASSIC.ordinal -> {

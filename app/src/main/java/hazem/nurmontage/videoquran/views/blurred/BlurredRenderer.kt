@@ -15,20 +15,13 @@ import hazem.nurmontage.videoquran.model.SurahNameEntity
 import hazem.nurmontage.videoquran.views.BlurredImageView
 import kotlin.math.cos
 
-// ═══════════════════════════════════════════════════════════════════════════════
 //  Extension functions for BlurredImageView that handle the main rendering
 //  methods. Faithfully converted from BlurredImageView.java.
 //
 //  NOTE: The onDraw extension function cannot call super.onDraw(canvas).
 //  The actual override in BlurredImageView should call super.onDraw(canvas)
 //  first, then delegate to this extension function.
-// ═══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Draw watermark text "NurMontage" with optional remove button.
- *
- * Original: BlurredImageView.java lines 2139–2171
- */
 fun BlurredImageView.drawWattermark(canvas: Canvas, isFlag: Boolean) {
     if (this.bitmapBlured == null || this.ipad_rect == null) {
         return
@@ -89,12 +82,6 @@ fun BlurredImageView.drawWattermark(canvas: Canvas, isFlag: Boolean) {
     this.mRectWattermark!!.union(removeBtnRect)
 }
 
-/**
- * Calculate the maximum text size that fits within the given width and height
- * constraints. Uses binary search (100 iterations) to find the optimal size.
- *
- * Original: BlurredImageView.java lines 2173–2196
- */
 fun BlurredImageView.calculateTextSize(
     textValue: String?,
     paint: Paint,
@@ -123,19 +110,6 @@ fun BlurredImageView.calculateTextSize(
     return result
 }
 
-/**
- * Main draw logic — renders the entire view including background bitmap,
- * iPad frame, progress bar, entities, bismilah, surah name, and watermark.
- *
- * Contains complex nested if/else for background bitmap drawing based on mIpadType.
- * The GRADIENT, MASK_BRUSH, BLACK_LAYER, and CASSET_IMG types additionally draw
- * bitmapNotBlur as their background layer.
- *
- * IMPORTANT: This is an extension function. The actual onDraw override in
- * BlurredImageView should call `super.onDraw(canvas)` first, then call this.
- *
- * Original: BlurredImageView.java lines 2204–2305
- */
 fun BlurredImageView.onDrawExt(canvas: Canvas) {
     try {
         if (this.isNotDraw) {
@@ -150,7 +124,6 @@ fun BlurredImageView.onDrawExt(canvas: Canvas) {
         val bitmap3 = this.bitmapBlured
         if (bitmap3 != null && !bitmap3.isRecycled) {
 
-            // ═════════════════════════════════════════════════════════════════
             //  Phase 1: Type-specific background drawing
             //
             //  CONFIRMED by smali (BlurredImageView.smali lines 21307–21581):
@@ -158,7 +131,6 @@ fun BlurredImageView.onDrawExt(canvas: Canvas) {
             //  proceed to the SAME bitmapSquare check + drawIpad/drawProgress.
             //  The JADX decompiler split this into two exclusive branches,
             //  which was WRONG. The actual flow is unified.
-            // ═════════════════════════════════════════════════════════════════
             if (this.mIpadType == IpadType.GRADIENT.ordinal ||
                 this.mIpadType == IpadType.MASK_BRUSH.ordinal ||
                 this.mIpadType == IpadType.BLACK_LAYER.ordinal ||
@@ -207,7 +179,6 @@ fun BlurredImageView.onDrawExt(canvas: Canvas) {
                 }
             }
 
-            // ═════════════════════════════════════════════════════════════════
             //  Phase 2: bitmapSquare check → drawIpad or drawProgress
             //
             //  CONFIRMED by smali (BlurredImageView.smali lines 21586–21599):
@@ -216,16 +187,13 @@ fun BlurredImageView.onDrawExt(canvas: Canvas) {
             //  non-gradient types. The JADX decompiler incorrectly split this
             //  into two branches, causing GRADIENT/MASK_BRUSH/BLACK_LAYER/
             //  CASSET_IMG types to skip drawIpad entirely (BUG-3 root cause).
-            // ═════════════════════════════════════════════════════════════════
             if (this.bitmapSquare != null) {
                 this.drawIpad(canvas, true)
             } else {
                 this.drawProgressExt(canvas)
             }
 
-            // ═════════════════════════════════════════════════════════════════
             //  Phase 3: Overlays (same for all types)
-            // ═════════════════════════════════════════════════════════════════
             this.drawLineHelper(canvas)
             this.drawBismilahExt(canvas)
             this.drawEntityExt(canvas)
@@ -263,18 +231,6 @@ fun BlurredImageView.onDrawExt(canvas: Canvas) {
     }
 }
 
-/**
- * Draw progress bar with line drawing, circle cursor, and text labels.
- *
- * Draws:
- * 1. Background line (color_line_bg) across the progress rect
- * 2. Progress line (paintLecture color) from left to progress position
- * 3. Circle cursor at the progress position
- * 4. currentTime text at the left
- * 5. remainingTime text at the right
- *
- * Original: BlurredImageView.java lines 2307–2317
- */
 fun BlurredImageView.drawProgressExt(canvas: Canvas) {
     val progressX = this.rectFProgress!!.left +
         ((this.rectFProgress!!.right - this.rectFProgress!!.left) * this.progress)
@@ -314,38 +270,15 @@ fun BlurredImageView.drawProgressExt(canvas: Canvas) {
     )
 }
 
-/**
- * Accelerate-decelerate interpolator using cosine function.
- *
- * Original: BlurredImageView.java lines 2319–2321
- */
 fun BlurredImageView.accelerateDecelerateInterpolator(input: Float): Float {
     return ((cos((input + 1.0f) * Math.PI) / 2.0f) + 0.5f).toFloat()
 }
 
-/**
- * Draw aya rect overlay with semi-transparent color.
- *
- * Uses InputDeviceCompat.SOURCE_ANY color for the semi-transparent overlay.
- *
- * Original: BlurredImageView.java lines 3793–3796
- */
 fun BlurredImageView.drawAyaExt(canvas: Canvas) {
     this.paintLecture.color = InputDeviceCompat.SOURCE_ANY
     canvas.drawRect(this.rectFAya!!, this.paintLecture)
 }
 
-/**
- * Draw lecture controls: pause/next/previous/favorite/repeat buttons
- * using drawable resources.
- *
- * Layout:
- * ┌─────────────────────────────────────────────────────┐
- * │  [favorite]  [previous]  [pause]  [next]  [repeat] │
- * └─────────────────────────────────────────────────────┘
- *
- * Original: BlurredImageView.java lines 3798–3832
- */
 fun BlurredImageView.drawLectureExt(canvas: Canvas) {
     val height = this.rectFLecture!!.height() * 0.4f
 
@@ -408,12 +341,6 @@ fun BlurredImageView.drawLectureExt(canvas: Canvas) {
     repeatDrawable?.draw(canvas)
 }
 
-/**
- * Draw bismilah entities (bismilah and isti3adha).
- * Only draws if the entity is visible and its timeline is visible.
- *
- * Original: BlurredImageView.java lines 3775–3783
- */
 fun BlurredImageView.drawBismilahExt(canvas: Canvas) {
     val bismilah = this.bismilahEntity
     if (bismilah != null && bismilah.isVisible &&
@@ -430,11 +357,6 @@ fun BlurredImageView.drawBismilahExt(canvas: Canvas) {
     }
 }
 
-/**
- * Draw surah name entity.
- *
- * Original: BlurredImageView.java lines 3786–3790
- */
 fun BlurredImageView.drawNameSurahExt(canvas: Canvas) {
     val surahName = this.surahNameEntity
     if (surahName != null) {
@@ -442,13 +364,6 @@ fun BlurredImageView.drawNameSurahExt(canvas: Canvas) {
     }
 }
 
-/**
- * Draw all visible quran and translation entities.
- * Quran entities are drawn if isVisible AND their entityQuran timeline is visible.
- * Translation entities are drawn if isVisible AND their entityTrslTimeline is visible.
- *
- * Original: BlurredImageView.java lines 2597–2610
- */
 fun BlurredImageView.drawEntityExt(canvas: Canvas) {
     val quranList = this.getQuranEntities()
     for (i in quranList.indices) {
