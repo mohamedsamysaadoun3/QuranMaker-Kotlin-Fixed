@@ -109,12 +109,15 @@ object Utils {
         val height: Int
 
         if (resizeType.ordinal == ResizeType.SOCIAL_STORY.ordinal) {
-            height = (size * ResizeType.VERTICAL.value).toInt()
-            width = size
+            // Portrait ratio (9:16): narrow width, tall height
+            width = (size * ResizeType.VERTICAL.value).toInt()
+            height = size
         } else if (resizeType.ordinal == ResizeType.YOUTUBE_THUMBNAIL.ordinal) {
+            // Landscape ratio (16:9): wide width, short height
             height = (size * ResizeType.YOUTUBE_THUMBNAIL.value).toInt()
             width = size
         } else {
+            // Square ratio (1:1)
             height = size
             width = size
         }

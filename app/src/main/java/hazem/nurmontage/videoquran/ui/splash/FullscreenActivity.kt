@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import hazem.nurmontage.videoquran.core.base.BaseActivity
@@ -25,25 +24,20 @@ import hazem.nurmontage.videoquran.utils.LocaleHelper
  * 1. If launched with `from_setting` extra → route to SeettingActivity
  * 2. If no template temp file and no saved templates → route to WorkUserActivity
  * 3. Otherwise → route to EngineActivity
- *
- * Also adds EdgeToEdge.enable() and attachBaseContext(LocaleHelper).
  */
 @SuppressLint("CustomSplashScreen")
 class FullscreenActivity : BaseActivity() {
 
     private lateinit var binding: ActivityFullscreenBinding
-    private var keepSplash = true
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.onAttach(newBase))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val splashScreen = installSplashScreen()
-        splashScreen.setKeepOnScreenCondition { keepSplash }
+        installSplashScreen()
 
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
         binding = ActivityFullscreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -62,7 +56,7 @@ class FullscreenActivity : BaseActivity() {
             val targetIntent: Intent
 
             // 1. If coming from settings language change, go to SeettingActivity
-            if (getIntent() != null && getIntent().getBooleanExtra("from_setting", false)) {
+            if (intent != null && intent.getBooleanExtra("from_setting", false)) {
                 targetIntent = Intent(this, SeettingActivity::class.java)
             } else {
                 // 2. Check templates (matches original logic exactly):
@@ -79,7 +73,6 @@ class FullscreenActivity : BaseActivity() {
                 }
             }
 
-            keepSplash = false
             startActivity(targetIntent)
             finish()
         }, SPLASH_DELAY)

@@ -7,6 +7,7 @@ import android.net.Uri
 import android.view.View
 import androidx.core.view.InputDeviceCompat
 import hazem.nurmontage.videoquran.R
+import hazem.nurmontage.videoquran.core.common.Constants
 import hazem.nurmontage.videoquran.utils.audio.AudioUtils
 import hazem.nurmontage.videoquran.utils.DrawableHelper
 import hazem.nurmontage.videoquran.utils.NetworkUtils
@@ -46,7 +47,7 @@ fun EngineActivity.addEntity(
             mTemplate!!.ipad_type == IpadType.MASK_BRUSH.ordinal ||
             mTemplate!!.ipad_type == IpadType.BLACK_LAYER.ordinal
     val nameFont = if (blurredImageView.getQuranEntities().isEmpty()) {
-        "arabic/Quran.ttf"
+        Constants.FONT_QURAN
     } else {
         blurredImageView.getQuranEntities()[0].nameFont
     }
@@ -644,10 +645,15 @@ fun EngineActivity.addTimeLineQuran(quranEntity: QuranEntity): EntityQuranTimeli
     if (quran != null) {
         xCursur = quran.rect.right
     }
+    // Check if bismilah timeline exists and take the max position (matches Java ref)
+    if (trackViewEntity.isExist(trackViewEntity.bismilahTimeline)) {
+        xCursur = Math.max(xCursur, trackViewEntity.bismilahTimeline!!.rect.right)
+    }
+    val f = xCursur
     val entityQuranTimeline = EntityQuranTimeline(
-        quranEntity, xCursur, 0.0f,
+        quranEntity, f, 0.0f,
         trackViewEntity.getWidth() * 0.077f,
-        trackViewEntity.getQuran()!!.rect.right,
+        f + (trackViewEntity.getSecond_in_screen() * 4.0f),
         trackViewEntity.getSecond_in_screen()
     )
     trackViewEntity.addQuran(entityQuranTimeline)
