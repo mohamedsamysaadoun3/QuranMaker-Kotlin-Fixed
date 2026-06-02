@@ -8,11 +8,11 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "hazem.nurmontage.videoquran"
+        applicationId = "hazem.nurmontage.videoquran.kotlin"
         minSdk = 24
         targetSdk = 35
-        versionCode = 21000200
-        versionName = "6.7.1-QuranMaker"
+        versionCode = 21000201
+        versionName = "6.7.1-QuranMaker-KT"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -23,6 +23,10 @@ android {
             storePassword = "quran123"
             keyAlias = "quranmaker"
             keyPassword = "quran123"
+            // توقيع v1 + v2 + v3 لضمان التوافق مع كل إصدارات الأندرويد
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
         }
     }
 

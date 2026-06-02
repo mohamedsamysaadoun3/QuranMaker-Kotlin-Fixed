@@ -25,9 +25,9 @@
         <package android:name="hazem.tuffah.quranaudio"/>
     </queries>
 
-    <permission android:name="hazem.nurmontage.videoquran.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+    <permission android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
         android:protectionLevel="signature"/>
-    <uses-permission android:name="hazem.nurmontage.videoquran.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"/>
+    <uses-permission android:name="${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"/>
 
     <application
         android:name="hazem.nurmontage.videoquran.core.App"
@@ -237,7 +237,7 @@
         <!-- ═══════════════════════════════════════════════════ -->
         <provider
             android:name="androidx.startup.InitializationProvider"
-            android:authorities="hazem.nurmontage.videoquran.androidx-startup"
+            android:authorities="${applicationId}.androidx-startup"
             android:exported="false">
             <meta-data
                 android:name="androidx.emoji2.text.EmojiCompatInitializer"

@@ -89,7 +89,7 @@
     <string name="youtube_thumbnail">Youtube (16:9)</string>
     <string name="youtube_short">Youtube Short (9:16)</string>
     <string name="tiktok">TikTok (9:16)</string>
-    <string name="file_provider">hazem.nurmontage.videoquran.MyProvider</string>
+    <string name="file_provider">${applicationId}.MyProvider</string>
     <string name="in_transition">In</string>
     <string name="out_transition">Out</string>
     <string name="before">Before</string>
