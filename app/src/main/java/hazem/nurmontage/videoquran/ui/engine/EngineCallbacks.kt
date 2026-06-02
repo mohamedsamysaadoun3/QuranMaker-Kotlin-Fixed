@@ -27,6 +27,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import hazem.nurmontage.videoquran.R
 import hazem.nurmontage.videoquran.utils.BitmapCropper
+import hazem.nurmontage.videoquran.utils.ColorUtils
 import hazem.nurmontage.videoquran.utils.audio.AudioUtils
 import hazem.nurmontage.videoquran.utils.DrawableHelper
 import hazem.nurmontage.videoquran.utils.FileUtils
@@ -77,6 +78,7 @@ import hazem.nurmontage.videoquran.views.blurred.updateSizeAya
 import hazem.nurmontage.videoquran.views.blurred.updateSizeAyaTrsl
 import hazem.nurmontage.videoquran.views.blurred.resizeEntity
 import hazem.nurmontage.videoquran.views.blurred.updatePosSurahName
+import hazem.nurmontage.videoquran.views.blurred.createRectWithoutSurahName
 import hazem.nurmontage.videoquran.utils.AspectRatioCalculator
 import hazem.nurmontage.videoquran.utils.LocaleHelper
 import hazem.nurmontage.videoquran.core.base.BaseActivity
@@ -1687,7 +1689,7 @@ fun EngineActivity.createIIpadEditCallback(): EditIpadFragment.IIpadEditCallback
             }
             try {
                 mTemplate!!.ipad_type = i
-                mTemplate!!.changeTypeIpad(i)
+                blurredImageView.changeTypeIpad(i)
                 if (mTemplate!!.isVideoSquare) {
                     if (i != IpadType.GRADIENT.ordinal && i != IpadType.BLACK_LAYER.ordinal && i != IpadType.MASK_BRUSH.ordinal && i != IpadType.BLUE_TYPE.ordinal && i != IpadType.CASSET_IMG.ordinal) {
                         if (mTemplate!!.ipad_type == IpadType.CASSET_IMG_BLUR.ordinal) {
@@ -1699,12 +1701,129 @@ fun EngineActivity.createIIpadEditCallback(): EditIpadFragment.IIpadEditCallback
                     blurredImageView.setRadius_square(0)
                 }
                 if (i == IpadType.IPAD.ordinal || i == IpadType.IPAD_UNBLUR.ordinal) {
-                    // IPad type change handling - simplified for split
-                    blurredImageView.invalidate()
+                    val width = (blurredImageView.ipad_rect!!.width() * 0.87530595f).toInt()
+                    val i2 = (width * 1.13f).toInt()
+                    val min = (Math.min(width, i2) * 0.10800001f).toInt()
+                    var round = Math.round(blurredImageView.bitmapOriginal!!.width * mTemplate!!.x_square)
+                    var round2 = Math.round(blurredImageView.bitmapOriginal!!.height * mTemplate!!.y_square)
+                    var i3 = width + round
+                    if (i3 > blurredImageView.bitmapOriginal!!.width) {
+                        round -= i3 - blurredImageView.bitmapOriginal!!.width
+                        i3 = blurredImageView.bitmapOriginal!!.width
+                    }
+                    var i4 = i2 + round2
+                    if (i4 > blurredImageView.bitmapOriginal!!.height) {
+                        round2 -= i4 - blurredImageView.bitmapOriginal!!.height
+                        i4 = blurredImageView.bitmapOriginal!!.height
+                    }
+                    if (round < 0) round = 0
+                    if (round2 < 0) round2 = 0
+                    val rect = Rect(round, round2, i3, i4)
+                    val width2 = (blurredImageView.bitmapOriginal!!.width * mTemplate!!.width_square).toInt()
+                    val height = (blurredImageView.bitmapOriginal!!.height * mTemplate!!.height_square).toInt()
+                    blurredImageView.bitmapSquare = UtilsBitmap.cropToSquareWithRoundCorners(blurredImageView.bitmapOriginal!!, rect, min, width2, height)
+                    blurredImageView.setRadius_square(min)
+                    rect.right = rect.left + width2
+                    rect.bottom = rect.top + height
+                    blurredImageView.rectSquare = rect
                 }
+                if (i == IpadType.IPAD_CLASSIC.ordinal) {
+                    val width3 = (blurredImageView.ipad_rect!!.width() * 0.87530595f).toInt()
+                    val i5 = (width3 * 1.13f).toInt()
+                    var round3 = Math.round(blurredImageView.bitmapOriginal!!.width * mTemplate!!.x_square)
+                    var round4 = Math.round(blurredImageView.bitmapOriginal!!.height * mTemplate!!.y_square)
+                    var i6 = width3 + round3
+                    if (i6 > blurredImageView.bitmapOriginal!!.width) {
+                        round3 -= i6 - blurredImageView.bitmapOriginal!!.width
+                        i6 = blurredImageView.bitmapOriginal!!.width
+                    }
+                    var i7 = i5 + round4
+                    if (i7 > blurredImageView.bitmapOriginal!!.height) {
+                        round4 -= i7 - blurredImageView.bitmapOriginal!!.height
+                        i7 = blurredImageView.bitmapOriginal!!.height
+                    }
+                    if (round3 < 0) round3 = 0
+                    if (round4 < 0) round4 = 0
+                    val rect2 = Rect(round3, round4, i6, i7)
+                    val width4 = (blurredImageView.bitmapOriginal!!.width * mTemplate!!.width_square).toInt()
+                    val height2 = (blurredImageView.bitmapOriginal!!.height * mTemplate!!.height_square).toInt()
+                    blurredImageView.bitmapSquare = UtilsBitmap.cropToSquare(blurredImageView.bitmapOriginal!!, rect2, width4, height2)
+                    blurredImageView.setRadius_square(0)
+                    rect2.right = rect2.left + width4
+                    rect2.bottom = rect2.top + height2
+                    blurredImageView.rectSquare = rect2
+                }
+                if (i == IpadType.IPAD_NEOMORPHIC.ordinal) {
+                    val width5 = (blurredImageView.ipad_rect!!.width() * 0.6f).toInt()
+                    var round5 = Math.round(blurredImageView.bitmapOriginal!!.width * mTemplate!!.x_square)
+                    var round6 = Math.round(blurredImageView.bitmapOriginal!!.height * mTemplate!!.y_square)
+                    var i8 = width5 + round5
+                    if (i8 > blurredImageView.bitmapOriginal!!.width) {
+                        round5 -= i8 - blurredImageView.bitmapOriginal!!.width
+                        i8 = blurredImageView.bitmapOriginal!!.width
+                    }
+                    var i9 = width5 + round6
+                    if (i9 > blurredImageView.bitmapOriginal!!.height) {
+                        round6 -= i9 - blurredImageView.bitmapOriginal!!.height
+                        i9 = blurredImageView.bitmapOriginal!!.height
+                    }
+                    if (round5 < 0) round5 = 0
+                    if (round6 < 0) round6 = 0
+                    val rect3 = Rect(round5, round6, i8, i9)
+                    val width6 = (blurredImageView.bitmapOriginal!!.width * mTemplate!!.width_square).toInt()
+                    val height3 = (blurredImageView.bitmapOriginal!!.height * mTemplate!!.height_square).toInt()
+                    blurredImageView.bitmapSquare = UtilsBitmap.cropToSquareWithRoundCorners(blurredImageView.bitmapOriginal!!, rect3, width5, width6, height3)
+                    blurredImageView.setRadius_square(width5)
+                    rect3.right = rect3.left + width6
+                    rect3.bottom = rect3.top + height3
+                    blurredImageView.rectSquare = rect3
+                }
+                if (i == IpadType.BOTTOM_RECT.ordinal) {
+                    val width7 = (blurredImageView.ipad_rect!!.width() * 1.0f).toInt()
+                    val height4 = (blurredImageView.bitmapBlured!!.height * 0.5355f).toInt()
+                    var round7 = Math.round(blurredImageView.bitmapOriginal!!.width * mTemplate!!.x_square)
+                    var round8 = Math.round(blurredImageView.bitmapOriginal!!.height * mTemplate!!.y_square)
+                    var i10 = width7 + round7
+                    if (i10 > blurredImageView.bitmapOriginal!!.width) {
+                        round7 -= i10 - blurredImageView.bitmapOriginal!!.width
+                        i10 = blurredImageView.bitmapOriginal!!.width
+                    }
+                    var i11 = height4 + round8
+                    if (i11 > blurredImageView.bitmapOriginal!!.height) {
+                        round8 -= i11 - blurredImageView.bitmapOriginal!!.height
+                        i11 = blurredImageView.bitmapOriginal!!.height
+                    }
+                    if (round7 < 0) round7 = 0
+                    if (round8 < 0) round8 = 0
+                    val rect4 = Rect(round7, round8, i10, i11)
+                    val width8 = (blurredImageView.bitmapOriginal!!.width * mTemplate!!.width_square).toInt()
+                    val height5 = (blurredImageView.bitmapOriginal!!.height * mTemplate!!.height_square).toInt()
+                    blurredImageView.bitmapSquare = UtilsBitmap.cropToSquare(blurredImageView.bitmapOriginal!!, rect4, width8, height5)
+                    blurredImageView.setRadius_square(0)
+                    rect4.right = rect4.left + width8
+                    rect4.bottom = rect4.top + height5
+                    blurredImageView.rectSquare = rect4
+                }
+                if (i == IpadType.BORDER.ordinal) {
+                    if (ColorUtils.isColorDark(blurredImageView.bitmapOriginal!!.getPixel(
+                        (blurredImageView.bitmapOriginal!!.width * 0.5f).toInt(),
+                        (blurredImageView.bitmapOriginal!!.height * 0.5f).toInt()
+                    ))) {
+                        mTemplate!!.color_ipad = -1
+                    } else {
+                        mTemplate!!.color_ipad = ViewCompat.MEASURED_STATE_MASK
+                    }
+                    blurredImageView.setColorIpad(mTemplate!!.color_ipad)
+                }
+                blurredImageView.createRectWithoutSurahName()
+                blurredImageView.resizeEntity()
+                if (blurredImageView.surahNameEntity != null && blurredImageView.surahNameEntity!!.style != SurahNameStyle.ZAGHRAFAT.ordinal && !blurredImageView.surahNameEntity!!.isHaveBg) {
+                    blurredImageView.updatePosSurahName()
+                }
+                blurredImageView.changeColorIpad()
                 blurredImageView.invalidate()
             } catch (e: Exception) {
-                e.printStackTrace()
+                android.util.Log.e("execption", "onChangeType" + e.message)
             }
         }
 

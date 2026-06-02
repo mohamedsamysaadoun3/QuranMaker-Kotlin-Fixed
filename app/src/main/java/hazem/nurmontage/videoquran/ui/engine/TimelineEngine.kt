@@ -892,10 +892,13 @@ class TimelineEngine(
         if (lastQuran != null) {
             xCursor = lastQuran.rect.right
         }
+        if (trackViewEntity.isExist(trackViewEntity.bismilahTimeline)) {
+            xCursor = maxOf(xCursor, trackViewEntity.bismilahTimeline!!.rect.right)
+        }
         val entityQuranTimeline = EntityQuranTimeline(
             quranEntity, xCursor, 0.0f,
             trackViewEntity.getWidth() * 0.077f,
-            trackViewEntity.getQuran()!!.rect.right,
+            xCursor + trackViewEntity.getSecond_in_screen() * 4.0f,
             trackViewEntity.getSecond_in_screen()
         )
         trackViewEntity.addQuran(entityQuranTimeline)
@@ -985,10 +988,12 @@ class TimelineEngine(
         if (lastTrsl != null) {
             xCursor = lastTrsl.rect.right
         }
+        val quranRight = trackViewEntity.getQuran()?.rect?.right
+            ?: (xCursor + trackViewEntity.getSecond_in_screen() * 4.0f)
         val entityTrslTimeline = EntityTrslTimeline(
             translationQuranEntity, xCursor, 0.0f,
             trackViewEntity.getWidth() * 0.077f,
-            trackViewEntity.getQuran()!!.rect.right,
+            quranRight,
             trackViewEntity.getSecond_in_screen()
         )
         trackViewEntity.addTrslQuran(entityTrslTimeline)
