@@ -64,10 +64,13 @@ class Template : Serializable {
     val entityMediaList: MutableList<EntityMedia> = arrayListOf()
     val quranEntityList: MutableList<EntityQuranTemplate> = arrayListOf()
     val translationTemplateList: MutableList<EntityTranslationTemplate> = arrayListOf()
+    val freeElementList: MutableList<FreeElement> = arrayListOf()
 
     fun addMedia(entity: EntityMedia) { entityMediaList.add(entity) }
     fun addQuranEntityList(entity: EntityQuranTemplate) { quranEntityList.add(entity) }
     fun addTrslEntityList(entity: EntityTranslationTemplate) { translationTemplateList.add(entity) }
+    fun addFreeElement(freeElement: FreeElement) { freeElementList.add(freeElement) }
+    fun removeFreeElement(freeElement: FreeElement) { freeElementList.remove(freeElement) }
 
     fun setWidthAndHeight(w: Int, h: Int) { width = w; height = h }
     fun setDrawingTranslation(dx: Float, dy: Float) { mDrawingTranslationX = dx; mDrawingTranslationY = dy }

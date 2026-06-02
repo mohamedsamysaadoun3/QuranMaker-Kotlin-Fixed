@@ -1695,10 +1695,11 @@ fun EngineActivity.createIIpadEditCallback(): EditIpadFragment.IIpadEditCallback
                         if (mTemplate!!.ipad_type == IpadType.CASSET_IMG_BLUR.ordinal) {
                             blurredImageView.bitmapSquare = blurredImageView.bitmapBlured
                             blurredImageView.setRadius_square(0)
+                        } else {
+                            blurredImageView.bitmapSquare = blurredImageView.bitmapNotBlur
+                            blurredImageView.setRadius_square(0)
                         }
                     }
-                    blurredImageView.bitmapSquare = blurredImageView.bitmapNotBlur
-                    blurredImageView.setRadius_square(0)
                 }
                 if (i == IpadType.IPAD.ordinal || i == IpadType.IPAD_UNBLUR.ordinal) {
                     val width = (blurredImageView.ipad_rect!!.width() * 0.87530595f).toInt()

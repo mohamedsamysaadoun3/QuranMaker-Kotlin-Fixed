@@ -297,6 +297,29 @@ class EngineActivity : BaseActivity() {
         super.onResume()
         isToCrop = false
         isSaveTmpTemplate = true
+
+        // Handle Pixabay background result (faithful to Java original EngineActivity.onResume)
+        val pixabayPath = Common.pixabayBgFilePath
+        if (pixabayPath != null) {
+            val fromFile = Uri.fromFile(java.io.File(pixabayPath))
+            val pixabayType = Common.pixabayBgType
+            if (pixabayType == null || MimeTypes.BASE_TYPE_VIDEO != pixabayType) {
+                handleImg(fromFile)
+            } else {
+                handleVideo(fromFile)
+            }
+            Common.pixabayBgFilePath = null
+            Common.pixabayBgType = null
+        }
+
+        // Handle free elements from FreeLayerActivity (faithful to Java original EngineActivity.onResume)
+        val freeList = Common.freeElements
+        if (freeList != null && mTemplate != null) {
+            mTemplate!!.freeElementList.clear()
+            for (element in freeList) {
+                mTemplate!!.addFreeElement(element)
+            }
+        }
     }
 
     override fun onDestroy() {

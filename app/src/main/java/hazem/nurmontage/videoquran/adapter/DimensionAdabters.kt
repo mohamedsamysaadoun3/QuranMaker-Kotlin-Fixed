@@ -56,6 +56,7 @@ class DimensionAdabters(
 
         holder.layout.layoutParams.width = pair.first
         holder.layout.layoutParams.height = pair.second
+        holder.layout.requestLayout()
 
         val parts = dimension.name.split("\n")
         holder.name.text = parts[0]

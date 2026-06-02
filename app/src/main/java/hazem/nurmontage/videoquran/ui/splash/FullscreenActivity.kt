@@ -9,6 +9,7 @@ import android.os.Looper
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import hazem.nurmontage.videoquran.core.base.BaseActivity
+import hazem.nurmontage.videoquran.core.common.Common
 import hazem.nurmontage.videoquran.core.common.Constants
 import hazem.nurmontage.videoquran.databinding.ActivityFullscreenBinding
 import hazem.nurmontage.videoquran.ui.engine.EngineActivity
@@ -29,15 +30,19 @@ import hazem.nurmontage.videoquran.utils.LocaleHelper
 class FullscreenActivity : BaseActivity() {
 
     private lateinit var binding: ActivityFullscreenBinding
+    private var isReady = false
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.onAttach(newBase))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
 
         super.onCreate(savedInstanceState)
+
+        // Keep the splash screen visible until content is ready
+        splashScreen.setKeepOnScreenCondition { !isReady }
 
         binding = ActivityFullscreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -48,6 +53,9 @@ class FullscreenActivity : BaseActivity() {
         val insetsController = WindowCompat.getInsetsController(window, window.decorView)
         insetsController.isAppearanceLightStatusBars = true
         insetsController.isAppearanceLightNavigationBars = true
+
+        // Mark content as ready so the splash overlay dismisses and shows the Quranic verse
+        isReady = true
 
         // Smart navigation after splash delay
         val allTemplates = getSharedPreferences("MTemplate", 0).all

@@ -24,6 +24,8 @@ object Common {
     var minSquareW: Int = 0
     var bitmap: Bitmap? = null
     var freeElements: List<FreeElement>? = null
+    var pixabayBgFilePath: String? = null
+    var pixabayBgType: String? = null
     var radius: Int = 0
     var rect: Rect? = null
     var pHBorder: Float = 0.065f
