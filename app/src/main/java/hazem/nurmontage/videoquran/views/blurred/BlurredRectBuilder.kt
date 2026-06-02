@@ -20,7 +20,6 @@ fun BlurredImageView.updateIpad(bitmap: Bitmap, size: Int, width117: Int) {
     this.bitmapNotBlur = bitmap
     this.mIpadType = size
 
-    // ── IPAD_CLASSIC ──────────────────────────────────────────────────────
     if (size == IpadType.IPAD_CLASSIC.ordinal) {
         if (this.mResizetype == ResizeType.SOCIAL_STORY.ordinal) {
             val height = bitmap.height * 0.7601563f
@@ -45,7 +44,6 @@ fun BlurredImageView.updateIpad(bitmap: Bitmap, size: Int, width117: Int) {
         }
     }
 
-    // ── IPAD_NEOMORPHIC ───────────────────────────────────────────────────
     if (size == IpadType.IPAD_NEOMORPHIC.ordinal) {
         if (this.mResizetype == ResizeType.SOCIAL_STORY.ordinal) {
             val height7 = bitmap.height * 0.7601563f
@@ -70,7 +68,6 @@ fun BlurredImageView.updateIpad(bitmap: Bitmap, size: Int, width117: Int) {
         }
     }
 
-    // ── CASSET / CASSET_IMG / CASSET_IMG_BLUR ────────────────────────────
     if (size == IpadType.CASSET.ordinal || size == IpadType.CASSET_IMG.ordinal || size == IpadType.CASSET_IMG_BLUR.ordinal) {
         val minVal = min(bitmap.width.toFloat(), bitmap.height.toFloat())
         val f7 = minVal * 0.45f
@@ -80,7 +77,6 @@ fun BlurredImageView.updateIpad(bitmap: Bitmap, size: Int, width117: Int) {
         this.ipad_rect = RectF(width7, height13, f8 + width7, f7 + height13)
     }
 
-    // ── IPAD / IPAD_UNBLUR ───────────────────────────────────────────────
     if (size == IpadType.IPAD.ordinal || size == IpadType.IPAD_UNBLUR.ordinal) {
         if (this.mResizetype == ResizeType.SOCIAL_STORY.ordinal) {
             val height14 = bitmap.height * 0.7601563f
@@ -105,7 +101,6 @@ fun BlurredImageView.updateIpad(bitmap: Bitmap, size: Int, width117: Int) {
         }
     }
 
-    // ── BOTTOM_RECT ───────────────────────────────────────────────────────
     if (size == IpadType.BOTTOM_RECT.ordinal) {
         if (this.mResizetype == ResizeType.SOCIAL_STORY.ordinal) {
             val height20 = bitmap.height * 0.2f
@@ -130,7 +125,6 @@ fun BlurredImageView.updateIpad(bitmap: Bitmap, size: Int, width117: Int) {
         }
     }
 
-    // ── ROUND_RECT ────────────────────────────────────────────────────────
     if (size == IpadType.ROUND_RECT.ordinal) {
         val min2 = min(bitmap.width.toFloat(), bitmap.height.toFloat()) * 0.45f
         val f12 = min2 * 0.5f
@@ -139,7 +133,6 @@ fun BlurredImageView.updateIpad(bitmap: Bitmap, size: Int, width117: Int) {
         this.ipad_rect = RectF(width17, height26, width17 + min2, min2 + height26)
     }
 
-    // ── RECT ──────────────────────────────────────────────────────────────
     if (size == IpadType.RECT.ordinal) {
         val min3 = min(bitmap.width.toFloat(), bitmap.height.toFloat())
         val f13 = 0.35f * min3
@@ -149,13 +142,11 @@ fun BlurredImageView.updateIpad(bitmap: Bitmap, size: Int, width117: Int) {
         this.ipad_rect = RectF(width18, height27, f14 + width18, f13 + height27)
     }
 
-    // ── BLACK_LAYER / BLUE_TYPE / HEART / BATTERY ─────────────────────────
     if (size == IpadType.BLACK_LAYER.ordinal || size == IpadType.BLUE_TYPE.ordinal || size == IpadType.HEART.ordinal || size == IpadType.BATTERY.ordinal) {
         val f15 = this.btmX
         this.ipad_rect = RectF(f15 - 2.0f, this.btmY, f15 + bitmap.width + 2.0f, this.btmY + bitmap.height)
     }
 
-    // ── GRADIENT ──────────────────────────────────────────────────────────
     if (size == IpadType.GRADIENT.ordinal) {
         this.ipad_rect = RectF(
             this.btmX - 2.0f,
@@ -165,13 +156,11 @@ fun BlurredImageView.updateIpad(bitmap: Bitmap, size: Int, width117: Int) {
         )
     }
 
-    // ── MASK_BRUSH ────────────────────────────────────────────────────────
     if (size == IpadType.MASK_BRUSH.ordinal) {
         val f16 = this.btmX
         this.ipad_rect = RectF(f16, this.btmY, bitmap.width + f16, this.btmY + bitmap.height)
     }
 
-    // ── BORDER (special: sets STROKE style and returns early) ─────────────
     if (size == IpadType.BORDER.ordinal) {
         val min4 = min(bitmap.width, bitmap.height)
         val height28 = bitmap.height * Common.pHBorder
@@ -194,7 +183,6 @@ fun BlurredImageView.updateIpad(bitmap: Bitmap, size: Int, width117: Int) {
 fun BlurredImageView.updateIpad() {
     val bm = this.bitmapBlured ?: return
 
-    // ── IPAD_CLASSIC ──────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.IPAD_CLASSIC.ordinal) {
         if (this.mResizetype == ResizeType.SOCIAL_STORY.ordinal) {
             val height = bm.height * 0.7601563f
@@ -219,7 +207,6 @@ fun BlurredImageView.updateIpad() {
         }
     }
 
-    // ── IPAD_NEOMORPHIC ───────────────────────────────────────────────────
     if (this.mIpadType == IpadType.IPAD_NEOMORPHIC.ordinal) {
         if (this.mResizetype == ResizeType.SOCIAL_STORY.ordinal) {
             val height7 = bm.height * 0.7601563f
@@ -244,7 +231,6 @@ fun BlurredImageView.updateIpad() {
         }
     }
 
-    // ── IPAD / IPAD_UNBLUR ───────────────────────────────────────────────
     if (this.mIpadType == IpadType.IPAD.ordinal || this.mIpadType == IpadType.IPAD_UNBLUR.ordinal) {
         if (this.mResizetype == ResizeType.SOCIAL_STORY.ordinal) {
             val height13 = bm.height * 0.7601563f
@@ -269,7 +255,6 @@ fun BlurredImageView.updateIpad() {
         }
     }
 
-    // ── BOTTOM_RECT ───────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.BOTTOM_RECT.ordinal) {
         if (this.mResizetype == ResizeType.SOCIAL_STORY.ordinal) {
             val height19 = bm.height * 0.2f
@@ -294,7 +279,6 @@ fun BlurredImageView.updateIpad() {
         }
     }
 
-    // ── ROUND_RECT ────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.ROUND_RECT.ordinal) {
         val minVal = min(bm.width.toFloat(), bm.height.toFloat()) * 0.45f
         val f10 = minVal * 0.5f
@@ -303,7 +287,6 @@ fun BlurredImageView.updateIpad() {
         this.ipad_rect = RectF(width16, height25, width16 + minVal, minVal + height25)
     }
 
-    // ── CASSET / CASSET_IMG / CASSET_IMG_BLUR ────────────────────────────
     if (this.mIpadType == IpadType.CASSET.ordinal || this.mIpadType == IpadType.CASSET_IMG.ordinal || this.mIpadType == IpadType.CASSET_IMG_BLUR.ordinal) {
         val min2 = min(bm.width.toFloat(), bm.height.toFloat())
         val f11 = 0.45f * min2
@@ -313,7 +296,6 @@ fun BlurredImageView.updateIpad() {
         this.ipad_rect = RectF(width17, height26, f12 + width17, f11 + height26)
     }
 
-    // ── RECT ──────────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.RECT.ordinal) {
         val min3 = min(bm.width.toFloat(), bm.height.toFloat())
         val f13 = 0.35f * min3
@@ -323,13 +305,11 @@ fun BlurredImageView.updateIpad() {
         this.ipad_rect = RectF(width18, height27, f14 + width18, f13 + height27)
     }
 
-    // ── BLACK_LAYER / BLUE_TYPE / HEART / BATTERY ─────────────────────────
     if (this.mIpadType == IpadType.BLACK_LAYER.ordinal || this.mIpadType == IpadType.BLUE_TYPE.ordinal || this.mIpadType == IpadType.HEART.ordinal || this.mIpadType == IpadType.BATTERY.ordinal) {
         val f15 = this.btmX
         this.ipad_rect = RectF(f15 - 2.0f, this.btmY, f15 + bm.width + 2.0f, this.btmY + bm.height)
     }
 
-    // ── GRADIENT ──────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.GRADIENT.ordinal) {
         this.ipad_rect = RectF(
             this.btmX - 2.0f,
@@ -339,13 +319,11 @@ fun BlurredImageView.updateIpad() {
         )
     }
 
-    // ── MASK_BRUSH ────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.MASK_BRUSH.ordinal) {
         val f16 = this.btmX
         this.ipad_rect = RectF(f16, this.btmY, bm.width + f16, this.btmY + bm.height)
     }
 
-    // ── BORDER (special: sets STROKE style and returns early) ─────────────
     if (this.mIpadType == IpadType.BORDER.ordinal) {
         val min4 = min(bm.width, bm.height)
         val height28 = bm.height * Common.pHBorder
@@ -370,7 +348,6 @@ fun BlurredImageView.createRect() {
     val ipad = this.ipad_rect ?: return
     val bmSq = this.bitmapSquare
 
-    // ── IPAD_CLASSIC ──────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.IPAD_CLASSIC.ordinal) {
         if (bmSq == null) return  // can't create rects without square bitmap
         val height = ipad.height() - bmSq.height
@@ -393,7 +370,6 @@ fun BlurredImageView.createRect() {
         this.rectFLecture!!.set(centerX, f5, this.rectFAya!!.right, (height * 0.25f) + f5)
     }
 
-    // ── IPAD_NEOMORPHIC ───────────────────────────────────────────────────
     if (this.mIpadType == IpadType.IPAD_NEOMORPHIC.ordinal) {
         val height3 = ipad.height() * 0.6f
         if (bmSq == null) return  // can't create rects without square bitmap
@@ -419,7 +395,6 @@ fun BlurredImageView.createRect() {
         this.rectFLecture!!.set(this.rectFProgress!!.left - width5, f10 + f6, this.rectFProgress!!.right + width5, ipad.bottom)
     }
 
-    // ── IPAD / IPAD_UNBLUR ───────────────────────────────────────────────
     if (this.mIpadType == IpadType.IPAD.ordinal || this.mIpadType == IpadType.IPAD_UNBLUR.ordinal) {
         if (bmSq == null) return  // can't create rects without square bitmap
         val height4 = ipad.height() - bmSq.height
@@ -442,7 +417,6 @@ fun BlurredImageView.createRect() {
         this.rectFLecture!!.set(centerX2, f15, this.rectFAya!!.right, (height4 * 0.25f) + f15)
     }
 
-    // ── ROUND_RECT ────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.ROUND_RECT.ordinal) {
         val width7 = ipad.width() * 0.07f
         val f16 = ipad.left + width7
@@ -467,7 +441,6 @@ fun BlurredImageView.createRect() {
         this.rectFLecture!!.set(f16, height8, f18, ipad.bottom - (width7 * 0.75f))
     }
 
-    // ── RECT ──────────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.RECT.ordinal) {
         val width10 = ipad.width() * 0.05f
         val f22 = ipad.left + width10
@@ -489,7 +462,6 @@ fun BlurredImageView.createRect() {
         this.rectFLecture!!.set(f22, height11, this.rectFAya!!.right, ipad.bottom - width10)
     }
 
-    // ── BOTTOM_RECT ───────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.BOTTOM_RECT.ordinal) {
         val width12 = ipad.width() * 0.005f
         val width13 = ipad.left + (ipad.width() * 0.025f)
@@ -514,7 +486,6 @@ fun BlurredImageView.createRect() {
         this.rectFAya!!.bottom = this.rectFProgress!!.top * 1.025f
     }
 
-    // ── BLACK_LAYER ───────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.BLACK_LAYER.ordinal) {
         val f31 = if (this.mResizetype == ResizeType.SQUARE.ordinal) 0.34f else 0.4f
         val width16 = ipad.width() * 0.014f
@@ -538,7 +509,6 @@ fun BlurredImageView.createRect() {
         this.rectFLecture!!.set(f32, f36, f34, ipad.bottom - (width16 * 0.75f))
     }
 
-    // ── HEART / BATTERY ──────────────────────────────────────────────────
     if (this.mIpadType == IpadType.HEART.ordinal || this.mIpadType == IpadType.BATTERY.ordinal) {
         if (this.mResizetype == ResizeType.SOCIAL_STORY.ordinal) {
             val width17 = ipad.width() * 0.014f
@@ -603,7 +573,6 @@ fun BlurredImageView.createRect() {
         }
     }
 
-    // ── CASSET / CASSET_IMG / CASSET_IMG_BLUR ────────────────────────────
     if (this.mIpadType == IpadType.CASSET.ordinal || this.mIpadType == IpadType.CASSET_IMG.ordinal || this.mIpadType == IpadType.CASSET_IMG_BLUR.ordinal) {
         val width21 = ipad.width() * 0.012f
         val f52 = ipad.top + width21
@@ -620,7 +589,6 @@ fun BlurredImageView.createRect() {
         this.rectFLecture = RectF()
     }
 
-    // ── GRADIENT ──────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.GRADIENT.ordinal) {
         val width23 = ipad.width() * 0.014f
         val f55 = ipad.left + width23
@@ -646,7 +614,6 @@ fun BlurredImageView.createRect() {
         this.rectFSurahName!!.bottom = this.rectFAya!!.top
     }
 
-    // ── MASK_BRUSH ────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.MASK_BRUSH.ordinal) {
         if (this.mResizetype == ResizeType.SOCIAL_STORY.ordinal) {
             val width24 = ipad.width() * 0.014f
@@ -713,7 +680,6 @@ fun BlurredImageView.createRect() {
         }
     }
 
-    // ── BLUE_TYPE ─────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.BLUE_TYPE.ordinal) {
         if (this.mResizetype == ResizeType.SOCIAL_STORY.ordinal) {
             val width30 = ipad.width() * 0.014f
@@ -780,7 +746,6 @@ fun BlurredImageView.createRect() {
         }
     }
 
-    // ── BORDER ────────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.BORDER.ordinal) {
         if (bmSq == null) return  // can't create rects without square bitmap
         val height27 = ipad.height() - bmSq.height
@@ -808,7 +773,6 @@ fun BlurredImageView.createRect() {
         this.paintIpad.style = Paint.Style.FILL
     }
 
-    // ── Line stroke width & cursor radius ─────────────────────────────────
     if (this.mIpadType == IpadType.BOTTOM_RECT.ordinal || this.mIpadType == IpadType.ROUND_RECT.ordinal) {
         this.linePaint.strokeWidth = this.rectFProgress!!.height() * 0.02f
     } else {
@@ -821,7 +785,6 @@ fun BlurredImageView.createRectWithoutSurahName() {
     val ipad = this.ipad_rect ?: return
     val bmSq = this.bitmapSquare
 
-    // ── IPAD_CLASSIC ──────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.IPAD_CLASSIC.ordinal) {
         if (bmSq == null) return  // can't create rects without square bitmap
         val height = ipad.height() - bmSq.height
@@ -844,7 +807,6 @@ fun BlurredImageView.createRectWithoutSurahName() {
         this.rectFLecture!!.set(centerX, f5, this.rectFAya!!.right, (height * 0.25f) + f5)
     }
 
-    // ── IPAD_NEOMORPHIC ───────────────────────────────────────────────────
     if (this.mIpadType == IpadType.IPAD_NEOMORPHIC.ordinal) {
         if (bmSq == null) return  // can't create rects without square bitmap
         val height3 = ipad.height() * 0.6f
@@ -870,7 +832,6 @@ fun BlurredImageView.createRectWithoutSurahName() {
         this.rectFLecture!!.set(this.rectFProgress!!.left - width5, f10 + f6, this.rectFProgress!!.right + width5, ipad.bottom)
     }
 
-    // ── IPAD / IPAD_UNBLUR ───────────────────────────────────────────────
     if (this.mIpadType == IpadType.IPAD.ordinal || this.mIpadType == IpadType.IPAD_UNBLUR.ordinal) {
         if (bmSq == null) return  // can't create rects without square bitmap
         val height4 = ipad.height() - bmSq.height
@@ -893,7 +854,6 @@ fun BlurredImageView.createRectWithoutSurahName() {
         this.rectFLecture!!.set(centerX2, f15, this.rectFAya!!.right, (height4 * 0.25f) + f15)
     }
 
-    // ── ROUND_RECT ────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.ROUND_RECT.ordinal) {
         val width7 = ipad.width() * 0.07f
         val f16 = ipad.left + width7
@@ -918,7 +878,6 @@ fun BlurredImageView.createRectWithoutSurahName() {
         this.rectFLecture!!.set(f16, height8, f18, ipad.bottom - (width7 * 0.75f))
     }
 
-    // ── RECT ──────────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.RECT.ordinal) {
         val width10 = ipad.width() * 0.05f
         val f22 = ipad.left + width10
@@ -940,7 +899,6 @@ fun BlurredImageView.createRectWithoutSurahName() {
         this.rectFLecture!!.set(f22, height11, this.rectFAya!!.right, ipad.bottom - width10)
     }
 
-    // ── BOTTOM_RECT ───────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.BOTTOM_RECT.ordinal) {
         val width12 = ipad.width() * 0.005f
         val width13 = ipad.left + (ipad.width() * 0.025f)
@@ -965,7 +923,6 @@ fun BlurredImageView.createRectWithoutSurahName() {
         this.rectFAya!!.bottom = this.rectFProgress!!.top * 1.025f
     }
 
-    // ── BLACK_LAYER ───────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.BLACK_LAYER.ordinal) {
         val f31 = if (this.mResizetype == ResizeType.SQUARE.ordinal) 0.34f else 0.4f
         val width16 = ipad.width() * 0.014f
@@ -989,7 +946,6 @@ fun BlurredImageView.createRectWithoutSurahName() {
         this.rectFLecture!!.set(f32, f36, f34, ipad.bottom - (width16 * 0.75f))
     }
 
-    // ── HEART / BATTERY ──────────────────────────────────────────────────
     if (this.mIpadType == IpadType.HEART.ordinal || this.mIpadType == IpadType.BATTERY.ordinal) {
         if (this.mResizetype == ResizeType.SOCIAL_STORY.ordinal) {
             val width17 = ipad.width() * 0.014f
@@ -1054,7 +1010,6 @@ fun BlurredImageView.createRectWithoutSurahName() {
         }
     }
 
-    // ── CASSET / CASSET_IMG / CASSET_IMG_BLUR ────────────────────────────
     if (this.mIpadType == IpadType.CASSET.ordinal || this.mIpadType == IpadType.CASSET_IMG.ordinal || this.mIpadType == IpadType.CASSET_IMG_BLUR.ordinal) {
         val width21 = ipad.width() * 0.012f
         val f52 = ipad.top + width21
@@ -1071,7 +1026,6 @@ fun BlurredImageView.createRectWithoutSurahName() {
         this.rectFLecture = RectF()
     }
 
-    // ── GRADIENT ──────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.GRADIENT.ordinal) {
         val width23 = ipad.width() * 0.014f
         val f55 = ipad.left + width23
@@ -1097,7 +1051,6 @@ fun BlurredImageView.createRectWithoutSurahName() {
         this.rectFSurahName!!.bottom = this.rectFAya!!.top
     }
 
-    // ── MASK_BRUSH ────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.MASK_BRUSH.ordinal) {
         if (this.mResizetype == ResizeType.SOCIAL_STORY.ordinal) {
             val width24 = ipad.width() * 0.014f
@@ -1164,7 +1117,6 @@ fun BlurredImageView.createRectWithoutSurahName() {
         }
     }
 
-    // ── BLUE_TYPE ─────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.BLUE_TYPE.ordinal) {
         if (this.mResizetype == ResizeType.SOCIAL_STORY.ordinal) {
             val width30 = ipad.width() * 0.014f
@@ -1231,7 +1183,6 @@ fun BlurredImageView.createRectWithoutSurahName() {
         }
     }
 
-    // ── BORDER ────────────────────────────────────────────────────────────
     if (this.mIpadType == IpadType.BORDER.ordinal) {
         if (bmSq == null) return  // can't create rects without square bitmap
         val height27 = ipad.height() - bmSq.height
@@ -1259,7 +1210,6 @@ fun BlurredImageView.createRectWithoutSurahName() {
         this.paintIpad.style = Paint.Style.FILL
     }
 
-    // ── Line stroke width & cursor radius ─────────────────────────────────
     if (this.mIpadType == IpadType.BOTTOM_RECT.ordinal || this.mIpadType == IpadType.ROUND_RECT.ordinal) {
         this.linePaint.strokeWidth = this.rectFProgress!!.height() * 0.02f
     } else {

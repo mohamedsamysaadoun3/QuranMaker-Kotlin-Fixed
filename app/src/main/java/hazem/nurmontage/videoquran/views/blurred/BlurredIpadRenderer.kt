@@ -50,7 +50,6 @@ fun BlurredImageView.drawRectWithShadow(
     if (isGlass()) {
         val cornerRadius = min(rect.width(), rect.height()) * 0.14f
 
-        // ── Pass 1: BlurMaskFilter shadow ──
         val shadowPaint = Paint().apply {
             isAntiAlias = true
             setColor(color)
@@ -66,7 +65,6 @@ fun BlurredImageView.drawRectWithShadow(
         shadowPath.offset(offsetX.toFloat(), offsetY.toFloat())
         canvas.drawPath(shadowPath, shadowPaint)
 
-        // ── Pass 2: Gradient fill (glass effect) ──
         val gradient = this.color_gradient
         val baseColor: Int
         if (gradient != null) {
@@ -90,7 +88,6 @@ fun BlurredImageView.drawRectWithShadow(
             canvas.drawRect(rect, this.paintIpad)
         }
 
-        // ── Pass 3: Border stroke (lightened edge) ──
         this.paintIpad.style = Paint.Style.STROKE
         this.paintIpad.strokeWidth = rect.height() * 0.003f
         this.paintIpad.color = Color.argb(
@@ -105,7 +102,6 @@ fun BlurredImageView.drawRectWithShadow(
             canvas.drawRect(rect, this.paintIpad)
         }
 
-        // ── Pass 4: Glass reflection gradient overlay ──
         this.paintIpad.shader = LinearGradient(
             rect.left, rect.top, rect.right, rect.bottom,
             intArrayOf(Color.argb(140, 255, 255, 255), Color.argb(10, 255, 255, 255)),
@@ -119,14 +115,12 @@ fun BlurredImageView.drawRectWithShadow(
             canvas.drawRect(rect, this.paintIpad)
         }
 
-        // ── Restore paintIpad state ──
         this.paintIpad.shader = if (this.color_gradient != null) this.linearGradient_classic else null
         this.paintIpad.color = this.color_ipad
         this.paintIpad.alpha = 190
         return
     }
 
-    // ── Non-glass path: simple shadow + fill ──
     val shadowPaint2 = Paint().apply {
         isAntiAlias = true
         setColor(color)
@@ -1001,11 +995,6 @@ fun BlurredImageView.drawIpad(canvas: Canvas, isFlag: Boolean) {
     when {
         this.mIpadType == IpadType.IPAD_CLASSIC.ordinal -> {
             canvas.drawRect(this.ipad_rect!!, this.paintIpad)
-            // BEFORE: Premium path set coordinates but never drew the bitmap (thin-line bug)
-            // WHY_CHANGED: Reference calls drawBitmapWithShadow() here, not coordinate-only path
-            // FIXED_BY: Call drawBitmapWithShadow(canvas) to actually draw the iPad album art
-            // REF: BlurredImageView.java line 3315
-            // VISUAL_IMPACT: iPad frame now shows album art instead of empty rectangle
             drawBitmapWithShadow(canvas)
             drawLectureExt(canvas)
             if (isFlag) {
@@ -1028,11 +1017,6 @@ fun BlurredImageView.drawIpad(canvas: Canvas, isFlag: Boolean) {
         this.mIpadType == IpadType.IPAD.ordinal || this.mIpadType == IpadType.IPAD_UNBLUR.ordinal -> {
             val shadowRad = (min(this.ipad_rect!!.width(), this.ipad_rect!!.height()) * 0.03f).toInt()
             drawRectWithShadow(canvas, this.ipad_rect!!, ViewCompat.MEASURED_STATE_MASK, if (shadowRad <= 0) 1 else shadowRad, 0, 0, true)
-            // BEFORE: Premium path set coordinates but never drew the bitmap (thin-line bug)
-            // WHY_CHANGED: Reference calls drawBitmapWithShadow() here for onDraw rendering
-            // FIXED_BY: Call drawBitmapWithShadow(canvas) to actually draw the iPad album art
-            // REF: BlurredImageView.java line 3325
-            // VISUAL_IMPACT: iPad frame now shows album art instead of empty rectangle
             drawBitmapWithShadow(canvas)
             drawLectureExt(canvas)
             if (isFlag) {
@@ -1041,11 +1025,6 @@ fun BlurredImageView.drawIpad(canvas: Canvas, isFlag: Boolean) {
         }
         this.mIpadType == IpadType.BOTTOM_RECT.ordinal -> {
             drawRectBottom(canvas, this.ipad_rect!!)
-            // BEFORE: Used Save variant (premium export path) instead of display path
-            // WHY_CHANGED: Reference's 2-param drawIpad uses drawBitmapWithShadowTypeBottom for display
-            // FIXED_BY: Use drawBitmapWithShadowTypeBottom for on-screen rendering
-            // REF: BlurredImageView.java line 3335
-            // VISUAL_IMPACT: Bottom-rect iPad renders correctly during editing
             drawBitmapWithShadowTypeBottom(canvas)
             drawLectureExt(canvas)
             if (isFlag) {

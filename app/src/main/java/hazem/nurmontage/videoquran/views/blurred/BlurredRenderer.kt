@@ -282,7 +282,6 @@ fun BlurredImageView.drawAyaExt(canvas: Canvas) {
 fun BlurredImageView.drawLectureExt(canvas: Canvas) {
     val height = this.rectFLecture!!.height() * 0.4f
 
-    // ── Pause button (center) ──
     val pauseRect = Rect(
         (this.rectFLecture!!.centerX() - height).toInt(),
         (this.rectFLecture!!.centerY() - height).toInt(),
@@ -294,7 +293,6 @@ fun BlurredImageView.drawLectureExt(canvas: Canvas) {
     pauseDrawable?.setBounds(pauseRect.left, pauseRect.top, pauseRect.right, pauseRect.bottom)
     pauseDrawable?.draw(canvas)
 
-    // ── Next button (right of pause) ──
     val smallHeight = (pauseRect.height() * 0.3f).toInt()
     val smallWidth = (pauseRect.width() * 0.45f).toInt()
     val nextOffset = (pauseRect.width() * 0.29f).toInt()
@@ -310,7 +308,6 @@ fun BlurredImageView.drawLectureExt(canvas: Canvas) {
     nextDrawable?.setBounds(nextRect.left, nextRect.top, nextRect.right, nextRect.bottom)
     nextDrawable?.draw(canvas)
 
-    // ── Previous button (left of pause) ──
     val prevRight = pauseRect.left - nextOffset
     val prevRect = Rect(
         prevRight - smallWidth,
@@ -323,7 +320,6 @@ fun BlurredImageView.drawLectureExt(canvas: Canvas) {
     prevDrawable?.setBounds(prevRect.left, prevRect.top, prevRect.right, prevRect.bottom)
     prevDrawable?.draw(canvas)
 
-    // ── Favorite button (far left, at progress rect left) ──
     val favHalfWidth = (prevRect.width() * 0.5f).toInt()
     val favLeft = this.rectFProgress!!.left.toInt()
     val favRight = prevRect.width() + favLeft
@@ -332,7 +328,6 @@ fun BlurredImageView.drawLectureExt(canvas: Canvas) {
     favoriteDrawable?.setBounds(favLeft, prevRect.centerY() - favHalfWidth, favRight, prevRect.centerY() + favHalfWidth)
     favoriteDrawable?.draw(canvas)
 
-    // ── Repeat button (far right, at progress rect right) ──
     val repeatLeft = this.rectFProgress!!.right.toInt() - prevRect.width()
     val repeatRight = this.rectFProgress!!.right.toInt()
     val repeatDrawable: Drawable? = ContextCompat.getDrawable(context, R.drawable.repeat_24px)

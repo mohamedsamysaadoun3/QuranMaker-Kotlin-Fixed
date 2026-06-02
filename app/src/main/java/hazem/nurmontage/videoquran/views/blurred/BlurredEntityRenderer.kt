@@ -149,7 +149,6 @@ fun BlurredImageView.drawEntityBitmap(file: File, size: Int, index: Int) {
     updateSizeTrslSave(size, index)
     updateBismilahEntity(size, index)
 
-    // ── Quran entities ──
     var entityCounter = 0
     for (i in getQuranEntities().indices) {
         val quranEntity = getQuranEntities()[i]
@@ -177,7 +176,6 @@ fun BlurredImageView.drawEntityBitmap(file: File, size: Int, index: Int) {
         }
     }
 
-    // ── Translation entities ──
     var trslCounter = 0
     for (i in getTranslationEntities().indices) {
         val translationQuranEntity = getTranslationEntities()[i]
@@ -203,7 +201,6 @@ fun BlurredImageView.drawEntityBitmap(file: File, size: Int, index: Int) {
         }
     }
 
-    // ── Bismilah entity ──
     val bismilah = this.bismilahEntity
     if (bismilah != null && bismilah.getBismilahTimeline()?.visible() == true) {
         bismilahEntity!!.getPaintAya().alpha = 255
@@ -225,7 +222,6 @@ fun BlurredImageView.drawEntityBitmap(file: File, size: Int, index: Int) {
         }
     }
 
-    // ── Isti3adha entity ──
     val isti3adha = this.mIsti3adhaEntity
     if (isti3adha == null || isti3adha.getBismilahTimeline()?.visible() != true) {
         return
@@ -599,8 +595,6 @@ fun BlurredImageView.getBitmapDraw(isFlag: Boolean, file: File?): Bitmap {
         drawIpad(canvas, false)
     }
 
-    // Billing removed — no watermark for any user
-
     if (surahNameEntity != null) {
         surahNameEntity!!.rect = RectF(
             surahNameEntity!!.copyRect!!.left * canvas.width,
@@ -727,7 +721,6 @@ fun BlurredImageView.updateSizeAya() {
     var translationWidth = quranEntityWithTrsl?.getTranslationWidth() ?: 0.0f
     var hasTranslation = translationWidth != 0.0f
 
-    // ── Single entity path ──
     if (countEntityQuran() == 1) {
         val calculateTextSize = lastAdd.calculateTextSize()
         val blurRadius = if (lastAdd.getTxt()!!.length < 9) 0.7f else 0.95f
@@ -747,7 +740,6 @@ fun BlurredImageView.updateSizeAya() {
         return
     }
 
-    // ── Multiple entities path: find the widest entity ──
     var width = if (lastAdd.factorSize == 1.0f) lastAdd.getWidth() else -1.0f
     for (i in getQuranEntities().indices.reversed()) {
         val quranEntity2 = getQuranEntities()[i]
@@ -767,7 +759,6 @@ fun BlurredImageView.updateSizeAya() {
 
     val calculateTextSize2 = lastAdd.calculateTextSize()
 
-    // ── Apply calculated text size to all visible entities ──
     for (i in getQuranEntities().indices.reversed()) {
         val quranEntity3 = getQuranEntities()[i]
         if (quranEntity3.entityQuran?.visible() == true && quranEntity3.rect.width() == rectFAya!!.width()) {
@@ -779,7 +770,6 @@ fun BlurredImageView.updateSizeAya() {
         }
     }
 
-    // ── Handle translation sizing ──
     if (hasTranslation && quranEntityWithTrsl != null) {
         val optimalSize = quranEntityWithTrsl.calculateOptimalTextSize(
             (quranEntityWithTrsl.rect.width() * 0.85f).toInt(),
@@ -802,7 +792,6 @@ fun BlurredImageView.updateSizeAyaTrsl() {
 
     var lastAddTrsl = getLastAddTrsl()
 
-    // ── Single entity path ──
     if (countEntityTrsl() == 1) {
         val calculateTextSize = lastAddTrsl.calculateTextSize()
         val blurRadius = if (lastAddTrsl.getTxt()!!.length < 9) 0.7f else 0.95f
@@ -814,7 +803,6 @@ fun BlurredImageView.updateSizeAyaTrsl() {
         return
     }
 
-    // ── Multiple entities path: find widest ──
     var width = if (lastAddTrsl.factorSize == 1.0f) lastAddTrsl.getWidth() else -1.0f
     for (i in getTranslationEntities().indices.reversed()) {
         val translationQuranEntity = getTranslationEntities()[i]
@@ -829,7 +817,6 @@ fun BlurredImageView.updateSizeAyaTrsl() {
 
     val calculateTextSize2 = lastAddTrsl.calculateTextSize()
 
-    // ── Apply calculated text size to all visible entities ──
     for (i in getTranslationEntities().indices.reversed()) {
         val translationQuranEntity2 = getTranslationEntities()[i]
         if (translationQuranEntity2.entityTrslTimeline?.visible() == true) {
@@ -849,7 +836,6 @@ fun BlurredImageView.updateSizeAyaResize() {
     var lastAdd = getLastAdd()
     lastAdd.setIpad_type(mIpadType)
     lastAdd.setCanvasWH(getmCanvas_width(), getmCanvas_height())
-    lastAdd.setFactor_scale(1.0f)
     lastAdd.setFcSize(1.0f)
     lastAdd.factorSizeTrl = 1.0f
 
@@ -861,7 +847,6 @@ fun BlurredImageView.updateSizeAyaResize() {
     var hasTranslation = translationWidth != 0.0f
     var width = lastAdd.getWidth()
 
-    // ── Single entity path ──
     if (countEntityQuran() == 1) {
         val calculateTextSize = lastAdd.calculateTextSize()
         val blurRadius = if (lastAdd.getTxt()!!.length < 9) 0.7f else 0.95f
@@ -881,7 +866,6 @@ fun BlurredImageView.updateSizeAyaResize() {
         return
     }
 
-    // ── Multiple entities: find widest ──
     for (i in getQuranEntities().indices.reversed()) {
         val quranEntity2 = getQuranEntities()[i]
         if (quranEntity2.entityQuran?.visible() == true) {
@@ -903,11 +887,9 @@ fun BlurredImageView.updateSizeAyaResize() {
 
     val calculateTextSize2 = lastAdd.calculateTextSize()
 
-    // ── Apply calculated text size to all visible entities ──
     for (i in getQuranEntities().indices.reversed()) {
         val quranEntity3 = getQuranEntities()[i]
         if (quranEntity3.entityQuran?.visible() == true) {
-            quranEntity3.setFactor_scale(1.0f)
             quranEntity3.factorSizeTrl = 1.0f
             quranEntity3.setFcSize(calculateTextSize2 / getmCanvas_width())
             quranEntity3.setupScale(quranEntity3.factorSize, getmCanvas_width(), getmCanvas_height())
@@ -915,7 +897,6 @@ fun BlurredImageView.updateSizeAyaResize() {
         }
     }
 
-    // ── Handle translation sizing ──
     if (hasTranslation && quranEntityWithTrsl != null) {
         val optimalSize = quranEntityWithTrsl.calculateOptimalTextSize(
             (quranEntityWithTrsl.rect.width() * 0.85f).toInt(),
@@ -939,7 +920,6 @@ fun BlurredImageView.updateSizeTrslAyaResize() {
     var lastAddTrsl = getLastAddTrsl()
     lastAddTrsl.setIpad_type(mIpadType)
     lastAddTrsl.setCanvasWH(getmCanvas_width(), getmCanvas_height())
-    lastAddTrsl.setFactor_scale(1.0f)
     lastAddTrsl.setFcSize(1.0f)
     lastAddTrsl.factorSizeTrl = 1.0f
 
@@ -947,7 +927,6 @@ fun BlurredImageView.updateSizeTrslAyaResize() {
     lastAddTrsl.onResize(rectF, (rectF.width() * 0.85f).toInt(), (rectFAya!!.height() * 0.85f).toInt())
     var width = lastAddTrsl.getWidth()
 
-    // ── Single entity path ──
     if (countEntityTrsl() == 1) {
         val calculateTextSize = lastAddTrsl.calculateTextSize()
         val blurRadius = if (lastAddTrsl.getTxt()!!.length < 9) 0.7f else 0.95f
@@ -959,7 +938,6 @@ fun BlurredImageView.updateSizeTrslAyaResize() {
         return
     }
 
-    // ── Multiple entities: find widest ──
     for (i in getTranslationEntities().indices.reversed()) {
         val translationQuranEntity = getTranslationEntities()[i]
         if (translationQuranEntity.entityTrslTimeline?.visible() == true) {
@@ -976,11 +954,9 @@ fun BlurredImageView.updateSizeTrslAyaResize() {
 
     val calculateTextSize2 = lastAddTrsl.calculateTextSize()
 
-    // ── Apply calculated text size to all visible entities ──
     for (i in getTranslationEntities().indices.reversed()) {
         val translationQuranEntity2 = getTranslationEntities()[i]
         if (translationQuranEntity2.entityTrslTimeline?.visible() == true) {
-            translationQuranEntity2.setFactor_scale(1.0f)
             translationQuranEntity2.factorSizeTrl = 1.0f
             translationQuranEntity2.setFcSize(calculateTextSize2 / getmCanvas_width())
             translationQuranEntity2.setupScale(translationQuranEntity2.factorSize, getmCanvas_width(), getmCanvas_height())
@@ -992,7 +968,6 @@ fun BlurredImageView.updateSizeTrslAyaResize() {
 fun BlurredImageView.updatePosSurahName() {
     if (surahNameEntity == null) return
 
-    // ── Center alignment for neumorphic/cassette types ──
     if (mIpadType == IpadType.IPAD_NEOMORPHIC.ordinal ||
         mIpadType == IpadType.CASSET.ordinal ||
         mIpadType == IpadType.CASSET_IMG.ordinal ||
@@ -1000,7 +975,6 @@ fun BlurredImageView.updatePosSurahName() {
     ) {
         surahNameEntity!!.setAlignment(Layout.Alignment.ALIGN_CENTER)
     } else if (!Utils.isProbablyLArabic(surahNameEntity!!.reader)) {
-        // ── LTR (non-Arabic): align left ──
         if (mIpadType == IpadType.IPAD.ordinal ||
             mIpadType == IpadType.IPAD_UNBLUR.ordinal ||
             mIpadType == IpadType.IPAD_CLASSIC.ordinal
@@ -1038,7 +1012,6 @@ fun BlurredImageView.updatePosSurahName() {
         }
         surahNameEntity!!.setAlignment(Layout.Alignment.ALIGN_NORMAL)
     } else {
-        // ── RTL (Arabic): align right ──
         if (mIpadType == IpadType.IPAD.ordinal ||
             mIpadType == IpadType.IPAD_UNBLUR.ordinal ||
             mIpadType == IpadType.IPAD_CLASSIC.ordinal
@@ -1078,7 +1051,6 @@ fun BlurredImageView.updatePosSurahName() {
     }
 
     surahNameEntity!!.ipad_type = mIpadType
-    surahNameEntity!!.setFactor_scale(1.0f)
     surahNameEntity!!.update(rectFSurahName!!)
 }
 
@@ -1086,7 +1058,6 @@ fun BlurredImageView.updateBismilahEntity() {
     val bismilah = bismilahEntity
     if (bismilah != null && bismilah.getBismilahTimeline()?.visible() == true) {
         bismilahEntity!!.setCanvasWH(getmCanvas_width(), getmCanvas_height())
-        bismilahEntity!!.setFactor_scale(1.0f)
         bismilahEntity!!.setFcSize(1.0f)
         val rectF = rectFAya!!
         bismilahEntity!!.update(rectF, (rectF.width() * 0.85f).toInt(), (rectFAya!!.height() * 0.85f).toInt())
@@ -1101,7 +1072,6 @@ fun BlurredImageView.updateBismilahEntity() {
     }
 
     mIsti3adhaEntity!!.setCanvasWH(getmCanvas_width(), getmCanvas_height())
-    mIsti3adhaEntity!!.setFactor_scale(1.0f)
     mIsti3adhaEntity!!.setFcSize(1.0f)
     val rectF2 = rectFAya!!
     mIsti3adhaEntity!!.update(rectF2, (rectF2.width() * 0.85f).toInt(), (rectFAya!!.height() * 0.85f).toInt())
@@ -1173,7 +1143,6 @@ fun BlurredImageView.setSurahNameEntity(
 ) {
     val surahName = textValue2.ifEmpty { " " }
 
-    // ── Determine alignment based on IpadType and language ──
     val alignment: Layout.Alignment
     if (mIpadType == IpadType.IPAD_NEOMORPHIC.ordinal ||
         mIpadType == IpadType.CASSET.ordinal ||
@@ -1184,7 +1153,6 @@ fun BlurredImageView.setSurahNameEntity(
     } else if (!Utils.isProbablyLArabic(surahName)) {
         alignment = Layout.Alignment.ALIGN_NORMAL
 
-        // ── Reposition for LTR (non-ZAGHRAFAT) ──
         if (size3 != SurahNameStyle.ZAGHRAFAT.ordinal) {
             if (mIpadType == IpadType.IPAD.ordinal ||
                 mIpadType == IpadType.IPAD_UNBLUR.ordinal ||
@@ -1225,7 +1193,6 @@ fun BlurredImageView.setSurahNameEntity(
     } else {
         alignment = Layout.Alignment.ALIGN_OPPOSITE
 
-        // ── Reposition for RTL (non-ZAGHRAFAT) ──
         if (size3 != SurahNameStyle.ZAGHRAFAT.ordinal) {
             if (mIpadType == IpadType.IPAD.ordinal ||
                 mIpadType == IpadType.IPAD_UNBLUR.ordinal ||
@@ -1265,7 +1232,6 @@ fun BlurredImageView.setSurahNameEntity(
         }
     }
 
-    // ── Create or update SurahNameEntity ──
     val existing = surahNameEntity
     if (existing == null) {
         // Load fonts
