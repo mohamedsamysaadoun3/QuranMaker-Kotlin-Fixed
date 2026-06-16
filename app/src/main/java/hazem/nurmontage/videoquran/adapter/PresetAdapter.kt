@@ -66,7 +66,7 @@ class PresetAdapter(
         // Selection border: white stroke on the container
         if (isSelected) {
             val strokeDrawable = GradientDrawable().apply {
-                shape = GradientDrawable.OVAL
+                shape = GradientDrawable.RECTANGLE
                 cornerRadius = 100f
                 setStroke(3, -1) // White 3px stroke
             }
@@ -77,7 +77,7 @@ class PresetAdapter(
 
         // Gradient fill on the color preview
         val gradientDrawable = GradientDrawable().apply {
-            shape = GradientDrawable.OVAL
+            shape = GradientDrawable.RECTANGLE
             cornerRadius = 100f
             colors = intArrayOf(gradient.color, gradient.second, gradient.three)
         }
@@ -94,7 +94,7 @@ class PresetAdapter(
     fun setGradientBackground(view: View, color: Int) {
         val drawable = GradientDrawable().apply {
             setColor(color)
-            shape = GradientDrawable.OVAL
+            shape = GradientDrawable.RECTANGLE
             cornerRadius = 100f
         }
         view.background = drawable

@@ -559,7 +559,7 @@ class ProgressViewActivity : BaseActivity(), ExportCommandBuilder.PreRenderExecu
         val template = mTemplate ?: return null.also { updateNext(latch, semaphore) }
 
         try {
-            val (args, outputPath) = ExportCommandBuilder.generateVideoTimerArgs(template, durationMs)
+            val (args, outputPath) = ExportCommandBuilder.generateVideoTimerArgs(this, template, durationMs)
 
             val syncLatch = CountDownLatch(1)
             semaphore.acquire()

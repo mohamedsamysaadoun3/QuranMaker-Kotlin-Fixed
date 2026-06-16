@@ -44,7 +44,7 @@ class EntitySelectTool(canvasSize: Int, context: Context) {
 
         val p = Paint(Paint.ANTI_ALIAS_FLAG)
         paint = p
-        p.color = -0x6400B
+        p.color = -0x63FD3
         val f = canvasSize.toFloat()
         p.strokeWidth = 0.005f * f
         round = 0.02f * f
@@ -85,7 +85,7 @@ class EntitySelectTool(canvasSize: Int, context: Context) {
         scaleCanvas.drawRoundRect(rectApplyAll, cornerRadius, cornerRadius, paint)
 
         paint.style = Paint.Style.FILL
-        paint.color = -0xDE4E4E
+        paint.color = -14540254
         paint.typeface = applyAllFont
         val maxTextWidth = rectApplyAll.width() * 0.8f
         val maxTextHeight = rectApplyAll.height() * 0.6f
@@ -101,7 +101,7 @@ class EntitySelectTool(canvasSize: Int, context: Context) {
             paint
         )
 
-        paint.color = -0x6400B
+        paint.color = -0x63FD3
         paint.style = Paint.Style.STROKE
     }
 

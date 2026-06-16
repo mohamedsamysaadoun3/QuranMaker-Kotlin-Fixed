@@ -905,11 +905,13 @@ fun EngineActivity.createIBismilahEntityCallback(): EditBismilahEntityFragment.I
 
         override fun onDelete() {
             try {
-                blurredImageView.entity_select = null
-                blurredImageView.postInvalidate()
-                hideFragment()
+                pausePlayer()
+                trackViewEntity.deleteEntity(false)
+                updateTime()
+                iTrimLineCallback?.onEmptySelect()
             } catch (e: Exception) {
                 e.printStackTrace()
+                iTrimLineCallback?.onEmptySelect()
             }
         }
 
@@ -936,19 +938,19 @@ fun EngineActivity.createIBismilahEntityCallback(): EditBismilahEntityFragment.I
         }
 
         override fun fromTheStart() {
-            trackViewEntity.translateToStart()
+            trackViewEntity.translateFromStart()
         }
 
         override fun fromNow() {
-            // translateFromNowBismilah not available, using approximate
+            trackViewEntity.translateFromNow()
         }
 
         override fun untilNow() {
-            // translateUntilNowBismilah not available, using approximate
+            trackViewEntity.translateUntilNow()
         }
 
         override fun untilTheEnd() {
-            trackViewEntity.translateToEnd()
+            trackViewEntity.translateEndNow()
         }
     }
 }
@@ -1014,11 +1016,13 @@ fun EngineActivity.createIEditEntityCallback(): EditEntityFragment.IEditEntityCa
 
         override fun onDelete() {
             try {
-                blurredImageView.entity_select = null
-                blurredImageView.postInvalidate()
-                hideFragment()
+                pausePlayer()
+                trackViewEntity.deleteEntity(false)
+                updateTime()
+                iTrimLineCallback?.onEmptySelect()
             } catch (e: Exception) {
                 e.printStackTrace()
+                iTrimLineCallback?.onEmptySelect()
             }
         }
 
@@ -1031,7 +1035,7 @@ fun EngineActivity.createIEditEntityCallback(): EditEntityFragment.IEditEntityCa
             try {
                 val quranEntity = trackViewEntity.selectedEntity!!.getEntityView() as QuranEntity
                 val beginTransaction = supportFragmentManager.beginTransaction()
-                val fragAyaObj: Any = ColorAyaFragment.getInstance(iEditTrstEntityCallback, quranEntity, mResources!!)
+                val fragAyaObj: Any = ColorAyaFragment.getInstance(iEditEntityCallback, quranEntity, mResources!!)
                 mCurrentFragment = fragAyaObj as androidx.fragment.app.Fragment?
                 beginTransaction.replace(R.id.m_container, mCurrentFragment!!)
                 beginTransaction.commit()
@@ -1060,7 +1064,7 @@ fun EngineActivity.createIEditEntityCallback(): EditEntityFragment.IEditEntityCa
         }
 
         override fun fromTheStart() {
-            trackViewEntity.translateToStart()
+            trackViewEntity.translateFromStart()
         }
 
         override fun fromNow() {
@@ -1072,7 +1076,7 @@ fun EngineActivity.createIEditEntityCallback(): EditEntityFragment.IEditEntityCa
         }
 
         override fun untilTheEnd() {
-            trackViewEntity.translateToEnd()
+            trackViewEntity.translateEndNow()
         }
     }
 }
@@ -1095,7 +1099,7 @@ fun EngineActivity.createIEditTrstEntityCallback(): EditTrslEntityFragment.IEdit
         }
 
         override fun updateTrsl(i: Int) {
-            // Translation entity doesn't have separate trsl color
+            blurredImageView.setColorTrsl(i)
         }
 
         override fun onFont() {
@@ -1135,11 +1139,13 @@ fun EngineActivity.createIEditTrstEntityCallback(): EditTrslEntityFragment.IEdit
 
         override fun onDelete() {
             try {
-                blurredImageView.entity_select = null
-                blurredImageView.postInvalidate()
-                hideFragment()
+                pausePlayer()
+                trackViewEntity.deleteEntity(true)
+                updateTime()
+                iTrimLineCallback?.onEmptySelect()
             } catch (e: Exception) {
                 e.printStackTrace()
+                iTrimLineCallback?.onEmptySelect()
             }
         }
 
@@ -1163,13 +1169,18 @@ fun EngineActivity.createIEditTrstEntityCallback(): EditTrslEntityFragment.IEdit
 
         override fun onEdit() {
             try {
+                pausePlayer()
                 val translationQuranEntity = trackViewEntity.selectedEntity!!.getEntityView() as TranslationQuranEntity
                 val intent = Intent(this@createIEditTrstEntityCallback, hazem.nurmontage.videoquran.ui.editor.EditTrslTxtActivity::class.java)
-                intent.putExtra("txt", translationQuranEntity.txt)
+                intent.putExtra("surah_name", "")
+                intent.putExtra(Common.READER, translationQuranEntity.txt)
+                intent.putExtra("isBg", translationQuranEntity.isHaveBg())
+                intent.putExtra("clrBg", translationQuranEntity.clrBg)
                 isToCrop = true
                 editTrslResult.launch(intent)
                 overridePendingTransition(0, 0)
-            } catch (unused: Exception) {
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
 
@@ -1182,7 +1193,7 @@ fun EngineActivity.createIEditTrstEntityCallback(): EditTrslEntityFragment.IEdit
         }
 
         override fun fromTheStart() {
-            trackViewEntity.translateToStart()
+            trackViewEntity.translateFromStart()
         }
 
         override fun fromNow() {
@@ -1194,7 +1205,7 @@ fun EngineActivity.createIEditTrstEntityCallback(): EditTrslEntityFragment.IEdit
         }
 
         override fun untilTheEnd() {
-            trackViewEntity.translateToEnd()
+            trackViewEntity.translateEndNow()
         }
     }
 }
@@ -1202,6 +1213,7 @@ fun EngineActivity.createIEditTrstEntityCallback(): EditTrslEntityFragment.IEdit
 fun EngineActivity.createIEditMultipleCallback(): EditMultipleEntityFragment.IEditMultipleCallback {
     return object : EditMultipleEntityFragment.IEditMultipleCallback {
         override fun onDelete() {
+            pausePlayer()
             dialogDeleteSelected()
         }
     }
@@ -1213,23 +1225,71 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
 
         override fun updateEntity(effectAudioType: EffectAudioType, entityAudio: EntityAudio) {
             try {
-                val entityAudio2 = trackViewEntity.entityListAudio[trackViewEntity.entityListAudio.indexOf(entityAudio)]
+                for (index in trackViewEntity.entityListAudio.indices) {
+                    val entityAudio2 = trackViewEntity.entityListAudio[index]
+                    if (entityAudio2 !== entityAudio && entityAudio2.visible()) {
+                        when (effectAudioType) {
+                            EffectAudioType.ECHO -> {
+                                entityAudio2.effectAudio.decays = entityAudio.effectAudio.decays
+                                entityAudio2.effectAudio.delays = entityAudio.effectAudio.delays
+                                entityAudio2.effectAudio.outGain = entityAudio.effectAudio.outGain
+                                entityAudio2.effectAudio.decays_cmd = entityAudio.effectAudio.decays_cmd
+                                entityAudio2.effectAudio.delays_cmd = entityAudio.effectAudio.delays_cmd
+                            }
+                            EffectAudioType.NOICE -> {
+                                entityAudio2.effectAudio.isRemoveNoice = entityAudio.effectAudio.isRemoveNoice
+                            }
+                            EffectAudioType.ENHANCE -> {
+                                entityAudio2.effectAudio.isEnhance = entityAudio.effectAudio.isEnhance
+                            }
+                            EffectAudioType.SPEED -> {
+                                entityAudio2.effectAudio.speed = entityAudio.effectAudio.speed
+                            }
+                            EffectAudioType.REVERB -> {
+                                entityAudio2.effectAudio.reverbPreset = entityAudio.effectAudio.reverbPreset
+                                entityAudio2.effectAudio.reverbPreset_index_list = entityAudio.effectAudio.reverbPreset_index_list
+                            }
+                            EffectAudioType.VOLUME -> {
+                                entityAudio2.effectAudio.volume = entityAudio.effectAudio.volume
+                            }
+                            EffectAudioType.FADE -> {
+                                entityAudio2.effectAudio.fade_in = entityAudio.effectAudio.fade_in
+                                entityAudio2.effectAudio.fade_out = entityAudio.effectAudio.fade_out
+                            }
+                            else -> {}
+                        }
+                    }
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
 
         override fun onDone() {
+            pausePreview()
             hideFragment()
+            val selected = trackViewEntity.selectedEntity
+            if (selected != null) {
+                iTrimLineCallback?.onSelectEntity(selected, -1.0f)
+            }
         }
 
         override fun startPreview() {
             try {
-                val entityAudio = trackViewEntity.selectedEntity!! as EntityAudio
-                mIsPlaying = true
-                trackViewEntity.isPlaying = true
-                blurredImageView.isPlaying = true
-                startTimelineAnimationPreview(entityAudio)
+                val selected = trackViewEntity.selectedEntity
+                if (selected is EntityAudio) {
+                    val entityAudio = selected
+                    if (entityAudio.getMediaPlayer()?.isPlaying == true) {
+                        return
+                    }
+                    trackViewEntity.previewEntity(entityAudio)
+                    mIsPlaying = true
+                    trackViewEntity.isPlaying = true
+                    blurredImageView.isPlaying = true
+                    trackViewEntity.translateToStart(entityAudio)
+                    startCursur = trackViewEntity.current_cursur_position
+                    startTimelineAnimationPreview(entityAudio)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -1293,11 +1353,13 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
 
         override fun onDelete() {
             try {
-                blurredImageView.entity_select = null
-                blurredImageView.postInvalidate()
-                hideFragment()
+                pausePlayer()
+                trackViewEntity.deleteMediaEntity()
+                updateTime()
+                iTrimLineCallback?.onEmptySelect()
             } catch (e: Exception) {
                 e.printStackTrace()
+                iTrimLineCallback?.onEmptySelect()
             }
         }
 
@@ -1317,12 +1379,26 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
                         val split = entityAudio.split(abs)
                         if (split != null) {
                             trackViewEntity.stackSplit(entityAudio)
+                            trackViewEntity.stackSplit(split)
                             split.pathFfmpeg = entityAudio.getPathFfmpeg()
                             split.setAmps(entityAudio.amps)
-                            trackViewEntity.addAudio(split, entityAudio.index + 1)
+                            split.setRenderer(entityAudio.getRenderer())
+                            split.effectAudio = entityAudio.effectAudio
+                            split.setMediaPlayer(entityAudio.getMediaPlayer())
+                            split.index = entityAudio.index + 1
+                            split.start = round.toFloat()
+                            split.setMinDuration(entityAudio.getMinDuration() - round)
+                            split.offset = entityAudio.offset
+                            split.setOffsetRight(entityAudio.getOffsetRight())
+                            split.setOffsetLeft(entityAudio.getOffsetLeft())
+                            trackViewEntity.splitAudio(split, entityAudio.index + 1)
+                            entityAudio.end = round.toFloat()
+                            entityAudio.setMinDuration(round)
                             entityAudio.setCurrentRect()
                             entityAudio.right = abs
                             entityAudio.onChange()
+                            entityAudio.updateEffect()
+                            updateTime()
                         }
                         trackViewEntity.invalidate()
                     }
@@ -1482,10 +1558,19 @@ fun EngineActivity.createITransitionCallback(): TransitionEntityAdabters.ITransi
             entityQuranTimeline.setTransition(null)
         }
 
-        override fun playing(entityQuranTimeline: EntityQuranTimeline) {}
+        override fun playing(entityQuranTimeline: EntityQuranTimeline) {
+            if (entityQuranTimeline.quranEntity != null) {
+                entityQuranTimeline.quranEntity.isAnimTest = true
+            }
+        }
 
         override fun onHideFragment(entityQuranTimeline: EntityQuranTimeline) {
             hideFragment()
+            try {
+                iTrimLineCallback?.onSelectEntity(entityQuranTimeline, -1.0f)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
         override fun remove(i: Int, entityQuranTimeline: EntityQuranTimeline) {
@@ -1591,10 +1676,17 @@ fun EngineActivity.createITransitionBismilahCallback(): TransitionBismilahAdabte
             entityBismilahTimeline.setTransition(null)
         }
 
-        override fun playing(entityBismilahTimeline: EntityBismilahTimeline) {}
+        override fun playing(entityBismilahTimeline: EntityBismilahTimeline) {
+            entityBismilahTimeline.quranEntity.isAnimTest = true
+        }
 
         override fun onHideFragment(entityBismilahTimeline: EntityBismilahTimeline) {
             hideFragment()
+            try {
+                iTrimLineCallback?.onSelectEntity(entityBismilahTimeline, -1.0f)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
         override fun remove(i: Int, entityBismilahTimeline: EntityBismilahTimeline) {

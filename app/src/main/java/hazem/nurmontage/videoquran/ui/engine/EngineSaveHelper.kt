@@ -134,6 +134,9 @@ fun EngineActivity.save() {
                         rect.right = rect.left + width3
                         rect.bottom = rect.top + height3
                         blurredImageView.rectSquare = rect
+                        // NEOMORPHIC also needs setupBitmapDraw for export (matching Java)
+                        val bitmapForNeomorphic = UtilsBitmap.blurInSave(this, bitmap!!, 20, 1, mTemplate!!.width, mTemplate!!.height)!!
+                        mTemplate!!.uri_bg_ffmpeg = blurredImageView.setupBitmapDraw(bitmapForNeomorphic, cropToSquareWithRoundCorners!!, mTemplate!!)
                     } else {
                         if (mTemplate!!.ipad_type != IpadType.IPAD.ordinal && mTemplate!!.ipad_type != IpadType.IPAD_UNBLUR.ordinal && mTemplate!!.ipad_type != IpadType.IPAD_CLASSIC.ordinal) {
                             val width4 = (blurredImageView.ipad_rect!!.width() * 1.0f).toInt()

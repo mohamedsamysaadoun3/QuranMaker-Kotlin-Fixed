@@ -602,7 +602,7 @@ fun EngineActivity.changeEntityAudio(i: Int, uri: Uri) {
                 override fun apply(fFmpegSession: com.arthenica.ffmpegkit.FFmpegSession) {
                     if (fFmpegSession.returnCode.isValueSuccess()) {
                         try {
-                            entityAudio.setAmps(PCMWaveformExtractor.extractWaveform(file.absolutePath, round2 / ((round * 0.1f).toInt() + (round * 0.07f).toInt())))
+                            entityAudio.setAmps(PCMWaveformExtractor.extractWaveform(file.absolutePath, round2 / ((round * 0.1f).toInt() + (round * 0.07f).toInt())), round2, round)
                             entityAudio.pathFfmpeg = str
                             runOnUiThread {
                                 updateTimeToEndAya()
@@ -673,7 +673,7 @@ fun EngineActivity.changeEntityAudioLambda(uri: Uri, i: Int, i2: Int, str: Strin
     try {
         val copyFromUri = AudioUtils.copyFromUri(this@changeEntityAudioLambda, uri, mTemplate!!.folder_template!!)!!
         val f = i.toFloat()
-        entityAudio.setAmps(PCMWaveformExtractor.extractWaveform(str, i2 / ((0.1f * f).toInt() + (f * 0.07f).toInt())))
+        entityAudio.setAmps(PCMWaveformExtractor.extractWaveform(str, i2 / ((0.1f * f).toInt() + (f * 0.07f).toInt())), i2, i)
         entityAudio.pathFfmpeg = copyFromUri
         if (i3 != -1) {
             val i4 = i3 + 1
@@ -774,7 +774,7 @@ fun EngineActivity.changeEntityAudioFromVideo(i: Int, uri: Uri, str: String) {
                 override fun apply(fFmpegSession: com.arthenica.ffmpegkit.FFmpegSession) {
                     if (fFmpegSession.returnCode.isValueSuccess()) {
                         try {
-                            entityAudio.setAmps(PCMWaveformExtractor.extractWaveform(file.absolutePath, round2 / ((round * 0.1f).toInt() + (round * 0.07f).toInt())))
+                            entityAudio.setAmps(PCMWaveformExtractor.extractWaveform(file.absolutePath, round2 / ((round * 0.1f).toInt() + (round * 0.07f).toInt())), round2, round)
                             entityAudio.pathFfmpeg = uri.path
                             entityAudio.videoPath = str
                             runOnUiThread {
@@ -1008,7 +1008,7 @@ fun EngineActivity.addEntitMediaHttp(entityMedia: EntityMedia, i: Int, uri: Uri,
             override fun apply(fFmpegSession: com.arthenica.ffmpegkit.FFmpegSession) {
                 if (fFmpegSession.returnCode.isValueSuccess()) {
                     try {
-                        entityAudio?.setAmps(PCMWaveformExtractor.extractWaveform(file.absolutePath, round2 / ((round * 0.1f).toInt() + (round * 0.07f).toInt())))
+                        entityAudio?.setAmps(PCMWaveformExtractor.extractWaveform(file.absolutePath, round2 / ((round * 0.1f).toInt() + (round * 0.07f).toInt())), round2, round)
                         entityAudio?.pathFfmpeg = str
                         val i4 = i2 + 1
                         if (i4 >= mTemplate!!.entityMediaList.size) {
@@ -1084,7 +1084,7 @@ fun EngineActivity.addEntitMediaHttp(entityMedia: EntityMedia, i: Int, uri: Uri,
     } else {
         executor.execute {
             try {
-                entityAudio2?.setAmps(PCMWaveformExtractor.extractWaveform(str2, round2 / ((round * 0.1f).toInt() + (round * 0.07f).toInt())))
+                entityAudio2?.setAmps(PCMWaveformExtractor.extractWaveform(str2, round2 / ((round * 0.1f).toInt() + (round * 0.07f).toInt())), round2, round)
                 entityAudio2?.pathFfmpeg = str
                 val i4 = i2 + 1
                 if (i4 >= mTemplate!!.entityMediaList.size) {

@@ -56,7 +56,7 @@ class ColorAdapter(
         if (isSelected) {
             val selectedBg = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE // Java: setShape(0)
-                cornerRadius = 10.0f               // Java: setCornerRadius(10.0f)
+                cornerRadius = 100.0f               // Java: setCornerRadius(100.0f)
                 setStroke(3, -0x1)                 // Java: setStroke(3, -1) white
             }
             itemView.background = selectedBg
@@ -68,7 +68,7 @@ class ColorAdapter(
         // Java: setShape(0) = RECTANGLE, setCornerRadius(10.0f), setColor(color)
         val colorBg = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE // Java: setShape(0)
-            cornerRadius = 10.0f               // Java: setCornerRadius(10.0f)
+            cornerRadius = 100.0f               // Java: setCornerRadius(100.0f)
             setColor(color)
         }
         imageView.background = colorBg

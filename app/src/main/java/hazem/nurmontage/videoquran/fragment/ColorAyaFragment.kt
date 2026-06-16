@@ -16,7 +16,7 @@ import hazem.nurmontage.videoquran.adapter.ColorAdapter
 import hazem.nurmontage.videoquran.core.common.Constants
 import hazem.nurmontage.videoquran.core.common.Constants.AyaTextPreset
 import hazem.nurmontage.videoquran.databinding.FragmentColorAyaBinding
-import hazem.nurmontage.videoquran.fragment.EditTrslEntityFragment
+import hazem.nurmontage.videoquran.fragment.EditEntityFragment
 import hazem.nurmontage.videoquran.model.data.QuranEntity
 import hazem.nurmontage.videoquran.utils.Utils
 import hazem.nurmontage.videoquran.views.TextCustumFont
@@ -27,7 +27,7 @@ class ColorAyaFragment : Fragment {
         @JvmStatic var instance: ColorAyaFragment? = null
 
         fun getInstance(
-            callback: EditTrslEntityFragment.IEditEntityCallback?,
+            callback: EditEntityFragment.IEditEntityCallback?,
             entity: QuranEntity?,
             resources: Resources?
         ): ColorAyaFragment {
@@ -42,7 +42,7 @@ class ColorAyaFragment : Fragment {
     private var binding: FragmentColorAyaBinding? = null
     private var entitySelect: QuranEntity? = null
     private var iColor: ColorAdapter.IColor? = null
-    private var iEditEntityCallback: EditTrslEntityFragment.IEditEntityCallback? = null
+    private var iEditEntityCallback: EditEntityFragment.IEditEntityCallback? = null
     private var recyclerView: RecyclerView? = null
     private var resourcesRef: Resources? = null
     private var tabLayout: TabLayout? = null
@@ -50,7 +50,7 @@ class ColorAyaFragment : Fragment {
     constructor()
 
     constructor(
-        iEditEntityCallback: EditTrslEntityFragment.IEditEntityCallback?,
+        iEditEntityCallback: EditEntityFragment.IEditEntityCallback?,
         entity: QuranEntity?,
         resources: Resources?
     ) {

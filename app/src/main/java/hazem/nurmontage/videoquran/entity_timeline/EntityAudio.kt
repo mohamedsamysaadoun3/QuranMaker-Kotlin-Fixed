@@ -45,6 +45,8 @@ class EntityAudio : Entity {
     internal var lastLeft: Float = 0f
     internal var lastRight: Float = 0f
     internal var mediaPlayer: MediaPlayer? = null
+    fun getMediaPlayer(): MediaPlayer? = mediaPlayer
+    fun setMediaPlayer(mp: MediaPlayer?) { this.mediaPlayer = mp }
     internal var minDuration: Int = 0
     internal var objectAnimator: ObjectAnimator? = null
     internal var paintLine: Paint? = null

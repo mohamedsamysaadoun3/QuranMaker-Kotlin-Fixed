@@ -498,7 +498,7 @@ fun EngineActivity.initViews() {
     imageButton2.setOnClickListener {
         if (trackViewEntity.current_cursur_position == trackViewEntity.maxTime) return@setOnClickListener
         blurredImageView.progress = 1.0f
-        stop()
+        pausePlayer()
         startCursur = 0
         trackViewEntity.translateToEnd()
         updateViewTime(trackViewEntity.maxTime, trackViewEntity.current_cursur_position)
@@ -510,7 +510,7 @@ fun EngineActivity.initViews() {
     imageButton3.setOnClickListener {
         if (trackViewEntity.current_cursur_position == 0) return@setOnClickListener
         blurredImageView.progress = 0.0f
-        stop()
+        pausePlayer()
         startCursur = 0
         trackViewEntity.translateToStart()
         updateViewTime(trackViewEntity.maxTime, trackViewEntity.current_cursur_position)
@@ -524,7 +524,7 @@ fun EngineActivity.initViews() {
     disableRedoBtn()
     btnRedo.setOnClickListener(object : View.OnClickListener {
         override fun onClick(view: View) {
-            stop()
+            pausePlayer()
             showProgressSimple()
             Thread(Runnable {
                 runOnUiThread {
@@ -536,7 +536,7 @@ fun EngineActivity.initViews() {
     })
     btnUndo.setOnClickListener(object : View.OnClickListener {
         override fun onClick(view: View) {
-            stop()
+            pausePlayer()
             showProgressSimple()
             Thread(Runnable {
                 runOnUiThread {
@@ -567,7 +567,7 @@ fun EngineActivity.initViews() {
             if (entityView is SurahNameEntity) {
                 try {
                     if (EditS_NameFragment.instance != null) return
-                    stop()
+                    pausePlayer()
                     selectSurahName()
                     return
                 } catch (unused: Exception) {
@@ -607,7 +607,7 @@ fun EngineActivity.initViews() {
     buttonCustumFont.text = mResources!!.getString(R.string.export)
     btn_export.setOnClickListener {
         isSaveTmpTemplate = false
-        stop()
+        pausePlayer()
         if (Build.VERSION.SDK_INT >= 33) {
             save()
         } else if (ContextCompat.checkSelfPermission(this, "android.permission.WRITE_EXTERNAL_STORAGE") == 0) {
@@ -625,7 +625,7 @@ fun EngineActivity.initViews() {
     val textCustumFont = findViewById<TextCustumFont>(R.id.tv_ipad)
     textCustumFont.text = mResources!!.getString(R.string.ipad)
     findViewById<View>(R.id.btn_add_quran).setOnClickListener {
-        stop()
+        pausePlayer()
         try {
             val beginTransaction = supportFragmentManager.beginTransaction()
             mCurrentFragment = AddQuranFragment.getInstance(iAddQuran, mResources)
@@ -636,7 +636,7 @@ fun EngineActivity.initViews() {
         }
     }
     findViewById<View>(R.id.btn_bg).setOnClickListener {
-        stop()
+        pausePlayer()
         try {
             val beginTransaction = supportFragmentManager.beginTransaction()
             mCurrentFragment = ChangeBgFragment.getInstance(iChangeBgCallback, mResources, mTemplate!!.name_drawable)
@@ -653,7 +653,7 @@ fun EngineActivity.initViews() {
     btnChangeResize = findViewById(R.id.btn_change_aspect)
     // Billing removed — all features available to everyone
     btnChangeResize?.setOnClickListener {
-        stop()
+        pausePlayer()
         try {
             val beginTransaction = supportFragmentManager.beginTransaction()
             mCurrentFragment = ResizeFragment.getInstance(iDimensionCallback, mResources, "16")
@@ -664,7 +664,7 @@ fun EngineActivity.initViews() {
         }
     }
     btnIpod?.setOnClickListener {
-        stop()
+        pausePlayer()
         try {
             val beginTransaction = supportFragmentManager.beginTransaction()
             mCurrentFragment = EditIpadFragment.getInstance(mResources, mTemplate!!.ipad_type, iIpadEditCallback, mTemplate!!.index_color, mTemplate!!.gradient != null, mTemplate!!.isGlass)
@@ -1906,14 +1906,14 @@ internal fun EngineActivity.pausePlayer() {
             try {
                 btnPlayPause.setImageResource(R.drawable.play_btn)
             } catch (_: UninitializedPropertyAccessException) {}
-            stop()
+            pausePlayer()
         }
         trackViewEntity.pauseScroll()
     } catch (_: Exception) {}
 }
 
 internal fun EngineActivity.releaseWakeLock() {
-    try { window.clearFlags(0x00000400) } catch (_: Exception) {}
+    try { window.clearFlags(0x00000080) } catch (_: Exception) {}
 }
 
 internal fun EngineActivity.clearFFmpeg() {

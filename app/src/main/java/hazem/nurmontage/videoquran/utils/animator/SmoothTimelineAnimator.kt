@@ -17,20 +17,20 @@ class SmoothTimelineAnimator(
     private var startCursorMs: Int = startCursorMs
     private var currentTimeMs: Int = 0
     private var startTimeMs: Long = 0L
-    private var isRunning: Boolean = false
+    private var _isRunning: Boolean = false
 
     private lateinit var frameCallback: Choreographer.FrameCallback
 
     init {
         frameCallback = Choreographer.FrameCallback {
-            if (isRunning) {
+            if (_isRunning) {
                 val elapsed = (SystemClock.uptimeMillis() - startTimeMs).toInt()
                 currentTimeMs = startCursorMs + elapsed
 
                 if (currentTimeMs >= maxTimeMs) {
                     listener.onUpdate(maxTimeMs)
                     listener.onEnd()
-                    isRunning = false
+                    _isRunning = false
                 } else {
                     listener.onUpdate(currentTimeMs)
                     Choreographer.getInstance().postFrameCallback(frameCallback)
@@ -39,18 +39,18 @@ class SmoothTimelineAnimator(
         }
     }
 
-    fun isRunning(): Boolean = isRunning
+    fun isRunning(): Boolean = _isRunning
 
     fun getCurrentTimeMs(): Int = currentTimeMs
 
     fun start() {
-        isRunning = true
+        _isRunning = true
         startTimeMs = SystemClock.uptimeMillis()
         Choreographer.getInstance().postFrameCallback(frameCallback)
     }
 
     fun stop() {
-        isRunning = false
+        _isRunning = false
         Choreographer.getInstance().removeFrameCallback(frameCallback)
     }
 }

@@ -15,6 +15,7 @@ import hazem.nurmontage.videoquran.model.EntityTranslationTemplate
 import hazem.nurmontage.videoquran.model.RenderManager
 import hazem.nurmontage.videoquran.model.SquareBitmapModel
 import hazem.nurmontage.videoquran.model.Template
+import hazem.nurmontage.videoquran.utils.FontUtils
 import hazem.nurmontage.videoquran.model.Transition
 import hazem.nurmontage.videoquran.utils.ColorUtils
 import hazem.nurmontage.videoquran.utils.audio.FfmpegCodecChecker
@@ -337,13 +338,16 @@ object ExportCommandBuilder {
     }
 
     fun generateVideoTimerArgs(
+        context: android.content.Context,
         template: Template,
         durationMs: Int
     ): Pair<Array<String>, String> {
         val outputPath = "${template.folder_template}/timer.mov"
         val maxSeconds = max(durationMs / 1000, 1)
         val timeModel = template.mTimeModel ?: return Pair(emptyArray(), "")
-        val fontPath = "${template.folder_template}/NotoNaskhArabic.ttf"
+        // Use filesDir font path (matching Java original) - FontUtils.copyFontToInternalStorage copies it there
+        FontUtils.copyFontToInternalStorage(context, "NotoNaskhArabic.ttf")
+        val fontPath = "${context.filesDir.absolutePath}/NotoNaskhArabic.ttf"
         val bgColor = if (ColorUtils.isColorDark(Color.parseColor(timeModel.color))) "black@0" else "white@0"
         val value2 = maxSeconds + 1
 

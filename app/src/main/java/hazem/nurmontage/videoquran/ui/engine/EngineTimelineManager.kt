@@ -178,7 +178,14 @@ fun EngineActivity.startTimelineAnimationPreview(entityAudio: EntityAudio) {
 }
 
 fun EngineActivity.pauseTimelineAnimation() {
-    valueAnimator?.stop()
+    stop()
+    val animator = valueAnimator
+    if (animator == null || !animator.isRunning()) {
+        return
+    }
+    startCursur = animator.getCurrentTimeMs()
+    animator.stop()
+    valueAnimator = null
 }
 
 fun EngineActivity.updateTime(j: Long) {

@@ -488,7 +488,9 @@ fun BlurredImageView.drawCaset(canvas: Canvas, isFlag: Boolean, file: File?) {
 }
 
 fun BlurredImageView.drawCasetNoBg(canvas: Canvas, isFlag: Boolean, file: File?) {
-    canvas.drawBitmap(this.bitmapSquare!!, 0.0f, 0.0f, null)
+    if (this.isVideo()) {
+        canvas.drawBitmap(this.bitmapSquare!!, 0.0f, 0.0f, null)
+    }
 
     val screen2 = this.scheme!!.screen2
     val body = this.scheme!!.body
@@ -933,7 +935,7 @@ fun BlurredImageView.drawBatteryType(canvas: Canvas, isFlag: Boolean) {
 fun BlurredImageView.drawBlueType(canvas: Canvas, isFlag: Boolean) {
     this.paintIpad.color = ViewCompat.MEASURED_STATE_MASK
 
-    if (isFlag) {
+    if (isFlag && this.isVideo()) {
         canvas.drawBitmap(this.bitmapSquare!!, 0.0f, 0.0f, this.grayscalePaint)
     }
 

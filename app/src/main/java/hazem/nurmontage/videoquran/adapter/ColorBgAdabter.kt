@@ -52,7 +52,7 @@ class ColorBgAdabter(
     ) {
         if (isSelected) {
             val borderDrawable = GradientDrawable().apply {
-                shape = GradientDrawable.OVAL
+                shape = GradientDrawable.RECTANGLE
                 cornerRadius = 10f
                 setStroke(3, -1)
             }
@@ -62,7 +62,7 @@ class ColorBgAdabter(
         }
 
         val colorDrawable = GradientDrawable().apply {
-            shape = GradientDrawable.OVAL
+            shape = GradientDrawable.RECTANGLE
             cornerRadius = 10f
             setColor(color)
         }
