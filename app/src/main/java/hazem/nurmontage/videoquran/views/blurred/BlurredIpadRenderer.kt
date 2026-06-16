@@ -994,17 +994,26 @@ fun BlurredImageView.drawBlackLayer(canvas: Canvas, isFlag: Boolean, isEmpty: Bo
 }
 
 fun BlurredImageView.drawIpad(canvas: Canvas, isFlag: Boolean) {
+    drawIpad(canvas, isFlag, false)
+}
+
+fun BlurredImageView.drawIpad(canvas: Canvas, isFlag: Boolean, isPremium: Boolean) {
     when {
         this.mIpadType == IpadType.IPAD_CLASSIC.ordinal -> {
             canvas.drawRect(this.ipad_rect!!, this.paintIpad)
-            drawBitmapWithShadow(canvas)
+            if (isPremium) {
+                this.left_square = this.ipad_rect!!.centerX() - (this.bitmapSquare!!.width * 0.5f)
+                this.top_square = this.ipad_rect!!.top + (this.bitmapBlured!!.height * 0.02f)
+            } else {
+                drawBitmapWithShadow(canvas)
+            }
             drawLectureExt(canvas)
             if (isFlag) {
                 drawProgressExt(canvas)
             }
         }
         this.mIpadType == IpadType.IPAD_NEOMORPHIC.ordinal -> {
-            drawNeumorphicRect(canvas, this.ipad_rect!!.width() * 0.12f, false)
+            drawNeumorphicRect(canvas, this.ipad_rect!!.width() * 0.12f, isPremium)
             drawLectureNeumorphic(canvas)
             if (isFlag) {
                 drawProgressNeumorphic(canvas)
@@ -1019,7 +1028,12 @@ fun BlurredImageView.drawIpad(canvas: Canvas, isFlag: Boolean) {
         this.mIpadType == IpadType.IPAD.ordinal || this.mIpadType == IpadType.IPAD_UNBLUR.ordinal -> {
             val shadowRad = (min(this.ipad_rect!!.width(), this.ipad_rect!!.height()) * 0.03f).toInt()
             drawRectWithShadow(canvas, this.ipad_rect!!, ViewCompat.MEASURED_STATE_MASK, if (shadowRad <= 0) 1 else shadowRad, 0, 0, true)
-            drawBitmapWithShadow(canvas)
+            if (isPremium) {
+                this.left_square = this.ipad_rect!!.centerX() - (this.bitmapSquare!!.width * 0.5f)
+                this.top_square = this.ipad_rect!!.top + (this.bitmapBlured!!.height * 0.02f)
+            } else {
+                drawBitmapWithShadow(canvas)
+            }
             drawLectureExt(canvas)
             if (isFlag) {
                 drawProgressExt(canvas)
@@ -1027,33 +1041,34 @@ fun BlurredImageView.drawIpad(canvas: Canvas, isFlag: Boolean) {
         }
         this.mIpadType == IpadType.BOTTOM_RECT.ordinal -> {
             drawRectBottom(canvas, this.ipad_rect!!)
-            drawBitmapWithShadowTypeBottom(canvas)
+            if (isPremium) {
+                drawBitmapWithShadowTypeBottomSave(canvas)
+            } else {
+                drawBitmapWithShadowTypeBottom(canvas)
+            }
             drawLectureExt(canvas)
             if (isFlag) {
                 drawProgressExt(canvas)
             }
         }
         this.mIpadType == IpadType.ROUND_RECT.ordinal -> {
-            val shadowRad2 = (this.ipad_rect!!.width() * 0.03f).toInt()
-            drawRectWithShadow(canvas, this.ipad_rect!!, ViewCompat.MEASURED_STATE_MASK, if (shadowRad2 <= 0) 1 else shadowRad2, 0, 0, true)
+            val width = (this.ipad_rect!!.width() * 0.03f).toInt()
+            drawRectWithShadow(canvas, this.ipad_rect!!, ViewCompat.MEASURED_STATE_MASK, if (width <= 0) 1 else width, 0, 0, true)
             drawLectureExt(canvas)
             if (isFlag) {
                 drawProgressExt(canvas)
             }
         }
         this.mIpadType == IpadType.RECT.ordinal || this.mIpadType == IpadType.BORDER.ordinal -> {
-            val shadowRad3 = (this.ipad_rect!!.width() * 0.03f).toInt()
-            drawRectWithShadow(canvas, this.ipad_rect!!, ViewCompat.MEASURED_STATE_MASK, if (shadowRad3 <= 0) 1 else shadowRad3, 0, 0, false)
+            val width2 = (this.ipad_rect!!.width() * 0.03f).toInt()
+            drawRectWithShadow(canvas, this.ipad_rect!!, ViewCompat.MEASURED_STATE_MASK, if (width2 <= 0) 1 else width2, 0, 0, false)
             drawLectureExt(canvas)
             if (isFlag) {
                 drawProgressExt(canvas)
             }
         }
         this.mIpadType == IpadType.BLACK_LAYER.ordinal -> {
-            drawBlackLayer(canvas, isFlag, isVideo())
-        }
-        this.mIpadType == IpadType.BLUE_TYPE.ordinal -> {
-            drawBlueType(canvas, isFlag)
+            drawBlackLayer(canvas, isFlag, isPremium)
         }
         this.mIpadType == IpadType.HEART.ordinal -> {
             drawHeartType(canvas, isFlag)
@@ -1061,11 +1076,14 @@ fun BlurredImageView.drawIpad(canvas: Canvas, isFlag: Boolean) {
         this.mIpadType == IpadType.BATTERY.ordinal -> {
             drawBatteryType(canvas, isFlag)
         }
+        this.mIpadType == IpadType.BLUE_TYPE.ordinal -> {
+            drawBlueType(canvas, isFlag)
+        }
         this.mIpadType == IpadType.GRADIENT.ordinal -> {
-            drawGradientLayer(canvas, isVideo())
+            drawGradientLayer(canvas, isFlag)
         }
         this.mIpadType == IpadType.MASK_BRUSH.ordinal -> {
-            drawMaskedBitmap(canvas, this.isVideo)
+            drawMaskedBitmap(canvas, isFlag)
         }
     }
 }

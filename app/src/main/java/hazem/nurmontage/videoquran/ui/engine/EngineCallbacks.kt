@@ -837,30 +837,31 @@ fun EngineActivity.createIFontCallback(): FontFragment.IFontCallback {
     return object : FontFragment.IFontCallback {
         override fun onAdd(str: String?, typeface: Typeface?) {
             try {
-                if (trackViewEntity.selectedEntity != null) {
-                    val entityView = trackViewEntity.selectedEntity!!.getEntityView()
-                    if (entityView is QuranEntity) {
-                        entityView.nameFont = str!!
-                        entityView.getPaintAya().typeface = typeface!!
-                        entityView.setupScaleSave(entityView.factorSize, blurredImageView.getmCanvas_width())
-                        blurredImageView.invalidate()
+                val entitySelect = blurredImageView.entity_select
+                if (entitySelect is SurahNameEntity) {
+                    if (typeface != null && str != null) {
+                        blurredImageView.surahNameEntity?.setTypeface(typeface, str)
                     }
+                    blurredImageView.invalidate()
+                } else if (str != null && typeface != null) {
+                    blurredImageView.setTypeface(typeface, str)
                 }
+                FontFragment.instance?.add(typeface, str)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
 
         override fun onDone(str: String?, typeface: Typeface?) {
-            hideFragment()
             try {
-                if (trackViewEntity.selectedEntity != null) {
-                    val entityView = trackViewEntity.selectedEntity!!.getEntityView()
-                    if (entityView is QuranEntity) {
-                        entityView.nameFont = str!!
-                        entityView.getPaintAya().typeface = typeface!!
-                        entityView.setupScaleSave(entityView.factorSize, blurredImageView.getmCanvas_width())
-                        blurredImageView.invalidate()
+                hideFragment()
+                val entitySelect = blurredImageView.entity_select
+                if (entitySelect is SurahNameEntity) {
+                    selectSurahName()
+                } else {
+                    val selected = trackViewEntity.selectedEntity
+                    if (selected != null) {
+                        iTrimLineCallback?.onSelectEntity(selected, -1.0f)
                     }
                 }
             } catch (e: Exception) {
@@ -869,7 +870,27 @@ fun EngineActivity.createIFontCallback(): FontFragment.IFontCallback {
         }
 
         override fun onCancel(str: String?, typeface: Typeface?) {
-            hideFragment()
+            try {
+                val entitySelect = blurredImageView.entity_select
+                if (entitySelect is SurahNameEntity) {
+                    if (typeface != null && str != null) {
+                        blurredImageView.surahNameEntity?.setTypeface(typeface, str)
+                    }
+                    blurredImageView.invalidate()
+                    selectSurahName()
+                } else {
+                    if (str != null && typeface != null) {
+                        blurredImageView.setTypeface(typeface, str)
+                    }
+                    hideFragment()
+                    val selected = trackViewEntity.selectedEntity
+                    if (selected != null) {
+                        iTrimLineCallback?.onSelectEntity(selected, -1.0f)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }
@@ -1322,6 +1343,7 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
 
         override fun onCmdPlay(str: String) {
             try {
+                pausePreview()
                 val entityAudio = trackViewEntity.selectedEntity!! as EntityAudio
                 applyffectPlayAuto(str, entityAudio)
             } catch (e: Exception) {
@@ -1331,6 +1353,7 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
 
         override fun onCmd(str: String) {
             try {
+                pausePreview()
                 val entityAudio = trackViewEntity.selectedEntity!! as EntityAudio
                 applyffect(str, entityAudio)
             } catch (e: Exception) {
@@ -1339,15 +1362,20 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
         }
 
         override fun onCmdAll(effectAudio: EffectAudio) {
+            pausePreview()
             applyffectAll(effectAudio, 0)
         }
 
         override fun onDuplicate() {
             try {
                 val entityAudio = trackViewEntity.selectedEntity!! as EntityAudio
-                duplicateEntityAudio(Math.round((entityAudio.rect.right - entityAudio.rect.left) / trackViewEntity.second_in_screen * 1000.0f), entityAudio)
+                pausePlayer()
+                val duration = entityAudio.getMediaPlayer()?.duration ?: Math.round((entityAudio.rect.right - entityAudio.rect.left) / trackViewEntity.second_in_screen * 1000.0f)
+                duplicateEntityAudio(duration, entityAudio)
+                updateTime()
             } catch (e: Exception) {
                 e.printStackTrace()
+                iTrimLineCallback?.onEmptySelect()
             }
         }
 
@@ -1410,6 +1438,8 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
 
         override fun reverbEffect() {
             try {
+                pausePlayer()
+                findViewById<android.view.View>(R.id.layout_menu).visibility = android.view.View.INVISIBLE
                 val beginTransaction = supportFragmentManager.beginTransaction()
                 val entityAudio = trackViewEntity.selectedEntity!! as EntityAudio
                 mCurrentFragment = ReverbePresetFragment.getInstance(iEditMediaCallback, entityAudio)
@@ -1422,6 +1452,8 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
 
         override fun echoEffect() {
             try {
+                pausePlayer()
+                findViewById<android.view.View>(R.id.layout_menu).visibility = android.view.View.INVISIBLE
                 val beginTransaction = supportFragmentManager.beginTransaction()
                 val entityAudio = trackViewEntity.selectedEntity!! as EntityAudio
                 mCurrentFragment = EchoEffectFragment.getInstance(iEditMediaCallback, entityAudio)
@@ -1434,6 +1466,8 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
 
         override fun noice() {
             try {
+                pausePlayer()
+                findViewById<android.view.View>(R.id.layout_menu).visibility = android.view.View.INVISIBLE
                 val beginTransaction = supportFragmentManager.beginTransaction()
                 val entityAudio = trackViewEntity.selectedEntity!! as EntityAudio
                 mCurrentFragment = RemoveNoiceFragment.getInstance(iEditMediaCallback, entityAudio)
@@ -1446,6 +1480,8 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
 
         override fun enhanceVoice() {
             try {
+                pausePlayer()
+                findViewById<android.view.View>(R.id.layout_menu).visibility = android.view.View.INVISIBLE
                 val beginTransaction = supportFragmentManager.beginTransaction()
                 val entityAudio = trackViewEntity.selectedEntity!! as EntityAudio
                 mCurrentFragment = EnhanceVoiceFragment.getInstance(iEditMediaCallback, entityAudio)
@@ -1458,6 +1494,8 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
 
         override fun speedEffect() {
             try {
+                pausePlayer()
+                findViewById<android.view.View>(R.id.layout_menu).visibility = android.view.View.INVISIBLE
                 val beginTransaction = supportFragmentManager.beginTransaction()
                 val entityAudio = trackViewEntity.selectedEntity!! as EntityAudio
                 mCurrentFragment = SpeedFragment.getInstance(iEditMediaCallback, entityAudio)
@@ -1470,6 +1508,8 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
 
         override fun volumeEffect() {
             try {
+                pausePlayer()
+                findViewById<android.view.View>(R.id.layout_menu).visibility = android.view.View.INVISIBLE
                 val beginTransaction = supportFragmentManager.beginTransaction()
                 val entityAudio = trackViewEntity.selectedEntity!! as EntityAudio
                 mCurrentFragment = VolumeFragment.getInstance(iEditMediaCallback, entityAudio)
@@ -1482,6 +1522,8 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
 
         override fun pitchEffect() {
             try {
+                pausePlayer()
+                findViewById<android.view.View>(R.id.layout_menu).visibility = android.view.View.INVISIBLE
                 val beginTransaction = supportFragmentManager.beginTransaction()
                 val entityAudio = trackViewEntity.selectedEntity!! as EntityAudio
                 mCurrentFragment = PitchFragment.getInstance(iEditMediaCallback, entityAudio)
@@ -1494,6 +1536,8 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
 
         override fun fadeEffect() {
             try {
+                pausePlayer()
+                findViewById<android.view.View>(R.id.layout_menu).visibility = android.view.View.INVISIBLE
                 val beginTransaction = supportFragmentManager.beginTransaction()
                 val entityAudio = trackViewEntity.selectedEntity!! as EntityAudio
                 mCurrentFragment = FadeInOutFragment.getInstance(iEditMediaCallback, entityAudio)
@@ -1938,6 +1982,8 @@ fun EngineActivity.createIQuranIconCallback(): EditIconQuranFragment.IQuranIconC
                 quranEntity.icon = str
                 val resId = DrawableHelper.getIDDrawableIconByName(str)
                 quranEntity.setVectorDrawable(androidx.core.content.ContextCompat.getDrawable(this@createIQuranIconCallback, resId) as? android.graphics.drawable.VectorDrawable)
+                quranEntity.updateIconDraw()
+                quranEntity.initPreset(quranEntity.getmPreset())
                 blurredImageView.invalidate()
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -1946,15 +1992,19 @@ fun EngineActivity.createIQuranIconCallback(): EditIconQuranFragment.IQuranIconC
 
         override fun onDone(str: String) {
             try {
-                val quranEntity = trackViewEntity.selectedEntity!!.getEntityView() as QuranEntity
-                quranEntity.icon = str
                 val resId = DrawableHelper.getIDDrawableIconByName(str)
-                quranEntity.setVectorDrawable(androidx.core.content.ContextCompat.getDrawable(this@createIQuranIconCallback, resId) as? android.graphics.drawable.VectorDrawable)
-                blurredImageView.invalidate()
+                val drawable = androidx.core.content.ContextCompat.getDrawable(this@createIQuranIconCallback, resId) as? android.graphics.drawable.VectorDrawable
+                if (drawable != null) {
+                    blurredImageView.setIcon(str, drawable)
+                }
+                hideFragment()
+                val selected = trackViewEntity.selectedEntity
+                if (selected != null) {
+                    iTrimLineCallback?.onSelectEntity(selected, -1.0f)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            hideFragment()
         }
 
         override fun onCancel(str: String) {
@@ -1963,11 +2013,17 @@ fun EngineActivity.createIQuranIconCallback(): EditIconQuranFragment.IQuranIconC
                 quranEntity.icon = str
                 val resId = DrawableHelper.getIDDrawableIconByName(str)
                 quranEntity.setVectorDrawable(androidx.core.content.ContextCompat.getDrawable(this@createIQuranIconCallback, resId) as? android.graphics.drawable.VectorDrawable)
+                quranEntity.updateIconDraw()
+                quranEntity.initPreset(quranEntity.getmPreset())
                 blurredImageView.invalidate()
+                hideFragment()
+                val selected = trackViewEntity.selectedEntity
+                if (selected != null) {
+                    iTrimLineCallback?.onSelectEntity(selected, -1.0f)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            hideFragment()
         }
     }
 }

@@ -1035,8 +1035,19 @@ fun EngineActivity.selectSurahName() {
 }
 
 fun EngineActivity.clearCallback() {
-    // These are val properties and cannot be reassigned to null
-    // In the original Java code these were nullable interface references
+    // Mark activity as destroyed so callbacks become no-ops
+    // The lazy-initialized callbacks themselves cannot be nulled (they're val),
+    // but the activity reference they hold will be released when the activity is GC'd.
+    // We clear the timeline view's references to prevent stale callbacks.
+    try {
+        trackViewEntity.let {
+            it.selectedEntity = null
+        }
+        blurredImageView.entity_select = null
+        blurredImageView.surahNameEntity = null
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
 }
 
 // Removed duplicate addUpdateAnim functions - they are defined in EngineTimelineManager.kt

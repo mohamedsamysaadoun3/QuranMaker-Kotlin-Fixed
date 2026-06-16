@@ -592,7 +592,8 @@ fun BlurredImageView.getBitmapDraw(isFlag: Boolean, file: File?): Bitmap {
         bitmapSquare = bitmapBlured
         drawCasetNoBg(canvas, false, file)
     } else {
-        drawIpad(canvas, false)
+        // Use 3-arg overload to pass isPremium for video export paths
+        drawIpad(canvas, false, isVideo())
     }
 
     if (surahNameEntity != null) {
