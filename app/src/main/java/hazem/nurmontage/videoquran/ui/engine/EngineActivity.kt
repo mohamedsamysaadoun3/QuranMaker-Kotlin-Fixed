@@ -49,10 +49,6 @@ import androidx.media3.common.MimeTypes
 // non-lifecycle methods. Class members take precedence over extensions,
 // so removing a member function here makes the extension version active.
 // See: EngineAudioManager.kt, EngineEntityManager.kt, EngineUIHelper.kt,
-//       EngineCallbacks.kt, EngineTimelineManager.kt, FfmpegCommandBuilder.kt,
-//       EngineSaveHelper.kt, BackgroundManager.kt, ExportPipeline.kt,
-//       AudioEffectProcessor.kt, AudioLoadingManager.kt, TimelineEngine.kt,
-//       VideoPlayerController.kt, TemplateRestorer.kt
 
 @Suppress("TYPE_CHECKING_HAS_RUN_INTO_RECURSIVE_PROBLEM")
 class EngineActivity : BaseActivity() {
