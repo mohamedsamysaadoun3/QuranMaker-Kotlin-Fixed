@@ -131,6 +131,10 @@ class BlurredImageView @JvmOverloads constructor(
     internal var paintWattermark: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     internal var prevDistance: Float = -1.0f
     internal var progress: Float = 0f
+        set(value) {
+            field = value
+            postInvalidate()
+        }
     internal val quranEntities: MutableList<QuranEntity> = ArrayList()
     internal var radius_cursur: Float = 0f
     internal var radius_square: Int = 0
@@ -749,13 +753,14 @@ class BlurredImageView @JvmOverloads constructor(
     fun reset() {
         val bitmap = this.bitmapBlured
         if (bitmap != null && !bitmap.isRecycled) {
-            this.bitmapBlured!!.recycle()
+            bitmap.recycle()
         }
+        this.bitmapBlured = null
         val bitmap2 = this.bitmapSquare
-        if (bitmap2 == null || bitmap2.isRecycled) {
-            return
+        if (bitmap2 != null && !bitmap2.isRecycled) {
+            bitmap2.recycle()
         }
-        this.bitmapSquare!!.recycle()
+        this.bitmapSquare = null
     }
 
     fun resetWatermark() {

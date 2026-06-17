@@ -534,11 +534,6 @@ fun BlurredImageView.saveBitmap(bitmap: Bitmap, file: File?, textValue: String) 
 
 //  Entity Management
 
-fun BlurredImageView.setProgress(blurRadius: Float) {
-    progress = blurRadius
-    postInvalidate()
-}
-
 fun BlurredImageView.drawEntity(canvas: Canvas) {
     for (i in getQuranEntities().indices) {
         val quranEntity = getQuranEntities()[i]

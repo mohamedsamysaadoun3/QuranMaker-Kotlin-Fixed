@@ -6,8 +6,11 @@ import android.media.MediaFormat
 
 object WaveformExtractor {
 
+    private const val MAX_ITERATIONS = 100000  // Safety cap to prevent infinite loop on corrupt media
+
     fun extractAmplitudes(filePath: String, targetSamples: Int): FloatArray {
         val extractor = MediaExtractor()
+        var codec: MediaCodec? = null
         try {
             extractor.setDataSource(filePath)
             val audioTrackIndex = selectAudioTrack(extractor)
@@ -20,7 +23,8 @@ object WaveformExtractor {
             @Suppress("UNUSED_VARIABLE")
             val sampleRate = format.getInteger("sample-rate")
 
-            val codec = MediaCodec.createDecoderByType(format.getString("mime")!!)
+            val mime = format.getString("mime") ?: return FloatArray(targetSamples)
+            codec = MediaCodec.createDecoderByType(mime)
             codec.configure(format, null, null, 0)
             codec.start()
 
@@ -35,8 +39,11 @@ object WaveformExtractor {
 
             val bufferInfo = MediaCodec.BufferInfo()
             var eos = false
+            var iterations = 0
 
             while (true) {
+                if (++iterations > MAX_ITERATIONS) break  // Safety cap
+
                 if (!eos) {
                     val inputIndex = codec.dequeueInputBuffer(10000L)
                     if (inputIndex >= 0) {
@@ -79,13 +86,14 @@ object WaveformExtractor {
                 }
             }
 
-            codec.stop()
-            codec.release()
-            extractor.release()
             return amplitudes
-
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            e.printStackTrace()
             return FloatArray(targetSamples)
+        } finally {
+            try { codec?.stop() } catch (_: Exception) {}
+            try { codec?.release() } catch (_: Exception) {}
+            try { extractor.release() } catch (_: Exception) {}
         }
     }
 

@@ -15,7 +15,7 @@ class SmoothTimelineAnimator(
     }
 
     private var startCursorMs: Int = startCursorMs
-    private var currentTimeMs: Int = 0
+    private var currentTimeMs: Int = startCursorMs
     private var startTimeMs: Long = 0L
     private var _isRunning: Boolean = false
 

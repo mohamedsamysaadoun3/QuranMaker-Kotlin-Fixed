@@ -109,7 +109,7 @@ class EngineActivity : BaseActivity() {
     internal var vibrationHelper: MyVibrationHelper? = null
     internal var isSaveTmpTemplate: Boolean = true
     internal val executor: java.util.concurrent.Executor = java.util.concurrent.Executors.newSingleThreadExecutor()
-    internal val id_ffmpeg = mutableListOf<Long>()
+    internal val id_ffmpeg = java.util.Collections.synchronizedList(mutableListOf<Long>())
     internal var current_position_time: Int = 0
     internal var startCursur: Int = 0
 
@@ -319,12 +319,12 @@ class EngineActivity : BaseActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         try { Glide.get(this).clearMemory() } catch (_: Exception) {}
         clearFFmpeg()
         releaseWakeLock()
         clearCallback()
         pausePlayer()
+        super.onDestroy()
     }
 
     override fun attachBaseContext(newBase: Context) {

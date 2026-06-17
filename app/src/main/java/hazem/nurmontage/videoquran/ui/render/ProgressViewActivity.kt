@@ -97,7 +97,7 @@ class ProgressViewActivity : BaseActivity(), ExportCommandBuilder.PreRenderExecu
     private var statistics: Statistics? = null
 
     /** Active FFmpeg session IDs for cancellation. */
-    private val id_ffmpeg = mutableListOf<Long>()
+    private val id_ffmpeg = java.util.Collections.synchronizedList(mutableListOf<Long>())
 
     /** Smooth-progress animation state. */
     private var displayedProgress: Float = 0f

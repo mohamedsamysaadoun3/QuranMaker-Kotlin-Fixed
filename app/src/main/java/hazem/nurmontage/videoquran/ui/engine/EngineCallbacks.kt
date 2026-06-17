@@ -367,7 +367,6 @@ fun EngineActivity.createIAddQuran(): AddQuranFragment.IAddQuran {
 
         override fun onCancel() {
             hideFragment()
-            hideProgressFragment()
         }
 
         override fun onErrorLimitation() {
