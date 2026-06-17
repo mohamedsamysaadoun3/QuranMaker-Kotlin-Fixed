@@ -1402,8 +1402,10 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
 
         override fun onCut() {
             try {
-            pausePlayer()
-                val entityAudio = trackViewEntity.selectedEntity!! as EntityAudio
+                pausePlayer()
+                val selected = trackViewEntity.selectedEntity
+                if (selected !is EntityAudio) return
+                val entityAudio = selected
                 val abs = Math.abs(trackViewEntity.getCurrentPosition())
                 if (abs <= entityAudio.rect.left || abs >= entityAudio.rect.right) {
                     return
@@ -1411,38 +1413,51 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
                 val second_in_screenNoScale = trackViewEntity.second_in_screenNoScale * 0.1f
                 if (abs <= entityAudio.rect.left || abs >= entityAudio.rect.left + second_in_screenNoScale) {
                     if (abs >= entityAudio.rect.right || abs <= entityAudio.rect.right - second_in_screenNoScale) {
-                        val round = Math.round(
-                            (abs - entityAudio.rect.left) / trackViewEntity.second_in_screen * 1000.0f
+                        // Compute roundedMs using scaled second_in_screen (matching Java)
+                        val roundedMs = Math.round(
+                            (Math.abs(Math.round(trackViewEntity.getCurrentPosition() / trackViewEntity.second_in_screen * 1000.0f)) -
+                             Math.abs(Math.round(entityAudio.rect.left / trackViewEntity.second_in_screen * 1000.0f))).toFloat() +
+                            entityAudio.start
                         )
                         val split = entityAudio.split(abs)
-                        if (split != null) {
-                            trackViewEntity.stackSplit(entityAudio)
-                            trackViewEntity.stackSplit(split)
-                            split.pathFfmpeg = entityAudio.getPathFfmpeg()
-                            split.setAmps(entityAudio.amps)
-                            split.setRenderer(entityAudio.getRenderer())
-                            split.effectAudio = entityAudio.effectAudio
-                            split.setMediaPlayer(entityAudio.getMediaPlayer())
-                            split.index = entityAudio.index + 1
-                            split.start = round.toFloat()
-                            split.setMinDuration(entityAudio.getMinDuration() - round)
-                            split.offset = entityAudio.offset
-                            split.setOffsetRight(entityAudio.getOffsetRight())
-                            split.setOffsetLeft(entityAudio.getOffsetLeft())
-                            trackViewEntity.splitAudio(split, entityAudio.index + 1)
-                            entityAudio.end = round.toFloat()
-                            entityAudio.setMinDuration(round)
-                            entityAudio.setCurrentRect()
-                            entityAudio.right = abs
-                            entityAudio.onChange()
-                            entityAudio.updateEffect()
-                            updateTime()
-                        }
+                        // Copy state to split (matching Java EngineActivity.java:1654-1680)
+                        split.setAmps(entityAudio.amps)
+                        split.setRenderer(entityAudio.getRenderer())
+                        split.addPathHttp(entityAudio.getPathsHttp())
+                        split.setPathFfmpegEffect(entityAudio.getPathFfmpegEffect())
+                        split.setVideoPath(entityAudio.getVideoPath())
+                        split.setApplyEffectInPreview(entityAudio.isApplyEffectInPreview())
+                        split.effectAudio = entityAudio.effectAudio
+                        split.scaleFactor = entityAudio.scaleFactor
+                        split.setMediaPlayer(entityAudio.getMediaPlayer())
+                        split.pathFfmpeg = entityAudio.getPathFfmpeg()
+                        split.index = entityAudio.index + 1
+                        split.end = entityAudio.end
+                        val audioPosition = roundedMs.toFloat()
+                        split.start = audioPosition
+                        split.setMinDuration(roundedMs)
+                        trackViewEntity.splitAudio(split, split.index)
+                        trackViewEntity.stackSplit(entityAudio)
+                        entityAudio.setCurrentRect()
+                        entityAudio.right = abs
+                        entityAudio.max = (entityAudio.rect.right / entityAudio.scaleFactor) -
+                            ((entityAudio.rect.left / entityAudio.scaleFactor) - entityAudio.getOffsetLeft())
+                        entityAudio.end = audioPosition
+                        split.setOffsetRight(entityAudio.getOffsetRight())
+                        entityAudio.setOffsetRight(0.0f)
+                        split.offset = entityAudio.offset + entityAudio.getOffsetLeft() +
+                            (entityAudio.rect.width() / entityAudio.scaleFactor)
+                        entityAudio.onChange()
+                        split.secondInScreen = trackViewEntity.second_in_screenNoScale
+                        split.updateEffect()
+                        entityAudio.updateEffect()
+                        trackViewEntity.stackSplit(split)
                         trackViewEntity.invalidate()
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                iTrimLineCallback?.onEmptySelect()
             }
         }
 

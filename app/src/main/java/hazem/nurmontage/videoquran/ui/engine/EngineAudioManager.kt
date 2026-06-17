@@ -1262,18 +1262,14 @@ fun EngineActivity.addAudioRecitersTemplateRunnable(
         while (it.hasNext()) {
             val parse = Uri.parse(it.next())
             val uri = parse.toString()
-            var downloadFile: String?
+            var downloadFile: String? = null
             if (!uri.startsWith("http://") && !uri.startsWith("https://")) {
                 downloadFile = AudioUtils.copyFromUri(this, parse, mTemplate!!.folder_template!!)
-                if (downloadFile == null) {
-                    sb.append("file '").append(downloadFile!!.replace("'", "\\'")).append("'\n")
-                    i++
-                    updateProgress(i, pathes.size)
-                }
+            } else {
+                downloadFile = AudioUtils.downloadFile(this, uri, mTemplate!!.folder_template!!)
             }
-            downloadFile = AudioUtils.downloadFile(this, uri, mTemplate!!.folder_template!!)!!
-            if (downloadFile == null) {
-                sb.append("file '").append(downloadFile!!.replace("'", "\\'")).append("'\n")
+            if (downloadFile != null) {
+                sb.append("file '").append(downloadFile.replace("'", "\\'")).append("'\n")
                 i++
                 updateProgress(i, pathes.size)
             }

@@ -330,11 +330,11 @@ class EntityAudio : Entity {
     }
 
     override fun draw(canvas: Canvas, w: Int, h: Int) {
-        try { drawWave(canvas, rect) } catch (_: Exception) {}
+        try { drawWave(canvas, rect) } catch (e: Exception) { e.printStackTrace() }
     }
 
     override fun draw(canvas: Canvas) {
-        try { drawWave(canvas, rect) } catch (_: Exception) {}
+        try { drawWave(canvas, rect) } catch (e: Exception) { e.printStackTrace() }
     }
 
     override fun release() {
@@ -346,6 +346,6 @@ class EntityAudio : Entity {
                 mediaPlayer = null
             }
             renderer?.release()
-        } catch (_: Exception) {}
+        } catch (e: Exception) { e.printStackTrace() }
     }
 }
