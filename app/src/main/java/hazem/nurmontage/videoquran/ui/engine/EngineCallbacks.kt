@@ -194,6 +194,10 @@ fun EngineActivity.createITrimLineCallback(): TrackEntityView.ITrimLineCallback 
 
         override fun onSelectEntity(entity: Entity, f: Float) {
             pausePlayer()
+            // CRITICAL FIX: Set selectedEntity on trackViewEntity so edit buttons work
+            // (was missing — first tap showed edit fragment but selectedEntity was stale/null,
+            //  so edit buttons used wrong entity and did nothing until second tap)
+            trackViewEntity.selectEntity(entity, true)
             if (entity is EntityQuranTimeline) {
                 blurredImageView.entity_select = entity.getEntityView()
                 blurredImageView.invalidate()
