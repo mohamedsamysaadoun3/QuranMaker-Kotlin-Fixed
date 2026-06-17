@@ -914,6 +914,7 @@ fun EngineActivity.createIBismilahEntityCallback(): EditBismilahEntityFragment.I
 
         override fun onAnim() {
             try {
+            pausePlayer()
                 val bismilahEntity = trackViewEntity.selectedEntity!!.getEntityView() as BismilahEntity
                 val beginTransaction = supportFragmentManager.beginTransaction()
                 mCurrentFragment = EffectBismilahFragment.get(bismilahEntity.bismilahTimeline!!.getTransition(), mResources, iTransitionBismilahCallback, bismilahEntity.bismilahTimeline!!)
@@ -1002,6 +1003,7 @@ fun EngineActivity.createIEditEntityCallback(): EditEntityFragment.IEditEntityCa
 
         override fun onFont() {
             try {
+            pausePlayer()
                 val quranEntity = trackViewEntity.selectedEntity!!.getEntityView() as QuranEntity
                 val beginTransaction = supportFragmentManager.beginTransaction()
                 mCurrentFragment = FontFragment.getInstance(iFontCallback, quranEntity.nameFont!!, quranEntity.getPaintAya().typeface)
@@ -1014,6 +1016,7 @@ fun EngineActivity.createIEditEntityCallback(): EditEntityFragment.IEditEntityCa
 
         override fun onIcon() {
             try {
+            pausePlayer()
                 val quranEntity = trackViewEntity.selectedEntity!!.getEntityView() as QuranEntity
                 val beginTransaction = supportFragmentManager.beginTransaction()
                 mCurrentFragment = EditIconQuranFragment.getInstance(iQuranIconCallback, quranEntity.icon)
@@ -1025,6 +1028,7 @@ fun EngineActivity.createIEditEntityCallback(): EditEntityFragment.IEditEntityCa
 
         override fun onAnim() {
             try {
+            pausePlayer()
                 val quranEntity = trackViewEntity.selectedEntity!!.getEntityView() as QuranEntity
                 val beginTransaction = supportFragmentManager.beginTransaction()
                 mCurrentFragment = EffectAyaFragment.get(quranEntity.entityQuran!!.getTransition(), mResources, iTransitionCallback, quranEntity.entityQuran!!)
@@ -1067,6 +1071,7 @@ fun EngineActivity.createIEditEntityCallback(): EditEntityFragment.IEditEntityCa
 
         override fun onEdit() {
             try {
+            pausePlayer()
                 val quranEntity = trackViewEntity.selectedEntity!!.getEntityView() as QuranEntity
                 val beginTransaction = supportFragmentManager.beginTransaction()
                 mCurrentFragment = EditTextFragment.getInstance(iEdiTextCallback, quranEntity)
@@ -1125,6 +1130,7 @@ fun EngineActivity.createIEditTrstEntityCallback(): EditTrslEntityFragment.IEdit
 
         override fun onFont() {
             try {
+            pausePlayer()
                 val translationQuranEntity = trackViewEntity.selectedEntity!!.getEntityView() as TranslationQuranEntity
                 val beginTransaction = supportFragmentManager.beginTransaction()
                 mCurrentFragment = FontFragment.getInstance(iFontCallback, translationQuranEntity.nameFont!!, translationQuranEntity.getPaintAya().typeface)
@@ -1137,6 +1143,7 @@ fun EngineActivity.createIEditTrstEntityCallback(): EditTrslEntityFragment.IEdit
 
         override fun onIcon() {
             try {
+            pausePlayer()
                 val quranEntity = trackViewEntity.selectedEntity!!.getEntityView() as QuranEntity
                 val beginTransaction = supportFragmentManager.beginTransaction()
                 mCurrentFragment = EditIconQuranFragment.getInstance(iQuranIconCallback, quranEntity.icon)
@@ -1148,6 +1155,7 @@ fun EngineActivity.createIEditTrstEntityCallback(): EditTrslEntityFragment.IEdit
 
         override fun onAnim() {
             try {
+            pausePlayer()
                 val quranEntity = trackViewEntity.selectedEntity!!.getEntityView() as QuranEntity
                 val beginTransaction = supportFragmentManager.beginTransaction()
                 mCurrentFragment = EffectAyaFragment.get(quranEntity.entityQuran!!.getTransition(), mResources, iTransitionCallback, quranEntity.entityQuran!!)
@@ -1194,7 +1202,7 @@ fun EngineActivity.createIEditTrstEntityCallback(): EditTrslEntityFragment.IEdit
                 val translationQuranEntity = trackViewEntity.selectedEntity!!.getEntityView() as TranslationQuranEntity
                 val intent = Intent(this@createIEditTrstEntityCallback, hazem.nurmontage.videoquran.ui.editor.EditTrslTxtActivity::class.java)
                 intent.putExtra("surah_name", "")
-                intent.putExtra(Common.READER, translationQuranEntity.txt)
+                intent.putExtra("reader_name", translationQuranEntity.txt)
                 intent.putExtra("isBg", translationQuranEntity.isHaveBg())
                 intent.putExtra("clrBg", translationQuranEntity.clrBg)
                 isToCrop = true
@@ -1363,6 +1371,7 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
 
         override fun onCmdAll(effectAudio: EffectAudio) {
             pausePreview()
+            showProgressSimple()
             applyffectAll(effectAudio, 0)
         }
 
@@ -1393,6 +1402,7 @@ fun EngineActivity.createIEditMediaCallback(): EditMediaFragment.IEditMediaCallb
 
         override fun onCut() {
             try {
+            pausePlayer()
                 val entityAudio = trackViewEntity.selectedEntity!! as EntityAudio
                 val abs = Math.abs(trackViewEntity.getCurrentPosition())
                 if (abs <= entityAudio.rect.left || abs >= entityAudio.rect.right) {

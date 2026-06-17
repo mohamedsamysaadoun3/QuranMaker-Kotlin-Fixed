@@ -1906,7 +1906,7 @@ internal fun EngineActivity.pausePlayer() {
             try {
                 btnPlayPause.setImageResource(R.drawable.play_btn)
             } catch (_: UninitializedPropertyAccessException) {}
-            pausePlayer()
+            stop()
         }
         trackViewEntity.pauseScroll()
     } catch (_: Exception) {}

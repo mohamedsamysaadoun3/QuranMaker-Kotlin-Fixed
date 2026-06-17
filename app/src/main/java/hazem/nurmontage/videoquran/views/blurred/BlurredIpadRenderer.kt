@@ -994,7 +994,9 @@ fun BlurredImageView.drawBlackLayer(canvas: Canvas, isFlag: Boolean, isEmpty: Bo
 }
 
 fun BlurredImageView.drawIpad(canvas: Canvas, isFlag: Boolean) {
-    drawIpad(canvas, isFlag, false)
+    // For onDraw path, use isVideo() as isPremium for BLACK_LAYER/GRADIENT/MASK_BRUSH
+    // (matches Java's drawIpad(canvas, isFlag) behavior)
+    drawIpad(canvas, isFlag, this.isVideo())
 }
 
 fun BlurredImageView.drawIpad(canvas: Canvas, isFlag: Boolean, isPremium: Boolean) {
