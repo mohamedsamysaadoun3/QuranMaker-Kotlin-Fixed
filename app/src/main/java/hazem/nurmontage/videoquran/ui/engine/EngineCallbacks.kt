@@ -193,7 +193,7 @@ fun EngineActivity.createITrimLineCallback(): TrackEntityView.ITrimLineCallback 
         }
 
         override fun onSelectEntity(entity: Entity, f: Float) {
-            stop()
+            pausePlayer()
             if (entity is EntityQuranTimeline) {
                 blurredImageView.entity_select = entity.getEntityView()
                 blurredImageView.invalidate()
@@ -943,7 +943,13 @@ fun EngineActivity.createIBismilahEntityCallback(): EditBismilahEntityFragment.I
 
         override fun onDone() {
             hideFragment()
-            blurredImageView.invalidate()
+            val entitySelect = blurredImageView.entity_select
+            if (entitySelect is QuranEntity || entitySelect is BismilahEntity) {
+                val selected = trackViewEntity.selectedEntity
+                if (selected != null) {
+                    iTrimLineCallback?.onSelectEntity(selected, -1.0f)
+                }
+            }
         }
 
         override fun onColor() {
@@ -1053,7 +1059,12 @@ fun EngineActivity.createIEditEntityCallback(): EditEntityFragment.IEditEntityCa
 
         override fun onDone() {
             hideFragment()
-            blurredImageView.invalidate()
+            if (blurredImageView.entity_select is QuranEntity) {
+                val selected = trackViewEntity.selectedEntity
+                if (selected != null) {
+                    iTrimLineCallback?.onSelectEntity(selected, -1.0f)
+                }
+            }
         }
 
         override fun onColor() {
@@ -1082,11 +1093,28 @@ fun EngineActivity.createIEditEntityCallback(): EditEntityFragment.IEditEntityCa
         }
 
         override fun onCut() {
-            splitEntity(trackViewEntity.selectedEntity!!.getEntityView() as QuranEntity)
+            try {
+                pausePlayer()
+                val selected = trackViewEntity.selectedEntity?.getEntityView()
+                if (selected is QuranEntity) splitEntity(selected)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                iTrimLineCallback?.onEmptySelect()
+            }
         }
 
         override fun onDuplicate() {
-            duplicateEntity(trackViewEntity.selectedEntity!!.getEntityView() as QuranEntity)
+            try {
+                pausePlayer()
+                val selected = trackViewEntity.selectedEntity?.getEntityView()
+                if (selected is QuranEntity) {
+                    duplicateEntity(selected)
+                    updateTime()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                iTrimLineCallback?.onEmptySelect()
+            }
         }
 
         override fun fromTheStart() {
@@ -1180,7 +1208,12 @@ fun EngineActivity.createIEditTrstEntityCallback(): EditTrslEntityFragment.IEdit
 
         override fun onDone() {
             hideFragment()
-            blurredImageView.invalidate()
+            if (blurredImageView.entity_select is TranslationQuranEntity) {
+                val selected = trackViewEntity.selectedEntity
+                if (selected != null) {
+                    iTrimLineCallback?.onSelectEntity(selected, -1.0f)
+                }
+            }
         }
 
         override fun onColor() {
@@ -1214,11 +1247,28 @@ fun EngineActivity.createIEditTrstEntityCallback(): EditTrslEntityFragment.IEdit
         }
 
         override fun onCut() {
-            splitEntity(trackViewEntity.selectedEntity!!.getEntityView() as TranslationQuranEntity)
+            try {
+                pausePlayer()
+                val selected = trackViewEntity.selectedEntity?.getEntityView()
+                if (selected is TranslationQuranEntity) splitEntity(selected)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                iTrimLineCallback?.onEmptySelect()
+            }
         }
 
         override fun onDuplicate() {
-            duplicateEntity(trackViewEntity.selectedEntity!!.getEntityView() as TranslationQuranEntity)
+            try {
+                pausePlayer()
+                val selected = trackViewEntity.selectedEntity?.getEntityView()
+                if (selected is TranslationQuranEntity) {
+                    duplicateEntity(selected)
+                    updateTime()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                iTrimLineCallback?.onEmptySelect()
+            }
         }
 
         override fun fromTheStart() {
@@ -1642,15 +1692,17 @@ fun EngineActivity.createITransitionCallback(): TransitionEntityAdabters.ITransi
         }
 
         override fun updateDurationIn(f: Float, entityQuranTimeline: EntityQuranTimeline) {
-            entityQuranTimeline.getTransition()?.duration_in = f
+            val t = entityQuranTimeline.getTransition() ?: return
+            t.duration_in = f
             entityQuranTimeline.quranEntity.endAnimator()
-            entityQuranTimeline.quranEntity.runIn((entityQuranTimeline.getTransition()!!.duration_in * 1000.0f).toInt(), true, entityQuranTimeline.getTransition()!!.type_in)
+            entityQuranTimeline.quranEntity.runIn((t.duration_in * 1000.0f).toInt(), true, t.type_in)
         }
 
         override fun updateDurationOut(f: Float, entityQuranTimeline: EntityQuranTimeline) {
-            entityQuranTimeline.getTransition()?.duration_out = f
+            val t = entityQuranTimeline.getTransition() ?: return
+            t.duration_out = f
             entityQuranTimeline.quranEntity.endAnimator()
-            entityQuranTimeline.quranEntity.runOut((entityQuranTimeline.getTransition()!!.duration_out * 1000.0f).toInt(), true, entityQuranTimeline.getTransition()!!.type_out)
+            entityQuranTimeline.quranEntity.runOut((t.duration_out * 1000.0f).toInt(), true, t.type_out)
         }
 
         override fun applyAll(i: Int, entityQuranTimeline: EntityQuranTimeline) {
@@ -1735,15 +1787,17 @@ fun EngineActivity.createITransitionBismilahCallback(): TransitionBismilahAdabte
         }
 
         override fun updateDurationIn(f: Float, entityBismilahTimeline: EntityBismilahTimeline) {
-            entityBismilahTimeline.getTransition()?.duration_in = f
+            val t = entityBismilahTimeline.getTransition() ?: return
+            t.duration_in = f
             entityBismilahTimeline.quranEntity.endAnimator()
-            entityBismilahTimeline.quranEntity.runIn((entityBismilahTimeline.getTransition()!!.duration_in * 1000.0f).toInt(), true, entityBismilahTimeline.getTransition()!!.type_in)
+            entityBismilahTimeline.quranEntity.runIn((t.duration_in * 1000.0f).toInt(), true, t.type_in)
         }
 
         override fun updateDurationOut(f: Float, entityBismilahTimeline: EntityBismilahTimeline) {
-            entityBismilahTimeline.getTransition()?.duration_out = f
+            val t = entityBismilahTimeline.getTransition() ?: return
+            t.duration_out = f
             entityBismilahTimeline.quranEntity.endAnimator()
-            entityBismilahTimeline.quranEntity.runOut((entityBismilahTimeline.getTransition()!!.duration_out * 1000.0f).toInt(), true, entityBismilahTimeline.getTransition()!!.type_out)
+            entityBismilahTimeline.quranEntity.runOut((t.duration_out * 1000.0f).toInt(), true, t.type_out)
         }
 
         override fun applyAll(entityBismilahTimeline: EntityBismilahTimeline) {
