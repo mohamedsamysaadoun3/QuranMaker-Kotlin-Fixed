@@ -222,7 +222,7 @@ fun EngineActivity.duplicateEntity(quranEntity: QuranEntity) {
         typefaceNumber = UtilsFileLast.loadFontFromAsset(this, "fonts/arabic/خط فارس الكوفي.otf")!!
     }
     val typeface = typefaceNumber
-    var typeface2 = quranEntity.getPaintAya().typeface!!
+    var typeface2: Typeface? = quranEntity.getPaintAya().typeface
     if (typeface2 == null) {
         typeface2 = UtilsFileLast.loadFontFromAsset(this, "fonts/arabic/${quranEntity.nameFont!!}")!!
     }
@@ -422,7 +422,7 @@ fun EngineActivity.splitEntity(quranEntity: QuranEntity) {
                 typefaceNumber = UtilsFileLast.loadFontFromAsset(this, "fonts/arabic/خط فارس الكوفي.otf")!!
             }
             val typeface = typefaceNumber
-            var typeface2 = quranEntity.getPaintAya().typeface!!
+            var typeface2: Typeface? = quranEntity.getPaintAya().typeface
             if (typeface2 == null) {
                 typeface2 = UtilsFileLast.loadFontFromAsset(this, "fonts/arabic/${quranEntity.nameFont!!}")!!
             }

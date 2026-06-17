@@ -1595,15 +1595,9 @@ fun EngineActivity.createITransitionCallback(): TransitionEntityAdabters.ITransi
             }
             entityQuranTimeline.getTransition()!!.isIn = true
             entityQuranTimeline.getTransition()!!.type_in = type
-            addUpdateAnim(blurredImageView.mIsti3adhaEntity?.bismilahTimeline, entityQuranTimeline)
-            addUpdateAnim(blurredImageView.bismilahEntity?.bismilahTimeline, entityQuranTimeline)
-            for (entityQuranTimeline2 in trackViewEntity.entityListQuran) {
-                if (entityQuranTimeline2!!.getTransition() == null) {
-                    entityQuranTimeline2!!.setTransition(Transition())
-                }
-                entityQuranTimeline2!!.getTransition()!!.isIn = true
-                entityQuranTimeline2!!.getTransition()!!.type_in = type
-            }
+            EffectAyaFragment.instance?.updateView(entityQuranTimeline.getTransition()!!.duration_in, entityQuranTimeline.getTransition()!!)
+            entityQuranTimeline.quranEntity.endAnimator()
+            entityQuranTimeline.quranEntity.runIn((entityQuranTimeline.getTransition()!!.duration_in * 1000.0f).toInt(), true, entityQuranTimeline.getTransition()!!.type_in)
         }
 
         override fun `out`(type: String, entityQuranTimeline: EntityQuranTimeline) {
@@ -1612,25 +1606,19 @@ fun EngineActivity.createITransitionCallback(): TransitionEntityAdabters.ITransi
             }
             entityQuranTimeline.getTransition()!!.isOut = true
             entityQuranTimeline.getTransition()!!.type_out = type
-            addUpdateAnim(blurredImageView.mIsti3adhaEntity?.bismilahTimeline, entityQuranTimeline)
-            addUpdateAnim(blurredImageView.bismilahEntity?.bismilahTimeline, entityQuranTimeline)
-            for (entityQuranTimeline2 in trackViewEntity.entityListQuran) {
-                if (entityQuranTimeline2!!.getTransition() == null) {
-                    entityQuranTimeline2!!.setTransition(Transition())
-                }
-                entityQuranTimeline2!!.getTransition()!!.isOut = true
-                entityQuranTimeline2!!.getTransition()!!.type_out = type
-            }
+            EffectAyaFragment.instance?.updateView(entityQuranTimeline.getTransition()!!.duration_out, entityQuranTimeline.getTransition()!!)
+            entityQuranTimeline.quranEntity.endAnimator()
+            entityQuranTimeline.quranEntity.runOut((entityQuranTimeline.getTransition()!!.duration_out * 1000.0f).toInt(), true, entityQuranTimeline.getTransition()!!.type_out)
         }
 
         override fun destroy(entityQuranTimeline: EntityQuranTimeline) {
-            entityQuranTimeline.setTransition(null)
+            entityQuranTimeline.quranEntity.isAnimTest = false
+            entityQuranTimeline.quranEntity.endAnimator()
+            blurredImageView.invalidate()
         }
 
         override fun playing(entityQuranTimeline: EntityQuranTimeline) {
-            if (entityQuranTimeline.quranEntity != null) {
-                entityQuranTimeline.quranEntity.isAnimTest = true
-            }
+            entityQuranTimeline.quranEntity.isAnimTest = true
         }
 
         override fun onHideFragment(entityQuranTimeline: EntityQuranTimeline) {
@@ -1643,65 +1631,48 @@ fun EngineActivity.createITransitionCallback(): TransitionEntityAdabters.ITransi
         }
 
         override fun remove(i: Int, entityQuranTimeline: EntityQuranTimeline) {
-            addUpdateAnim(blurredImageView.mIsti3adhaEntity?.bismilahTimeline, entityQuranTimeline)
-            addUpdateAnim(blurredImageView.bismilahEntity?.bismilahTimeline, entityQuranTimeline)
-            for (entityQuranTimeline2 in trackViewEntity.entityListQuran) {
-                if (entityQuranTimeline.getTransition() == null) {
-                    entityQuranTimeline2!!.setTransition(null)
-                    return
-                }
-                if (entityQuranTimeline2!!.getTransition() == null) {
-                    entityQuranTimeline2!!.setTransition(Transition())
-                }
-                entityQuranTimeline2!!.getTransition()!!.isOut = entityQuranTimeline.getTransition()!!.isOut
-                entityQuranTimeline2!!.getTransition()!!.type_out = entityQuranTimeline.getTransition()!!.type_out
-                entityQuranTimeline2!!.getTransition()!!.duration_out = entityQuranTimeline.getTransition()!!.duration_out
-                entityQuranTimeline2!!.getTransition()!!.isIn = entityQuranTimeline.getTransition()!!.isIn
-                entityQuranTimeline2!!.getTransition()!!.type_in = entityQuranTimeline.getTransition()!!.type_in
-                entityQuranTimeline2!!.getTransition()!!.duration_in = entityQuranTimeline.getTransition()!!.duration_in
+            if (i == 0) {
+                entityQuranTimeline.getTransition()?.isIn = false
+                entityQuranTimeline.quranEntity.endAnimator()
+            }
+            if (i == 1) {
+                entityQuranTimeline.getTransition()?.isOut = false
+                entityQuranTimeline.quranEntity.endAnimator()
             }
         }
 
         override fun updateDurationIn(f: Float, entityQuranTimeline: EntityQuranTimeline) {
-            addUpdateAnim(blurredImageView.mIsti3adhaEntity?.bismilahTimeline, entityQuranTimeline)
-            addUpdateAnim(blurredImageView.bismilahEntity?.bismilahTimeline, entityQuranTimeline)
-            for (entityQuranTimeline2 in trackViewEntity.entityListQuran) {
-                if (entityQuranTimeline2!!.getTransition() != null) {
-                    entityQuranTimeline2!!.getTransition()!!.isIn = entityQuranTimeline.getTransition()!!.isIn
-                    entityQuranTimeline2!!.getTransition()!!.duration_in = entityQuranTimeline.getTransition()!!.duration_in
-                    entityQuranTimeline2!!.getTransition()!!.type_in = entityQuranTimeline.getTransition()!!.type_in
-                }
-            }
+            entityQuranTimeline.getTransition()?.duration_in = f
+            entityQuranTimeline.quranEntity.endAnimator()
+            entityQuranTimeline.quranEntity.runIn((entityQuranTimeline.getTransition()!!.duration_in * 1000.0f).toInt(), true, entityQuranTimeline.getTransition()!!.type_in)
         }
 
         override fun updateDurationOut(f: Float, entityQuranTimeline: EntityQuranTimeline) {
-            addUpdateAnim(blurredImageView.mIsti3adhaEntity?.bismilahTimeline, entityQuranTimeline)
-            addUpdateAnim(blurredImageView.bismilahEntity?.bismilahTimeline, entityQuranTimeline)
-            for (entityQuranTimeline2 in trackViewEntity.entityListQuran) {
-                if (entityQuranTimeline2!!.getTransition() != null) {
-                    entityQuranTimeline2!!.getTransition()!!.isOut = entityQuranTimeline.getTransition()!!.isOut
-                    entityQuranTimeline2!!.getTransition()!!.duration_out = entityQuranTimeline.getTransition()!!.duration_out
-                    entityQuranTimeline2!!.getTransition()!!.type_out = entityQuranTimeline.getTransition()!!.type_out
-                }
-            }
+            entityQuranTimeline.getTransition()?.duration_out = f
+            entityQuranTimeline.quranEntity.endAnimator()
+            entityQuranTimeline.quranEntity.runOut((entityQuranTimeline.getTransition()!!.duration_out * 1000.0f).toInt(), true, entityQuranTimeline.getTransition()!!.type_out)
         }
 
         override fun applyAll(i: Int, entityQuranTimeline: EntityQuranTimeline) {
-            addUpdateAnim(blurredImageView.mIsti3adhaEntity?.bismilahTimeline, entityQuranTimeline)
-            addUpdateAnim(blurredImageView.bismilahEntity?.bismilahTimeline, entityQuranTimeline)
+            showProgress()
+            addUpdateAnim(trackViewEntity.mIsi3adaTimeline, entityQuranTimeline)
+            addUpdateAnim(trackViewEntity.bismilahTimeline, entityQuranTimeline)
             for (entityQuranTimeline2 in trackViewEntity.entityListQuran) {
-                if (entityQuranTimeline.getTransition() == null) {
-                    entityQuranTimeline2!!.setTransition(null)
-                } else {
-                    if (entityQuranTimeline2!!.getTransition() == null) {
-                        entityQuranTimeline2!!.setTransition(Transition())
+                if (entityQuranTimeline2 !== entityQuranTimeline) {
+                    if (entityQuranTimeline.getTransition() == null) {
+                        entityQuranTimeline2!!.setTransition(null)
+                        hideProgressFragment()
+                        return
                     }
-                    entityQuranTimeline2!!.getTransition()!!.isOut = entityQuranTimeline.getTransition()!!.isOut
-                    entityQuranTimeline2!!.getTransition()!!.type_out = entityQuranTimeline.getTransition()!!.type_out
-                    entityQuranTimeline2!!.getTransition()!!.duration_out = entityQuranTimeline.getTransition()!!.duration_out
-                    entityQuranTimeline2!!.getTransition()!!.isIn = entityQuranTimeline.getTransition()!!.isIn
-                    entityQuranTimeline2!!.getTransition()!!.type_in = entityQuranTimeline.getTransition()!!.type_in
-                    entityQuranTimeline2!!.getTransition()!!.duration_in = entityQuranTimeline.getTransition()!!.duration_in
+                    if (entityQuranTimeline2!!.getTransition() == null) {
+                        entityQuranTimeline2.setTransition(Transition())
+                    }
+                    entityQuranTimeline2.getTransition()!!.isOut = entityQuranTimeline.getTransition()!!.isOut
+                    entityQuranTimeline2.getTransition()!!.type_out = entityQuranTimeline.getTransition()!!.type_out
+                    entityQuranTimeline2.getTransition()!!.duration_out = entityQuranTimeline.getTransition()!!.duration_out
+                    entityQuranTimeline2.getTransition()!!.isIn = entityQuranTimeline.getTransition()!!.isIn
+                    entityQuranTimeline2.getTransition()!!.type_in = entityQuranTimeline.getTransition()!!.type_in
+                    entityQuranTimeline2.getTransition()!!.duration_in = entityQuranTimeline.getTransition()!!.duration_in
                 }
             }
             hideProgressFragment()
@@ -1717,13 +1688,9 @@ fun EngineActivity.createITransitionBismilahCallback(): TransitionBismilahAdabte
             }
             entityBismilahTimeline.getTransition()!!.isIn = true
             entityBismilahTimeline.getTransition()!!.type_in = type
-            for (entityQuranTimeline in trackViewEntity.entityListQuran) {
-                if (entityQuranTimeline!!.getTransition() == null) {
-                    entityQuranTimeline!!.setTransition(Transition())
-                }
-                entityQuranTimeline!!.getTransition()!!.isIn = true
-                entityQuranTimeline!!.getTransition()!!.type_in = type
-            }
+            EffectBismilahFragment.instance?.updateView(entityBismilahTimeline.getTransition()!!.duration_in, entityBismilahTimeline.getTransition()!!)
+            entityBismilahTimeline.quranEntity.endAnimator()
+            entityBismilahTimeline.quranEntity.runIn((entityBismilahTimeline.getTransition()!!.duration_in * 1000.0f).toInt(), true, entityBismilahTimeline.getTransition()!!.type_in)
         }
 
         override fun `out`(type: String, entityBismilahTimeline: EntityBismilahTimeline) {
@@ -1732,17 +1699,15 @@ fun EngineActivity.createITransitionBismilahCallback(): TransitionBismilahAdabte
             }
             entityBismilahTimeline.getTransition()!!.isOut = true
             entityBismilahTimeline.getTransition()!!.type_out = type
-            for (entityQuranTimeline in trackViewEntity.entityListQuran) {
-                if (entityQuranTimeline!!.getTransition() == null) {
-                    entityQuranTimeline!!.setTransition(Transition())
-                }
-                entityQuranTimeline!!.getTransition()!!.isOut = true
-                entityQuranTimeline!!.getTransition()!!.type_out = type
-            }
+            EffectBismilahFragment.instance?.updateView(entityBismilahTimeline.getTransition()!!.duration_out, entityBismilahTimeline.getTransition()!!)
+            entityBismilahTimeline.quranEntity.endAnimator()
+            entityBismilahTimeline.quranEntity.runOut((entityBismilahTimeline.getTransition()!!.duration_out * 1000.0f).toInt(), true, entityBismilahTimeline.getTransition()!!.type_out)
         }
 
         override fun destroy(entityBismilahTimeline: EntityBismilahTimeline) {
-            entityBismilahTimeline.setTransition(null)
+            entityBismilahTimeline.quranEntity.isAnimTest = false
+            entityBismilahTimeline.quranEntity.endAnimator()
+            blurredImageView.invalidate()
         }
 
         override fun playing(entityBismilahTimeline: EntityBismilahTimeline) {
@@ -1759,58 +1724,47 @@ fun EngineActivity.createITransitionBismilahCallback(): TransitionBismilahAdabte
         }
 
         override fun remove(i: Int, entityBismilahTimeline: EntityBismilahTimeline) {
-            for (entityQuranTimeline in trackViewEntity.entityListQuran) {
-                if (entityBismilahTimeline.getTransition() == null) {
-                    entityQuranTimeline!!.setTransition(null)
-                    return
-                }
-                if (entityQuranTimeline!!.getTransition() == null) {
-                    entityQuranTimeline!!.setTransition(Transition())
-                }
-                entityQuranTimeline!!.getTransition()!!.isOut = entityBismilahTimeline.getTransition()!!.isOut
-                entityQuranTimeline!!.getTransition()!!.type_out = entityBismilahTimeline.getTransition()!!.type_out
-                entityQuranTimeline!!.getTransition()!!.duration_out = entityBismilahTimeline.getTransition()!!.duration_out
-                entityQuranTimeline!!.getTransition()!!.isIn = entityBismilahTimeline.getTransition()!!.isIn
-                entityQuranTimeline!!.getTransition()!!.type_in = entityBismilahTimeline.getTransition()!!.type_in
-                entityQuranTimeline!!.getTransition()!!.duration_in = entityBismilahTimeline.getTransition()!!.duration_in
+            if (i == 0) {
+                entityBismilahTimeline.getTransition()?.isIn = false
+                entityBismilahTimeline.quranEntity.endAnimator()
+            }
+            if (i == 1) {
+                entityBismilahTimeline.getTransition()?.isOut = false
+                entityBismilahTimeline.quranEntity.endAnimator()
             }
         }
 
         override fun updateDurationIn(f: Float, entityBismilahTimeline: EntityBismilahTimeline) {
-            for (entityQuranTimeline in trackViewEntity.entityListQuran) {
-                if (entityQuranTimeline!!.getTransition() != null) {
-                    entityQuranTimeline!!.getTransition()!!.isIn = entityBismilahTimeline.getTransition()!!.isIn
-                    entityQuranTimeline!!.getTransition()!!.duration_in = entityBismilahTimeline.getTransition()!!.duration_in
-                    entityQuranTimeline!!.getTransition()!!.type_in = entityBismilahTimeline.getTransition()!!.type_in
-                }
-            }
+            entityBismilahTimeline.getTransition()?.duration_in = f
+            entityBismilahTimeline.quranEntity.endAnimator()
+            entityBismilahTimeline.quranEntity.runIn((entityBismilahTimeline.getTransition()!!.duration_in * 1000.0f).toInt(), true, entityBismilahTimeline.getTransition()!!.type_in)
         }
 
         override fun updateDurationOut(f: Float, entityBismilahTimeline: EntityBismilahTimeline) {
-            for (entityQuranTimeline in trackViewEntity.entityListQuran) {
-                if (entityQuranTimeline!!.getTransition() != null) {
-                    entityQuranTimeline!!.getTransition()!!.isOut = entityBismilahTimeline.getTransition()!!.isOut
-                    entityQuranTimeline!!.getTransition()!!.duration_out = entityBismilahTimeline.getTransition()!!.duration_out
-                    entityQuranTimeline!!.getTransition()!!.type_out = entityBismilahTimeline.getTransition()!!.type_out
-                }
-            }
+            entityBismilahTimeline.getTransition()?.duration_out = f
+            entityBismilahTimeline.quranEntity.endAnimator()
+            entityBismilahTimeline.quranEntity.runOut((entityBismilahTimeline.getTransition()!!.duration_out * 1000.0f).toInt(), true, entityBismilahTimeline.getTransition()!!.type_out)
         }
 
         override fun applyAll(entityBismilahTimeline: EntityBismilahTimeline) {
+            showProgress()
+            val sister = if (trackViewEntity.mIsi3adaTimeline !== entityBismilahTimeline) trackViewEntity.mIsi3adaTimeline else trackViewEntity.bismilahTimeline
+            addUpdateAnim(sister, entityBismilahTimeline)
             for (entityQuranTimeline in trackViewEntity.entityListQuran) {
                 if (entityBismilahTimeline.getTransition() == null) {
                     entityQuranTimeline!!.setTransition(null)
+                    hideProgressFragment()
                     return
                 }
                 if (entityQuranTimeline!!.getTransition() == null) {
-                    entityQuranTimeline!!.setTransition(Transition())
+                    entityQuranTimeline.setTransition(Transition())
                 }
-                entityQuranTimeline!!.getTransition()!!.isOut = entityBismilahTimeline.getTransition()!!.isOut
-                entityQuranTimeline!!.getTransition()!!.type_out = entityBismilahTimeline.getTransition()!!.type_out
-                entityQuranTimeline!!.getTransition()!!.duration_out = entityBismilahTimeline.getTransition()!!.duration_out
-                entityQuranTimeline!!.getTransition()!!.isIn = entityBismilahTimeline.getTransition()!!.isIn
-                entityQuranTimeline!!.getTransition()!!.type_in = entityBismilahTimeline.getTransition()!!.type_in
-                entityQuranTimeline!!.getTransition()!!.duration_in = entityBismilahTimeline.getTransition()!!.duration_in
+                entityQuranTimeline.getTransition()!!.isOut = entityBismilahTimeline.getTransition()!!.isOut
+                entityQuranTimeline.getTransition()!!.type_out = entityBismilahTimeline.getTransition()!!.type_out
+                entityQuranTimeline.getTransition()!!.duration_out = entityBismilahTimeline.getTransition()!!.duration_out
+                entityQuranTimeline.getTransition()!!.isIn = entityBismilahTimeline.getTransition()!!.isIn
+                entityQuranTimeline.getTransition()!!.type_in = entityBismilahTimeline.getTransition()!!.type_in
+                entityQuranTimeline.getTransition()!!.duration_in = entityBismilahTimeline.getTransition()!!.duration_in
             }
             hideProgressFragment()
         }
